@@ -10,6 +10,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] float circleRadius;
     [SerializeField] float detectionRadius;
     [SerializeField] int numRooms;
+    [SerializeField] int maxTries;
 
     public static DungeonGenerator inst;
 
@@ -32,16 +33,55 @@ public class DungeonGenerator : MonoBehaviour
     //Drop a room within the circle without overlaps
     public void DropRoom(int numRooms)
     {
-        for(int i=0;i<numRooms;i++)
+        List<GameObject> placedRooms = new List<GameObject>();
+
+        for (int i = 0; i < numRooms; i++)
         {
-            float randTheta = Random.Range(0, 2*Mathf.PI);
-            float randX = Mathf.Pow(circleRadius,2)*Random.Range(0.0f, 1.0f) * Mathf.Cos(randTheta);
-            float randZ = Mathf.Pow(circleRadius,2)*Random.Range(0.0f, 1.0f) * Mathf.Sin(randTheta);
-            Vector3 randPt = new Vector3(randX,0,randZ);
-            GameObject randRoom = GameObject.Instantiate(roomPrefabList[(int)(Random.Range(0.0f, roomPrefabList.Count-1))]); //Make this rand
-            randRoom.transform.position = randPt;
+            bool positionFound = false;
+            Vector3 randPt = Vector3.zero;
+            GameObject randRoom = null;
+
+            int currTries = 0;
+
+            // Keep trying to find a position until it's not near any other room
+            while (!positionFound)
+            {
+                float randTheta = Random.Range(0, 2 * Mathf.PI);
+                float randX = Mathf.Pow(circleRadius, 2) * Random.Range(0.0f, 1.0f) * Mathf.Cos(randTheta);
+                float randZ = Mathf.Pow(circleRadius, 2) * Random.Range(0.0f, 1.0f) * Mathf.Sin(randTheta);
+                randPt = new Vector3(randX, 0, randZ);
+
+                // Check if the position is valid
+                bool tooClose = false;
+                foreach (GameObject placedRoom in placedRooms)
+                {
+                    if (Vector3.Distance(randPt, placedRoom.transform.position) < detectionRadius)
+                    {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                currTries++;
+
+                // If it's not too close to any other room, we're good
+                if (!tooClose)
+                {
+                    positionFound = true;
+                    randRoom = GameObject.Instantiate(roomPrefabList[(int)(Random.Range(0.0f, roomPrefabList.Count - 1))]);
+                    randRoom.transform.position = randPt;
+                    placedRooms.Add(randRoom);
+                    currTries = 0; //Reset 
+                }
+
+                if(currTries >= maxTries)
+                {
+                    positionFound = true;
+                    Debug.LogWarning("Attempts Exceeded MaxTries...");
+                }
+            }
         }
     }
+
 
     // Update is called once per frame
     void Update()
