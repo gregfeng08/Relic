@@ -1,2 +1,2 @@
 # Project: Relic
-Exploratory project for dynamic dungeon generation and regeneration
+An exploratory project for dynamic dungeon generation and regeneration during runtime
