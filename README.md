@@ -1,2 +1,2 @@
 # Project: Relic
- Gaem
+Exploratory project for dynamic dungeon generation and regeneration
