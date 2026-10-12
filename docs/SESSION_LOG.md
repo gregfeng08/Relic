@@ -2,6 +2,12 @@
 
 Newest first.
 
+## 2026-10-12 (evening) — Core loop agreed
+
+- Stats renamed to STR/AGI/VIT/INT/INS/CHR. Mana added: INT = pool, INS = regen; stamina from VIT (pool) and AGI (regen). Mages are a gear build.
+- Permanent boosts: boss essences themed by archetype (Librarian → INT), bound into the soul at a Soulbinder. No visible body marks; a Soul screen instead. The scribe was split into a Soulbinder and a Cartographer.
+- 02-core-loop marked AGREED. RLC-004 done. Combat spec (RLC-005) in progress, blocked on RLC-020 (camera, ability slots, dodge).
+
 ## 2026-10-12 (later still) — Power model revision
 
 - Greg: "skill is the only gate" overstated it. The new framing is "Nothing is locked": skill is the shortcut, power is the staircase. The power ceiling is very high.

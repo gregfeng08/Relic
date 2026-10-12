@@ -1,6 +1,6 @@
 # 02 — Core Loop
 
-Status: **DRAFT — revision 3, two small follow-ups open** · Last updated 2026-10-12
+Status: **AGREED (revision 4)** · Last updated 2026-10-12
 
 ## Decisions (Greg, 2026-10-12)
 
@@ -11,7 +11,7 @@ Status: **DRAFT — revision 3, two small follow-ups open** · Last updated 2026
 | Power ceiling | **Very high**, so less-skilled players can power through. Stat rolls can go past it, with exponentially rarer rolls. |
 | Hero | **One hero.** No party, no classes. |
 | Builds | **Defined by gear.** |
-| Character growth | **No XP levels, but stats grow by doing**: train to get stronger, study to get wiser. Plus permanent stat-boost consumables (our own take, not RotMG potions). |
+| Character growth | **No XP levels, but stats grow by doing**: train to get stronger, study to get wiser. Six stats: STR, AGI, VIT, INT, INS, CHR, plus mana for magic. Permanent boosts come from boss **essences** bound into the soul at a Soulbinder. |
 | Hubs | **Sanctuaries** (Wynncraft cities): live, trade, vault. |
 | Knowledge | Reliquary knowledge carries across characters for now. Open to changing it. **Maps might be items** (see below). |
 
@@ -24,7 +24,7 @@ Run, climb and glide (Genshin). Spot silhouettes, glints, ruins, camps. Action c
 ### Session (30–90 minutes)
 **Sanctuary → follow a lead → explore → dungeon → boss → loot → get it home (or push on).**
 
-1. **Prepare at a sanctuary.** Vault, trade, read the rumor board, buy or copy maps, pick a lead.
+1. **Prepare at a sanctuary.** Vault, trade, bind essences, read the rumor board, buy or copy maps, pick a lead.
 2. **Explore.** Cross a region, find points of interest, fight, grab loot. Training happens naturally as you play.
 3. **Dungeon.** Graph-generated, themed by the region's lore, ending in a boss.
 4. **Payoff.** Boss loot, maybe a relic or a permanent boost. Relic lore names new places, which become new leads.
@@ -66,29 +66,42 @@ With λ = 1 (a tuning knob) and each step = +5% over the ceiling:
 - **Forge rerolls** draw a fresh sample each time, so chasing a +5 costs about 150 rerolls on average. That's a long-term goal by design.
 
 ### 2. Trained stats (learn by doing)
-No XP levels. Stats grow from what you actually do: fighting up close trains Might, studying lore trains Insight. Growth slows down the higher a stat gets (diminishing returns), so training helps a lot early and becomes a slow polish later.
+No XP levels. Stats grow from what you actually do: fighting up close trains STR, studying lore trains INS. Growth slows down the higher a stat gets (diminishing returns), so training helps a lot early and becomes a slow polish later.
 
-Draft stat list, inspired by D&D and the 2022 prototype:
+Stat list (Greg, 2026-10-12):
 
 | Stat | Grows by | Affects |
 |---|---|---|
-| Might | Heavy weapons, carrying, climbing | Melee damage, stagger |
-| Finesse | Precise hits, perfect dodges | Crit chance, attack speed |
-| Vigor | Taking hits and surviving, long journeys | Health, stamina, resisting debuffs |
-| Wits | Using abilities, solving puzzles | Ability power, cooldowns |
-| Insight | Reading lore, studying relics and inscriptions | **Seeing secrets**: hidden doors, ancient scripts, item lore details |
-| Presence | Talking with NPCs, trading | Prices, NPC disposition, persuasion checks |
+| **STR** Strength | Heavy weapons, carrying, climbing | Melee damage, stagger |
+| **AGI** Agility | Precise hits, perfect dodges, sprinting | Move speed, attack speed, crit chance |
+| **VIT** Vitality | Taking hits and surviving, long journeys | Max HP, HP regen, stamina, debuff resistance |
+| **INT** Intelligence | Casting spells, solving puzzles | Spell power, **max mana** |
+| **INS** Insight | Reading lore, studying relics, meditating | **Mana regen**, **seeing secrets** (hidden doors, ancient scripts, lore details) |
+| **CHR** Charisma | Talking with NPCs, trading | Prices, NPC disposition, persuasion checks |
 
-**Insight is the pillar-1 stat.** A high-Insight character literally sees more of the world: they can read runes others can't and notice cracked walls. Studying makes the world deeper.
+**Insight is the pillar-1 stat.** A high-INS character literally sees more of the world: they can read scripts others can't and notice cracked walls. Studying makes the world deeper.
 
 Trained stats are lost on permadeath. That's what makes death sting even with a full vault.
 
-### 3. Permanent boosts (our answer to RotMG pots)
-**Proposal: Inscriptions.** Bosses and rare enemies drop *essences*. At a sanctuary's scribe, an essence becomes a rune **inscribed onto your character's body**, permanently adding a stat.
-- **They show.** Visible marks glow on the model, so your character's skin records their history.
-- **They're themed.** A drowned priest's essence makes a wave rune, and the lore for each one can be generated.
-- **They have limits.** A cap per stat, so pushing every stat to max is the long-term chase.
-- **They die with you.** They're lost on permadeath. Unused essences can be vaulted.
+### Resources: HP, mana, stamina
+Every character has all three bars. Their gear decides which ones they rely on.
+
+| Resource | Used for | Pool | Regen |
+|---|---|---|---|
+| HP | Staying alive | VIT | VIT |
+| Mana | Spells and magical abilities (from staves, tomes, relics) | INT | INS |
+| Stamina | Dodges, sprinting, climbing, gliding, heavy attacks | VIT | AGI |
+
+- **A mage is a gear build, not a class.** Equip a staff and tomes and your abilities draw on mana, so you train INT and INS. A warrior build lives on stamina and STR. Hybrids, like a spellblade, juggle both.
+- **Why INT and INS split mana:** INT is how much you can hold, INS is how fast it comes back. Mages want both, and studying the world (INS) literally fuels magic.
+
+### 3. Permanent boosts: Essences bound to the soul
+Bosses and rare enemies drop **essences** themed by what they were. A **Librarian** boss drops an **INT essence**; a berserker warlord drops STR; a blind oracle drops INS.
+- **Where they come from:** procedural bosses get an archetype from the world graph, and the archetype decides the essence (librarian, scholar or archmage → INT; giant or warlord → STR; and so on). Players learn to read a boss for what it will give.
+- **How they're used:** take an essence to a **Soulbinder** at a sanctuary. They merge it **into your character's soul** and the stat rises permanently. Nothing appears on the body. Instead there's a **Soul** screen showing every essence you've bound and where it came from, like a record of your character's history.
+- **Limits:** a cap per stat, so maxing every stat is the long-term chase.
+- **Death:** bound essences die with the character. Unbound essences can be vaulted and, in multiplayer, traded.
+- *Idea for later:* when you die, a faint soul shard holding part of your bound essence stays in your grave. That would make corpse runs and grave looting even more tempting.
 
 ## Sanctuaries
 
@@ -97,7 +110,8 @@ Trained stats are lost on permadeath. That's what makes death sting even with a 
 | Vault | Permanent storage; survives permadeath |
 | Merchants / trade | NPC trade now, player trade later |
 | Forge | Rerolls and re-enchanting |
-| Scribe | Turns essences into Inscriptions; copies maps |
+| Soulbinder | Binds essences into your soul (permanent stat gains) |
+| Cartographer | Copies your explored area onto map items; sells charts |
 | Rumor board / NPCs | Leads to dungeons, relics, other sanctuaries |
 | Reliquary shrine | Collection and unsolved leads |
 
@@ -108,11 +122,11 @@ Trained stats are lost on permadeath. That's what makes death sting even with a 
 
 ## Maps as items (proposal)
 - **Each character has its own fog of war** that clears as you explore. It dies with the character.
-- **A map is an item.** At a scribe, copy what you've explored onto a map you can carry, vault, sell or trade. Reading a map clears fog for any character.
+- **A map is an item.** At a cartographer, copy what you've explored onto a map you can carry, vault, sell or trade. Reading a map clears fog for any character.
 - **Treasure maps and charts drop as loot.** They're leads (pillar 2), and they're how you find hidden places.
 - **The Reliquary stays account-wide** (lore and relic entries). Map knowledge doesn't, so cartography matters.
 - **Later in multiplayer:** a skilled scout's map of a far region becomes valuable trade goods.
 
-## Open follow-ups (for Greg)
-1. **Inscriptions:** good direction for the permanent boosts, or a different flavor?
-2. **Stat list:** do the six stats feel right? Rename, merge or add any?
+## Resolved follow-ups
+- Stats renamed to STR / AGI / VIT / INT / INS / CHR; mana added (INT pool, INS regen).
+- Permanent boosts are essences themed by the boss, bound into the soul at a Soulbinder, with no visible body marks.
