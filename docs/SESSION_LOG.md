@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2026-10-12 (later still) — Power model revision
+
+- Greg: "skill is the only gate" overstated it. The new framing is "Nothing is locked": skill is the shortcut, power is the staircase. The power ceiling is very high.
+- Gear rolls go past the ceiling with P(+k) = e^(−λk) and a hidden safety cap. No XP levels; stats are trained by doing (draft six: Might, Finesse, Vigor, Wits, Insight, Presence). Permanent boosts proposed as Inscriptions.
+- Death: grave that anyone can loot in multiplayer. Maps as items (fog of war per character, copyable maps at a scribe). Reliquary stays account-wide.
+- Open: approve Inscriptions and the stat list (RLC-004).
+
 ## 2026-10-12 (later) — Core loop decisions
 
 - Greg decided: permadeath with dropped items + a vault, skill over stats (StarBreak), one hero, gear-defined builds, Wynncraft-style sanctuaries, no level gating.

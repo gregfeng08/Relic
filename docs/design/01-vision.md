@@ -17,7 +17,7 @@ Relic is an action RPG set in an endless, procedurally generated world. You expl
 | Game | What we take |
 |---|---|
 | Realm of the Mad God | Loot grubbing, dangerous bosses, the rush of a rare drop, difficulty that rises as you push outward |
-| StarBreak | Skill over stats: a stock character can clear the hardest content if the player is good enough |
+| StarBreak | A stock character can clear the hardest content (slowly) if the player is good enough |
 | Wynncraft | Cities and sanctuaries: safe hubs to live, trade and store loot, scattered through a dangerous world |
 | Genshin Impact | Terrain, traversal and the urge to see what's past the next ridge; art direction |
 | League of Legends / Genshin | Deep, connected lore with factions, history and characters |
@@ -48,14 +48,14 @@ Everything comes from one shared set of world facts (the **world graph**). Terra
 Build crafting, item memory, and an endless map give long-term goals without a level cap wall. There is always a better build, a deeper region and an undiscovered relic.
 **Test:** *Does this give a player something to want next week?*
 
-### 6. Skill is the only gate
-Nothing is level-locked. A skilled player can sprint from the starting sanctuary to a deadly far-off city with starter gear, the way you can run from Mondstadt to Liyue at level 5. It's harder, not forbidden. Gear widens your options and adds a moderate amount of power. It never turns a fight from impossible into trivial. Farther regions are more dangerous because of enemy *behavior* (patterns, density, combinations), not inflated health and damage numbers.
-**Test:** *Could a great player with starter gear get through this?*
+### 6. Nothing is locked
+There are no level gates. A skilled player can sprint from the starting sanctuary to a deadly far-off city with starter gear, the way you can run from Mondstadt to Liyue at level 5. A stock character *can* beat any boss, even if it takes hours of chipping away like Star Cathedral on a stock Duskwing. **Skill is the shortcut; power is the staircase.** Gear, trained stats and permanent boosts have a very high ceiling, so less-skilled players get there too, and lucky rolls can push past it. Farther regions are dangerous through enemy *behavior* (patterns, density, combinations) as well as numbers.
+**Test:** *Is this possible, however slowly, for a great player with starter gear? And reachable through power for everyone else?*
 
 ## Non-goals (for now)
 
 - Turn-based combat (D&D *systems* yes, D&D *turns* no)
-- Level gates, character levels that lock content, or numbers that grow without limit
+- Character levels or level gates (stats grow through training, not XP levels)
 - Classes. One hero, and the build comes from gear.
 - Crafting or survival busywork (food and water meters)
 - Handcrafted main story. Story emerges from the world graph.
