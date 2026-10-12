@@ -2,6 +2,12 @@
 
 Newest first.
 
+## 2026-10-12 (night) — Combat spec drafted
+
+- Greg: third-person camera, readable projectiles; gear slots as proposed; the dash moves your hitbox with NO i-frames (positioning like RotMG).
+- Wrote 03-combat.md: third-person bullet hell, small hitbox with an optional marker, ground-plane projectiles plus ground markers for airborne ones, pulled-back boss camera, no unavoidable damage, DEF with a 20% floor, power bands 1×→~8× (~12×), no enrage timers, grazing charges the ultimate.
+- Open (RLC-005): elements and reactions yes/no; is the power-band gap right?
+
 ## 2026-10-12 (evening) — Core loop agreed
 
 - Stats renamed to STR/AGI/VIT/INT/INS/CHR. Mana added: INT = pool, INS = regen; stamina from VIT (pool) and AGI (regen). Mages are a gear build.
