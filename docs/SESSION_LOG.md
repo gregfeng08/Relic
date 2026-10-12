@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2026-10-12 (later) — Core loop decisions
+
+- Greg decided: permadeath with dropped items + a vault, skill over stats (StarBreak), one hero, gear-defined builds, Wynncraft-style sanctuaries, no level gating.
+- Added pillar 6 "Skill is the only gate" to 01-vision. Rewrote 02-core-loop with the decisions, a sanctuaries section and consequences for the other specs.
+- Board: RLC-001 done, RLC-004 in review (follow-ups about dropped items and what survives death), new card RLC-019 for the sanctuary spec.
+- **Next:** combat & characters spec (RLC-005), then the item spec (RLC-006).
+
 ## 2026-10-12 — Ideation kickoff
 
 - Ideated core concepts: LLM-composed relics (effect grammar + power budget + kitbashed visuals), layered-noise world with region blending, graph-first dungeons, world graph as shared source of truth, D&D-style systems under action combat, NPC LLM dialogue (later).
