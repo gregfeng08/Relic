@@ -1,0 +1,365 @@
+<title>Relic Quest Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: phone-first single column (status → needs you → board tabs → log); wide screens show the board as columns. */
+:root {
+  --bg: #edf1f0;
+  --surface: #ffffff;
+  --surface-2: #f6f8f7;
+  --ink: #15232a;
+  --muted: #5a6a6f;
+  --line: #d2dbda;
+  --accent: #9a6a14;
+  --accent-soft: #f6ecd6;
+  --teal: #1d706b;
+  --teal-soft: #dcefec;
+  --warn: #a8432c;
+  --warn-soft: #f8e3dc;
+  --ok: #2b7347;
+  --ok-soft: #dff1e5;
+  --font-display: "Marcellus", "Palatino Linotype", Georgia, serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1619; --surface: #15222a; --surface-2: #192931; --ink: #e2ebe9; --muted: #8fa2a5; --line: #263840;
+    --accent: #e3b456; --accent-soft: #33291a; --teal: #57c3b8; --teal-soft: #173431;
+    --warn: #f08b70; --warn-soft: #3a211b; --ok: #72cf98; --ok-soft: #173326;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1619; --surface: #15222a; --surface-2: #192931; --ink: #e2ebe9; --muted: #8fa2a5; --line: #263840;
+  --accent: #e3b456; --accent-soft: #33291a; --teal: #57c3b8; --teal-soft: #173431;
+  --warn: #f08b70; --warn-soft: #3a211b; --ok: #72cf98; --ok-soft: #173326;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-inline: 16px;
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 1180px; margin-inline: auto; display: flex; flex-direction: column; gap: 28px; }
+
+/* Header */
+.masthead { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 7vw, 44px); line-height: 1.05; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+h1 .glyph { color: var(--accent); }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0; text-wrap: balance; }
+.section { display: flex; flex-direction: column; gap: 12px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.section-head p { margin: 0; color: var(--muted); font-size: 13px; }
+
+/* Status */
+.status { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 12px; }
+.status-row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+.phase { font-family: var(--font-display); font-size: 19px; }
+.headline { margin: 0; max-width: 65ch; }
+.meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Pills */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.p-review { background: var(--accent-soft); color: var(--accent); }
+.p-blocked { background: var(--warn-soft); color: var(--warn); }
+.p-progress { background: var(--teal-soft); color: var(--teal); }
+.p-ready, .p-backlog { background: var(--surface-2); color: var(--muted); }
+.p-done { background: var(--ok-soft); color: var(--ok); }
+
+/* Cards */
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.card.needs { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.card.needs.blocked { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+.card-btn { all: unset; box-sizing: border-box; display: grid; gap: 6px; width: 100%; padding: 14px 16px; cursor: pointer; border-radius: var(--radius); }
+.card-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.card-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tid { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.area { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.card-title { font-weight: 600; font-size: 15.5px; line-height: 1.35; overflow-wrap: anywhere; }
+.chev { margin-left: auto; color: var(--muted); font-size: 12px; transition: transform .15s; }
+.card.open .chev { transform: rotate(90deg); }
+.detail { padding: 0 16px 16px; display: grid; gap: 12px; border-top: 1px dashed var(--line); padding-top: 12px; margin-inline: 0; }
+.detail p { margin: 0; max-width: 65ch; overflow-wrap: anywhere; }
+.ask { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+.ask b { display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+.ref { font-family: var(--font-mono); font-size: 12px; color: var(--teal); overflow-wrap: anywhere; }
+
+/* Response form */
+.respond { display: grid; gap: 8px; }
+.respond label { font-size: 13px; color: var(--muted); }
+textarea { width: 100%; min-height: 84px; resize: vertical; font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+button.act { font: inherit; font-weight: 600; font-size: 14px; border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+button.act.primary { background: var(--teal); border-color: var(--teal); color: var(--surface); }
+button.act:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+button.act:disabled { opacity: .55; cursor: default; }
+.sent { font-size: 13px; color: var(--ok); }
+.sent.changes { color: var(--accent); }
+.err { font-size: 13px; color: var(--warn); }
+
+/* Board */
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.tab { font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; font-variant-numeric: tabular-nums; }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tab:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.columns { display: block; }
+.col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.col-head { display: none; }
+@media (min-width: 900px) {
+  .tabs { display: none; }
+  .columns { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .col[hidden] { display: flex !important; }
+  .col-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .col-head span:first-child { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .col-head span:last-child { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .col .card-btn { padding: 12px; }
+  .col .card-title { font-size: 14px; }
+}
+.empty { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: var(--radius); }
+
+/* Log */
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.log li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.log li:first-child { border-top: 0; }
+.log time { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.log p { margin: 0; max-width: 70ch; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .log li { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+.notice { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <span class="eyebrow">Relic · procedural action RPG</span>
+    <h1>Quest Board <span class="glyph">◆</span></h1>
+  </header>
+
+  <section class="status" id="status" aria-live="polite">
+    <div class="status-row"><span class="phase">Loading the board…</span></div>
+    <p class="headline">Tasks, reviews and the session log appear here once the board connects.</p>
+  </section>
+
+  <section class="section" id="needs-section">
+    <div class="section-head">
+      <h2>Needs you</h2>
+      <p>Reviews and decisions only you can make. Claude reads your answers at the start of each session.</p>
+    </div>
+    <div class="cards" id="needs"><div class="empty">Nothing waiting on you yet.</div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Board</h2><p id="board-meta"></p></div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="columns" id="columns"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Session log</h2><p>What Claude did, newest first.</p></div>
+    <ol class="log" id="log"></ol>
+  </section>
+</div>
+
+<script>
+(() => {
+  const COLUMNS = [
+    { key: "blocked",  label: "Blocked on you" },
+    { key: "review",   label: "Needs review" },
+    { key: "progress", label: "In progress" },
+    { key: "ready",    label: "Ready" },
+    { key: "backlog",  label: "Backlog" },
+    { key: "done",     label: "Done" },
+  ];
+  const BOARD_COLS = COLUMNS.filter(c => c.key !== "blocked" && c.key !== "review");
+  const LABEL = Object.fromEntries(COLUMNS.map(c => [c.key, c.label]));
+
+  const state = { tasks: [], status: null, log: [], db: null, canWrite: true, tab: "progress", open: new Set(), drafts: {}, busy: new Set(), errors: {} };
+  try { const t = localStorage.getItem("relic-tab"); if (t) state.tab = t; } catch (e) {}
+
+  const $ = id => document.getElementById(id);
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+    return el;
+  }
+  const fmtDate = iso => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return isNaN(d) ? String(iso) : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
+
+  // Defer re-render while the viewer is typing so their draft and focus survive.
+  let pending = false;
+  function scheduleRender() {
+    const a = document.activeElement;
+    if (a && a.tagName === "TEXTAREA") { pending = true; return; }
+    render();
+  }
+  document.addEventListener("focusout", () => { if (pending) { pending = false; setTimeout(scheduleRender, 0); } });
+
+  async function respond(task, verdict) {
+    const note = (state.drafts[task.id] || "").trim();
+    if (verdict === "answer" && !note) { state.errors[task.id] = "Write an answer first."; render(); return; }
+    state.busy.add(task.id); delete state.errors[task.id]; render();
+    try {
+      await state.db.doc("tasks/" + task.id).update({ response: { verdict, note, at: new Date().toISOString() } });
+      delete state.drafts[task.id];
+    } catch (e) {
+      state.errors[task.id] = e && e.code === "invalid_argument"
+        ? "You can view this board but not respond. Ask the owner for Contributor access."
+        : "Couldn't save your response. Check your connection and try again.";
+      if (e && e.code === "invalid_argument") state.canWrite = false;
+    }
+    state.busy.delete(task.id); render();
+  }
+
+  function responseLine(task) {
+    const r = task.response;
+    if (!r) return null;
+    const what = r.verdict === "approved" ? "You approved this" : r.verdict === "changes" ? "You asked for changes" : "You answered";
+    return h("p", { class: "sent" + (r.verdict === "changes" ? " changes" : "") }, `${what} on ${fmtDate(r.at)}. Claude picks it up next session.`);
+  }
+
+  function respondForm(task) {
+    if (!state.db || !state.canWrite) return null;
+    const isBlocked = task.column === "blocked";
+    const busy = state.busy.has(task.id);
+    const ta = h("textarea", {
+      id: "note-" + task.id,
+      placeholder: isBlocked ? "Your answer…" : "Optional note for Claude…",
+      oninput: e => { state.drafts[task.id] = e.target.value; },
+    });
+    ta.value = state.drafts[task.id] ?? (task.response && task.response.note) ?? "";
+    const actions = isBlocked
+      ? [h("button", { class: "act primary", type: "button", disabled: busy, onclick: () => respond(task, "answer") }, task.response ? "Update answer" : "Send answer")]
+      : [
+          h("button", { class: "act primary", type: "button", disabled: busy, onclick: () => respond(task, "approved") }, "Approve"),
+          h("button", { class: "act", type: "button", disabled: busy, onclick: () => respond(task, "changes") }, "Request changes"),
+        ];
+    return h("div", { class: "respond" },
+      h("label", { for: "note-" + task.id }, isBlocked ? "Answer" : "Note"),
+      ta,
+      h("div", { class: "actions" }, actions),
+      state.errors[task.id] ? h("p", { class: "err" }, state.errors[task.id]) : null,
+    );
+  }
+
+  function card(task, { needs = false } = {}) {
+    const open = state.open.has(task.id);
+    const toggle = () => { open ? state.open.delete(task.id) : state.open.add(task.id); render(); };
+    const cls = "card" + (open ? " open" : "") + (needs ? " needs" : "") + (task.column === "blocked" ? " blocked" : "");
+    return h("article", { class: cls },
+      h("button", { class: "card-btn", type: "button", "aria-expanded": String(open), onclick: toggle },
+        h("div", { class: "card-top" },
+          h("span", { class: "pill p-" + task.column }, LABEL[task.column] || task.column),
+          task.area ? h("span", { class: "area" }, task.area) : null,
+          h("span", { class: "chev", "aria-hidden": "true" }, "▸"),
+        ),
+        h("div", { class: "card-title" }, task.title || "Untitled"),
+        h("span", { class: "tid" }, task.id + (task.updated ? " · updated " + fmtDate(task.updated) : "")),
+      ),
+      open ? h("div", { class: "detail" },
+        task.summary ? h("p", {}, task.summary) : null,
+        task.ask ? h("div", { class: "ask" }, h("b", {}, "What Claude needs from you"), task.ask) : null,
+        task.ref ? h("p", { class: "ref" }, task.ref) : null,
+        responseLine(task),
+        (task.column === "review" || task.column === "blocked") ? respondForm(task) : null,
+      ) : null,
+    );
+  }
+
+  function render() {
+    const tasks = [...state.tasks].sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || String(a.id).localeCompare(String(b.id)));
+
+    // Status
+    const s = state.status;
+    const st = $("status"); st.replaceChildren();
+    if (!state.db) {
+      st.append(h("div", { class: "status-row" }, h("span", { class: "phase" }, "Board offline")),
+        h("p", { class: "headline" }, "Open this page on claude.ai while signed in to see live tasks."));
+    } else if (!s) {
+      st.append(h("div", { class: "status-row" }, h("span", { class: "phase" }, "Waiting for the first update")),
+        h("p", { class: "headline" }, "Claude posts the project phase and current focus here."));
+    } else {
+      st.append(
+        h("div", { class: "status-row" },
+          h("span", { class: "phase" }, s.phase || ""),
+          s.now ? h("span", { class: "pill p-progress" }, s.now) : null,
+        ),
+        s.headline ? h("p", { class: "headline" }, s.headline) : null,
+        h("span", { class: "meta" }, "Claude last updated " + fmtDate(s.updated)),
+      );
+    }
+
+    // Needs you
+    const needs = tasks.filter(t => t.column === "blocked" || t.column === "review");
+    const nv = $("needs"); nv.replaceChildren();
+    if (needs.length) needs.forEach(t => nv.append(card(t, { needs: true })));
+    else nv.append(h("div", { class: "empty" }, state.db ? "Nothing waiting on you. Claude will add reviews here." : "Nothing to show while the board is offline."));
+
+    // Board
+    const counts = Object.fromEntries(BOARD_COLS.map(c => [c.key, tasks.filter(t => t.column === c.key).length]));
+    if (!BOARD_COLS.some(c => c.key === state.tab)) state.tab = "progress";
+    const tabs = $("tabs"); tabs.replaceChildren();
+    BOARD_COLS.forEach(c => tabs.append(h("button", {
+      class: "tab", role: "tab", type: "button", "aria-selected": String(state.tab === c.key),
+      onclick: () => { state.tab = c.key; try { localStorage.setItem("relic-tab", c.key); } catch (e) {} render(); },
+    }, `${c.label} ${counts[c.key]}`)));
+    const cols = $("columns"); cols.replaceChildren();
+    cols.style.setProperty("--cols", BOARD_COLS.length);
+    BOARD_COLS.forEach(c => {
+      const list = tasks.filter(t => t.column === c.key);
+      cols.append(h("div", { class: "col", hidden: state.tab !== c.key, role: "tabpanel" },
+        h("div", { class: "col-head" }, h("span", {}, c.label), h("span", {}, String(list.length))),
+        list.length ? list.map(t => card(t)) : h("div", { class: "empty" }, "Empty"),
+      ));
+    });
+    $("board-meta").textContent = `${tasks.length} tasks · ${counts.done || 0} done`;
+
+    // Log
+    const lv = $("log"); lv.replaceChildren();
+    const entries = [...state.log].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 15);
+    if (entries.length) entries.forEach(e => lv.append(h("li", {}, h("time", { datetime: e.date }, fmtDate(e.date)), h("p", {}, e.text))));
+    else lv.append(h("div", { class: "empty" }, "No sessions logged yet."));
+  }
+
+  render();
+
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+    state.db = db;
+    if (!db) { render(); return; }
+    try {
+      const user = await window.claude.use("user");
+      const can = user ? await user.can("data.write") : null;
+      if (can === false) state.canWrite = false;
+    } catch (e) {}
+    db.collection("tasks").onSnapshot(snap => {
+      state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      scheduleRender();
+    }, () => scheduleRender());
+    db.doc("meta/status").onSnapshot(d => { state.status = d.exists ? d.data() : null; scheduleRender(); }, () => {});
+    db.doc("meta/log").onSnapshot(d => { state.log = d.exists ? (d.data().entries || []) : []; scheduleRender(); }, () => {});
+    render();
+  })();
+})();
+</script>
