@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2026-10-13 (night) — Lead specs and combat engine while streams run
+
+- Greg approved the LLM downloads (RLC-026). The exact files get posted once stream I recommends models. Region-shape direction agreed (09): warped, weighted cells now (sent to stream W mid-run, behind `IRegionField`); travel-effort borders with passes and terrain characters in M2.
+- Specs: 10-world-graph, 11-dungeons, 12-sanctuaries, 13-roadmap (M1–M8).
+- Built `Relic.Combat` (lead-owned): CombatSim interpreter, CombatRules, ICombatSpace, AbstractSpace, BalanceSim. 29/29 tests in dotnet and Unity.
+- **Next:** stream reports → review → merge into `rebuild` → feel-review cards; download the LLM files; use BalanceSim to calibrate PowerBudget and boss HP.
+
 ## 2026-10-13 (evening) — Groundwork built, streams launched
 
 - Greg approved: push, pillars, the parallel plan. Pushed `rebuild` and tag `legacy-2022`.
