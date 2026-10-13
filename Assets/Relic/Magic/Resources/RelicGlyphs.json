@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "about": "Glyph set v0 for Relic spellcraft. Templates live in a roughly [-1,1] box with Y up. A stroke is a list of [x,y] points and {\"arc\":[cx,cy,rx,ry,fromDeg,toDeg]} pieces (degrees counter-clockwise from +X). See Assets/Relic/Magic/README.md.",
+  "glyphs": [
+    {
+      "id": "water", "name": "Water", "role": "Core",
+      "hint": "A droplet: one stroke from a point at the top around a round bottom and back.",
+      "words": ["Tide"],
+      "core": { "damage": 8, "damageKind": "Magical", "status": "Soaked", "statusDuration": 4 },
+      "strokes": [
+        [[0, 1], {"arc": [0, -0.3, 0.6, 0.6, 10, -190]}, [0, 1]]
+      ]
+    },
+    {
+      "id": "flame", "name": "Flame", "role": "Core",
+      "hint": "Three flame tongues, one zigzag stroke: low peak, tall peak in the middle, low peak. No base.",
+      "words": ["Ember", "Cinder"],
+      "core": { "damage": 6, "damageKind": "Magical", "status": "Burning", "statusDuration": 3 },
+      "strokes": [
+        [[-1, -1], [-0.6, 0.2], [-0.3, -0.4], [0, 1], [0.3, -0.4], [0.6, 0.2], [1, -1]]
+      ]
+    },
+    {
+      "id": "stone", "name": "Stone", "role": "Core",
+      "hint": "A mountain: a closed triangle pointing up, with a line across its middle.",
+      "words": ["Stone", "Flint"],
+      "core": { "damage": 10, "damageKind": "Physical", "status": "Staggered", "statusDuration": 1 },
+      "strokes": [
+        [[-1, -0.7], [0, 0.9], [1, -0.7], [-1, -0.7]],
+        [[-0.5, 0.1], [0.5, 0.1]]
+      ]
+    },
+    {
+      "id": "wind", "name": "Wind", "role": "Core",
+      "hint": "Three gusts: horizontal strokes, the top one curling up at its right end.",
+      "words": ["Gale", "Squall"],
+      "core": { "damage": 5, "damageKind": "Magical", "knockback": 3 },
+      "strokes": [
+        [[-1, 0.5], [0.5, 0.5], {"arc": [0.5, 0.8, 0.3, 0.3, -90, 180]}],
+        [[-0.6, 0], [1, 0]],
+        [[-1, -0.5], [0.4, -0.5]]
+      ]
+    },
+    {
+      "id": "light", "name": "Light", "role": "Core",
+      "hint": "A five-pointed star in one stroke, starting and ending at the top point.",
+      "words": ["Dawn", "Glint"],
+      "core": { "damage": 6, "damageKind": "Magical", "status": "Dazed", "statusDuration": 2 },
+      "strokes": [
+        [[0, 1], [-0.588, -0.809], [0.951, 0.309], [-0.951, 0.309], [0.588, -0.809], [0, 1]]
+      ]
+    },
+    {
+      "id": "growth", "name": "Growth", "role": "Core",
+      "hint": "A sprouting fern: a stem that curls over at the top, plus a small leaf low on the left.",
+      "words": ["Bramble", "Thorn"],
+      "core": { "damage": 4, "damageKind": "Magical", "status": "Rooted", "statusDuration": 1.5 },
+      "strokes": [
+        [[0, -1], [0, 0.2], {"arc": [0.35, 0.2, 0.35, 0.35, 180, -120]}],
+        [[0, -0.5], [-0.5, -0.2]]
+      ]
+    },
+
+    {
+      "id": "more", "name": "More", "role": "Inner", "effect": "More",
+      "hint": "A plus sign. More damage.",
+      "words": ["Greater"],
+      "strokes": [
+        [[0, -1], [0, 1]],
+        [[-1, 0], [1, 0]]
+      ]
+    },
+    {
+      "id": "less", "name": "Less", "role": "Inner", "effect": "Less",
+      "hint": "A chevron pointing down. A smaller, cheaper, quicker spell.",
+      "words": ["Lesser"],
+      "strokes": [
+        [[-1, 0.6], [0, -0.6], [1, 0.6]]
+      ]
+    },
+    {
+      "id": "far", "name": "Far", "role": "Inner", "effect": "Far",
+      "hint": "An arrow pointing up and to the right. Longer range, wider areas.",
+      "words": ["Farflung"],
+      "strokes": [
+        [[-1, -1], [1, 1]],
+        [[0.2, 1], [1, 1], [1, 0.2]]
+      ]
+    },
+    {
+      "id": "lasting", "name": "Lasting", "role": "Inner", "effect": "Lasting",
+      "hint": "An infinity loop, one stroke. Statuses and areas last longer.",
+      "words": ["Lingering"],
+      "strokes": [
+        [[1, 0], [0.966, 0.3], [0.866, 0.52], [0.707, 0.6], [0.5, 0.52], [0.259, 0.3], [0, 0],
+         [-0.259, -0.3], [-0.5, -0.52], [-0.707, -0.6], [-0.866, -0.52], [-0.966, -0.3], [-1, 0],
+         [-0.966, 0.3], [-0.866, 0.52], [-0.707, 0.6], [-0.5, 0.52], [-0.259, 0.3], [0, 0],
+         [0.259, -0.3], [0.5, -0.52], [0.707, -0.6], [0.866, -0.52], [0.966, -0.3], [1, 0]]
+      ]
+    },
+    {
+      "id": "split", "name": "Split", "role": "Inner", "effect": "Split",
+      "hint": "A fork (Y). The first Split makes more projectiles; more Splits make them burst on impact.",
+      "words": ["Scattered"],
+      "strokes": [
+        [[0, -1], [0, 0.1]],
+        [[-0.8, 1], [0, 0.1], [0.8, 1]]
+      ]
+    },
+    {
+      "id": "seek", "name": "Seek", "role": "Inner", "effect": "Seek",
+      "hint": "An eye: an upper and a lower arc meeting at the corners, with a small pupil.",
+      "words": ["Seeker"],
+      "strokes": [
+        [{"arc": [0, -0.634, 1.184, 1.184, 147.6, 32.4]}],
+        [{"arc": [0, 0.634, 1.184, 1.184, -147.6, -32.4]}],
+        [{"arc": [0, 0, 0.22, 0.22, 90, 450]}]
+      ]
+    },
+    {
+      "id": "heavy", "name": "Heavy", "role": "Inner", "effect": "Heavy",
+      "hint": "A triangle pointing down, one closed stroke. Bigger and harder-hitting, but slower.",
+      "words": ["Heavy"],
+      "strokes": [
+        [[-0.9, 0.7], [0.9, 0.7], [0, -0.9], [-0.9, 0.7]]
+      ]
+    },
+    {
+      "id": "swift", "name": "Swift", "role": "Inner", "effect": "Swift",
+      "hint": "Two chevrons pointing right (>>). Faster projectiles.",
+      "words": ["Swift"],
+      "strokes": [
+        [[-0.9, 0.7], [-0.2, 0], [-0.9, -0.7]],
+        [[0.1, 0.7], [0.8, 0], [0.1, -0.7]]
+      ]
+    },
+
+    {
+      "id": "line", "name": "Line", "role": "Ring", "effect": "Line",
+      "hint": "A horizontal line with a short upright tick at each end. Bolts fired where you aim.",
+      "words": ["Bolt"],
+      "strokes": [
+        [[-1, 0], [1, 0]],
+        [[-1, -0.35], [-1, 0.35]],
+        [[1, -0.35], [1, 0.35]]
+      ]
+    },
+    {
+      "id": "cone", "name": "Cone", "role": "Ring", "effect": "Cone",
+      "hint": "A fan: a wedge opening to the right, closed by an arc.",
+      "words": ["Fan", "Spray"],
+      "strokes": [
+        [[-1, 0], [0.8, 0.6], {"arc": [-1, 0, 1.897, 1.897, 18.43, -18.43]}, [-1, 0]]
+      ]
+    },
+    {
+      "id": "ring", "name": "Ring", "role": "Ring", "effect": "Ring",
+      "hint": "A small circle. Projectiles burst out in every direction.",
+      "words": ["Nova", "Bloom"],
+      "strokes": [
+        [{"arc": [0, 0, 1, 1, 90, 450]}]
+      ]
+    },
+    {
+      "id": "wall", "name": "Wall", "role": "Ring", "effect": "Wall",
+      "hint": "A battlement: one square-wave stroke, up, across, down, across, up, across, down. Needs a Line next to it.",
+      "words": ["Rampart", "Bulwark"],
+      "strokes": [
+        [[-1, -0.6], [-1, 0.6], [-0.33, 0.6], [-0.33, -0.6], [0.33, -0.6], [0.33, 0.6], [1, 0.6], [1, -0.6]]
+      ]
+    },
+    {
+      "id": "orbit", "name": "Orbit", "role": "Ring", "effect": "Orbit",
+      "hint": "A spiral: one stroke winding out from the middle, about a turn and a quarter.",
+      "words": ["Halo", "Circlet"],
+      "strokes": [
+        [{"arc": [0, 0, 0.2, 0.2, 0, 180]}, {"arc": [0.1, 0, 0.3, 0.3, 180, 360]}, {"arc": [0, 0, 0.4, 0.4, 0, 180]},
+         {"arc": [0.1, 0, 0.5, 0.5, 180, 360]}, {"arc": [0, 0, 0.6, 0.6, 0, 180]}]
+      ]
+    },
+    {
+      "id": "return", "name": "Return", "role": "Ring", "effect": "Return",
+      "hint": "A hook: up, over the top and down, ending in an arrowhead. Projectiles come back.",
+      "words": ["Boomerang"],
+      "strokes": [
+        [[-0.7, -1], [-0.7, 0.2], {"arc": [0, 0.2, 0.7, 0.7, 180, 0]}, [0.7, -0.6]],
+        [[0.3, -0.2], [0.7, -0.65], [1.1, -0.2]]
+      ]
+    },
+    {
+      "id": "delay", "name": "Delay", "role": "Ring", "effect": "Delay",
+      "hint": "An hourglass: one closed stroke, top bar, diagonal, bottom bar, diagonal. Everything after it on the ring waits.",
+      "words": ["Patient"],
+      "strokes": [
+        [[-0.7, 1], [0.7, 1], [-0.7, -1], [0.7, -1], [-0.7, 1]]
+      ]
+    }
+  ]
+}
