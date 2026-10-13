@@ -153,7 +153,7 @@ namespace Relic.Items.Text
                     foreach (var e in b.World.Events) ids.Add(e.Id);
                 }
                 props["lore"] = new JObject { ["type"] = "string" };
-                props["worldRefs"] = new JObject { ["type"] = "array", ["minItems"] = 1, ["maxItems"] = 4, ["items"] = ids.Count > 0 ? new JObject { ["type"] = "string", ["enum"] = ids } : new JObject { ["type"] = "string" } };
+                props["worldRefs"] = new JObject { ["type"] = "array", ["minItems"] = 1, ["maxItems"] = 6, ["items"] = ids.Count > 0 ? new JObject { ["type"] = "string", ["enum"] = ids } : new JObject { ["type"] = "string" } };
                 props["enchantments"] = JsonSchemaBuilder.Program(1, b.Kind == DraftKind.Epic ? 1 : 3);
                 required.Add("lore"); required.Add("worldRefs"); required.Add("enchantments");
                 if (b.Kind == DraftKind.Legendary)

@@ -246,6 +246,9 @@ namespace Relic.Items
             }
         }
 
+        /// <summary>A person's name in the world's phonology (bosses, NPCs).</summary>
+        public static string PersonName(ref Pcg32 rng) => Pick(GivenA, ref rng) + Pick(GivenB, ref rng) + " " + Pick(Surnames, ref rng);
+
         static string Pick(string[] a, ref Pcg32 rng) => a[rng.Range(0, a.Length)];
 
         static string[] Shuffled(string[] src, ref Pcg32 rng)
