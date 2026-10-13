@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Game",
+    "rootNamespace": "Relic.Game",
+    "references": ["Relic.Core", "Relic.World.Logic", "Relic.World", "Relic.Magic.Logic", "Relic.Magic", "Relic.Items.Logic", "Relic.Items", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

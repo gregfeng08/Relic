@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Items.Logic",
+    "rootNamespace": "Relic.Items",
+    "references": ["Relic.Core"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["Newtonsoft.Json.dll"],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
