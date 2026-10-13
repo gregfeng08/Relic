@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Magic.Editor",
+    "rootNamespace": "Relic.Magic.DeskEditor",
+    "references": ["Relic.Magic", "Relic.Magic.Logic", "Relic.Core"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
