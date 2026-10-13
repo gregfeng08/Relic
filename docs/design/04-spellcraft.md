@@ -1,6 +1,6 @@
 # 04 — Spellcraft (drawn magic)
 
-Status: **CONCEPT — needs Greg's review** · Last updated 2026-10-13
+Status: **CONCEPT AGREED** (a full spec comes with the workstream) · Last updated 2026-10-13
 
 Inspired by the *idea* behind Witch Hat Atelier's magic: magic isn't an innate gift, it's a **craft**. Spells are drawn as circles of symbols, and anyone who learns the symbols can cast. We borrow that concept only. All our glyphs, names and lore are original.
 
@@ -69,6 +69,6 @@ The rules that matter for fairness are **deterministic**: same drawing, same spe
 | Too complex for new players | Start with three glyphs and premade pages; complexity grows as you discover more |
 | Scope | Ship a small glyph set first (6 cores, 8 modifiers, 7 shapes). Glyphs are data, so more can come later. |
 
-## Open questions (for Greg)
-1. **Drawing vs. placing:** should players *draw* glyphs freehand, with precision mattering (skill-based, the full fantasy), or *place* glyphs from a palette (simpler)? Recommended: draw, with a palette fallback for controllers and accessibility.
-2. **Is spellcraft the only magic?** Recommended: found staves and tomes come with pre-written spells you can use straight away *and* study to learn their glyphs. Otherwise, would you want all magic to be self-written?
+## Decisions (Greg, 2026-10-13)
+1. **Freehand drawing, plus a glyph palette** (as a fallback and for controllers). Precision matters when drawing.
+2. **Found staves and tomes carry pre-written spells.** You can use them right away and study them to learn their glyphs.

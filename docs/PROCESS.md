@@ -17,6 +17,24 @@ Claude owns day-to-day development. Greg sets direction and reviews.
 
 Greg can approve or request changes on any card from the board. Each session starts by reading those responses.
 
+## Parallel workstreams (proposed 2026-10-13)
+
+Three systems are built in parallel by separate agents, each on its own git branch and worktree. The lead (this session) owns the shared contracts, reviews and merges.
+
+| Stream | Owns | Depends on |
+|---|---|---|
+| **W — World** | Terrain sandbox: noise, chunks, region blending, toon shader, player controller | World-gen spec, project skeleton |
+| **M — Magic** | Spellcraft: glyph recognizer, circle parser, compiler to effects, drawing UI | Effect grammar contract, spellcraft spec |
+| **I — Items & bosses** | Relic generator (local LLM), power budget, boss/pattern generator | Effect grammar contract, item spec |
+| **Lead** | `Relic.Core` (effect grammar, seeds, shared types), specs, board, integration | — |
+
+**Rules for parallel work**
+- **Do first (lead, in order):** project skeleton → effect grammar contract → tech architecture → the specs each stream needs. Then streams start.
+- **Folder and assembly ownership.** Each stream owns one folder and one assembly definition: `Assets/Relic/World`, `Assets/Relic/Magic`, `Assets/Relic/Items`. Only the lead edits `Assets/Relic/Core`, `ProjectSettings/` and `Packages/`. This avoids merge conflicts in Unity's `.meta` and settings files.
+- **Pure C# where possible.** Generators, the grammar, the glyph compiler and the power budget live in plain C# with unit tests, so agents can verify work without opening the Unity editor.
+- **Contract changes go through the lead.** A stream that needs a new effect type requests it; it doesn't edit Core itself.
+- **Only "feel" checks need Greg:** how the terrain looks, how drawing feels, whether relics are fun to read.
+
 ## Session protocol (for Claude)
 
 1. Read `docs/SESSION_LOG.md` (latest entry) and the board, including any review verdicts and notes from Greg.
