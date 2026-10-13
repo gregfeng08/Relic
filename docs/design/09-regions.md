@@ -1,6 +1,6 @@
 # 09 — Region Shapes: borders that look like geography
 
-Status: **PROPOSAL — needs Greg's review** · Last updated 2026-10-13
+Status: **AGREED direction (Greg, 2026-10-13)** — layer 1 in M1, layers 2–3 in M2 · Last updated 2026-10-13
 
 ## The problem
 Voronoi cells over a jittered grid give convex polygons with straight edges and similar sizes. The result looks like a grid, not a map. Real regions, and Genshin's nations, are shaped by geography: **borders follow mountain ridges, rivers, coastlines and straits**. Mondstadt and Liyue are separated by mountains and a river valley, Inazuma by sea. Crossing a border is an *event*: you crest a pass, look down, and a new land opens up.
