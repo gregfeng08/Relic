@@ -56,3 +56,6 @@ tools/**/obj/
 # Local LLM model weights (large; downloaded per machine)
 /models/
 *.gguf
+
+# Stream agent worktrees (each is a separate Unity project)
+/.wt/
