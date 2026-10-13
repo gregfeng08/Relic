@@ -195,6 +195,15 @@ namespace Relic.Core.Tests
         }
 
         [Test]
+        public void TierRisesWithDistanceAndCaps()
+        {
+            Assert.AreEqual(0, Difficulty.TierAt(0, 0));
+            Assert.AreEqual(0, Difficulty.TierAt(1199, 0));
+            Assert.AreEqual(1, Difficulty.TierAt(0, -1200));
+            Assert.AreEqual(Difficulty.MaxTier, Difficulty.TierAt(1e6, 1e6));
+        }
+
+        [Test]
         public void SoakingPutsOutFire()
         {
             CollectionAssert.Contains(StatusRules.Clears(StatusId.Soaked), StatusId.Burning);

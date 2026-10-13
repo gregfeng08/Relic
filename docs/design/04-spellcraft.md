@@ -69,6 +69,33 @@ The rules that matter for fairness are **deterministic**: same drawing, same spe
 | Too complex for new players | Start with three glyphs and premade pages; complexity grows as you discover more |
 | Scope | Ship a small glyph set first (6 cores, 8 modifiers, 7 shapes). Glyphs are data, so more can come later. |
 
+## Brief for stream M (v1)
+
+**Glyph set v0.** Small on purpose; glyphs are data, so more can come later.
+- **Cores (6):** Water → Soaked, Flame → Burning, Stone → Staggered + Physical damage, Wind → Knockback, Light → Dazed, Growth → Rooted
+- **Inner modifiers (8):** More (amount ↑), Less (cost ↓), Far (range ↑), Lasting (duration ↑), Split (SplitCount / Count ↑), Seek (Seeking), Heavy (size ↑, speed ↓), Swift (speed ↑)
+- **Ring shapes and motion (7):** Line, Cone, Ring, Wall (CreateBarrier), Orbit, Return (Returning), Delay
+
+**Pipeline** (all of it pure C# in `Magic/Logic` except the drawing UI):
+1. **Strokes:** a list of polylines, normalized. Recognize glyphs with a $Q-style point-cloud recognizer against templates stored as data. It returns glyph id, confidence and a **precision score** (0–1).
+2. **Circle parse:** find the outer circle, then sort glyphs into core (center), inner ring and outer ring by radius. Order on the outer ring is clockwise from the top. Glyph size relative to the circle gives emphasis. Reject spells with no core or an unclosed circle.
+3. **Compile** to an `EffectProgram` with one Active rule: core → payload, modifiers → magnitudes and emitter flags, ring → emitter shape and area. Cooldown and mana cost are **derived from `PowerBudget.Cost`**: the more powerful the spell, the more expensive it is to cast. Precision scales efficiency (sloppy = more mana, longer cooldown, a misfire chance).
+4. **Validate** with `EffectValidator`. Report errors in plain language ("a Wall needs a Line or a Ring to shape it").
+5. **Name and flavor** come through an `ISpellNamer` interface (the LLM later). Use a deterministic stub name for now.
+
+**Unity side (`Magic/Runtime`):**
+- A **Writing Desk scene** (`Magic/Scenes/WritingDesk.unity`): draw with the mouse on a parchment canvas, see the recognized glyphs highlighted, and see the compiled spell's JSON, cost, cooldown and mana.
+- A **glyph palette** fallback (click to place glyphs in slots).
+- A **preview** that plays the spell's emitter shape as simple debug gizmos or particles in a test arena.
+
+**Pre-written spells:** a function that builds a spell drawing (glyph placements) from an `EffectProgram`-compatible recipe, so found tomes can carry spells whose glyphs the player can study. It must round-trip: recipe → circle → compile gives the same program.
+
+**Acceptance:**
+- Recognizer accuracy ≥ 95% on a synthetic test set (templates with noise, rotation and scale jitter).
+- The example spell (water core + Split ×3 + Seek + Line) compiles to the Tide Seekers program in CoreTests, within tolerance.
+- Greg can draw five different spells at the desk without frustration ("feel" review).
+- Pure logic tested in dotnet and Unity; `Assets/Relic/Magic/README.md` written.
+
 ## Decisions (Greg, 2026-10-13)
 1. **Freehand drawing, plus a glyph palette** (as a fallback and for controllers). Precision matters when drawing.
 2. **Found staves and tomes carry pre-written spells.** You can use them right away and study them to learn their glyphs.
