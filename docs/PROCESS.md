@@ -28,6 +28,8 @@ Three systems are built in parallel by separate agents, each on its own git bran
 | **I — Items & bosses** | Relic generator (local LLM), power budget, boss/pattern generator | Effect grammar contract, item spec |
 | **Lead** | `Relic.Core` (effect grammar, seeds, shared types), specs, board, integration | — |
 
+**Worktrees:** `.wt/world`, `.wt/magic`, `.wt/items` (gitignored) on branches `stream/world`, `stream/magic`, `stream/items`, created from `rebuild`. Each is a separate Unity project with its own `Library/`. They're created manually with `git worktree add .wt/<s> -b stream/<s> rebuild`, because the automatic worktree tool checks out `main`, whose committed `Library/` has paths too long for Windows.
+
 **Rules for parallel work**
 - **Do first (lead, in order):** project skeleton → effect grammar contract → tech architecture → the specs each stream needs. Then streams start.
 - **Folder and assembly ownership.** Each stream owns one folder and one assembly definition: `Assets/Relic/World`, `Assets/Relic/Magic`, `Assets/Relic/Items`. Only the lead edits `Assets/Relic/Core`, `ProjectSettings/` and `Packages/`. This avoids merge conflicts in Unity's `.meta` and settings files.

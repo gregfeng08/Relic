@@ -2,6 +2,16 @@
 
 Newest first.
 
+## 2026-10-13 (evening) — Groundwork built, streams launched
+
+- Greg approved: push, pillars, the parallel plan. Pushed `rebuild` and tag `legacy-2022`.
+- Replaced the 2022 project with a Unity 6000.3.9f1 URP skeleton (Library untracked, .gitignore/.gitattributes, LFS for art). Assemblies: Relic.Core (pure), World/Magic/Items × Logic/Runtime/Tests, Relic.Game.
+- Relic.Core: Hash + PCG32, StatId/ResourceId, Difficulty.TierAt, StatusId + physical clears, the effect grammar, PowerBudget, EffectValidator (+ScaleToFit), EffectJson. 16 tests pass in dotnet and Unity EditMode.
+- tools/Relic.Tests (dotnet harness) and tools/add-metas.sh (stable GUIDs outside Unity).
+- Specs: 05-effect-grammar, 06-tech-architecture (RTX 5060 Laptop 8 GB → 3–4B model in-game), 07-world-terrain, 08-items-bosses, plus the stream M brief in 04.
+- Launched three background agents in `.wt/{world,magic,items}`. Stream I is told not to download models: RLC-026 awaits Greg.
+- **Next:** review each stream's report, merge into `rebuild`, put the feel reviews on the board.
+
 ## 2026-10-13 (later) — Combat agreed, spellcraft concept
 
 - Greg: group fights = bosses designed for groups of players; minimal honest HUD OK; per-sanctuary vaults, couriers, no teleporting.
