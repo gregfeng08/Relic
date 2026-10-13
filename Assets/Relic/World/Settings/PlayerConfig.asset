@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eb4b430f6be4e12454822a02b1be824, type: 3}
+  m_Name: PlayerConfig
+  m_EditorClassIdentifier: Relic.World::Relic.World.Runtime.PlayerConfig
+  RunSpeed: 6
+  SprintSpeed: 9.5
+  GroundAcceleration: 60
+  GroundDeceleration: 45
+  TurnSpeed: 900
+  SlopeLimit: 48
+  SlideSpeed: 9
+  Gravity: 24
+  JumpHeight: 1.5
+  AirAcceleration: 14
+  MaxFallSpeed: 45
+  CoyoteTime: 0.12
+  JumpBuffer: 0.12
+  DashDistance: 4
+  DashDuration: 0.18
+  DashStamina: 18
+  DashCooldown: 0.3
+  MaxStamina: 240
+  StaminaRegen: 30
+  StaminaRegenDelay: 0.9
+  SprintDrain: 16
+  ClimbSpeed: 2.6
+  ClimbDrain: 9
+  ClimbJumpStamina: 22
+  ClimbJumpHeight: 1.4
+  VaultUpSpeed: 6.5
+  GlideSpeed: 9
+  GlideFallSpeed: 2.4
+  GlideTurnSpeed: 150
+  GlideDrain: 5
+  GlideMinHeight: 2.2
+  SwimSpeed: 3.6
+  SwimDepth: 1.15
+  MouseSensitivity: 0.12
+  CameraDistance: 5.5
+  CameraMinDistance: 1.5
+  CameraMaxDistance: 12
+  CameraPitchMin: -40
+  CameraPitchMax: 75
+  CameraFov: 55
+  CameraPivotOffset: {x: 0, y: 1.55, z: 0}
+  CameraShoulder: 0.35

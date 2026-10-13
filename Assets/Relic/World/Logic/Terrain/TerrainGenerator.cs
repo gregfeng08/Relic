@@ -52,6 +52,7 @@ namespace Relic.World.Terrain
         const double TemperatureWavelength = 3600.0;
         const double HumidityWavelength = 3000.0;
         const double TintWavelength = 37.0;
+        const double CliffWavelength = 900.0;
 
         const double TerraceStep = 13.0;
 
@@ -59,6 +60,7 @@ namespace Relic.World.Terrain
         readonly IRegionField _regions;
         readonly SimplexNoise2 _continent, _erosion, _mountainMask, _peaks, _hills, _detail;
         readonly SimplexNoise2 _warpX, _warpZ, _temperature, _humidity, _tint;
+        readonly SimplexNoise2 _cliffs;
         readonly MonotoneSpline _continentSpline;
 
         public TerrainGenerator(ulong seed, IRegionField regions = null)
@@ -76,6 +78,7 @@ namespace Relic.World.Terrain
             _temperature = SimplexNoise2.ForPurpose(seed, "climate.temperature");
             _humidity = SimplexNoise2.ForPurpose(seed, "climate.humidity");
             _tint = SimplexNoise2.ForPurpose(seed, "terrain.tint");
+            _cliffs = SimplexNoise2.ForPurpose(seed, "terrain.cliffs");
 
             // Continentalness → base height in meters: deep sea, shelf, coast, lowland, upland.
             _continentSpline = new MonotoneSpline(
@@ -122,7 +125,7 @@ namespace Relic.World.Terrain
             Biome biome = BiomeTable.Classify(temperature, humidity, h - water);
 
             float tint = (float)(0.93 + 0.07 * _tint.Fbm(x / TintWavelength, z / TintWavelength, 2));
-            Rgb ground = (BiomeTable.GroundColor(biome) * p.GroundTint * tint).Clamped();
+            Rgb ground = (SoftBiomeColor(temperature, humidity, h - water) * p.GroundTint * tint).Clamped();
 
             return new TerrainSample
             {
@@ -137,6 +140,20 @@ namespace Relic.World.Terrain
                 Region = r.Id0,
                 BorderFactor = r.BorderFactor,
             };
+        }
+
+        // Biome edges are discrete in climate space; averaging the table over a small climate
+        // neighbourhood turns stair-stepped vertex-color borders into soft ~50 m transitions.
+        const double SoftTemperature = 0.06, SoftHumidity = 0.06, SoftHeight = 0.8;
+
+        static Rgb SoftBiomeColor(double t, double m, double a)
+        {
+            Rgb c = BiomeTable.GroundColor(BiomeTable.Classify(t, m, a)) * 2f;
+            c = c + BiomeTable.GroundColor(BiomeTable.Classify(t + SoftTemperature, m + SoftHumidity, a + SoftHeight));
+            c = c + BiomeTable.GroundColor(BiomeTable.Classify(t - SoftTemperature, m - SoftHumidity, a - SoftHeight));
+            c = c + BiomeTable.GroundColor(BiomeTable.Classify(t + SoftTemperature, m - SoftHumidity, a - SoftHeight));
+            c = c + BiomeTable.GroundColor(BiomeTable.Classify(t - SoftTemperature, m + SoftHumidity, a + SoftHeight));
+            return c * (1f / 6f);
         }
 
         void Height(double x, double z, in RegionParams p, out double height, out double water)
@@ -161,14 +178,17 @@ namespace Relic.World.Terrain
             // 3. Peaks and valleys: ridged noise, gathered into ranges by a low-frequency mask.
             double pv = _peaks.Ridged(wx / PeaksWavelength, wz / PeaksWavelength, 3);
             double mask = WorldMath.SmoothStep(-0.35, 0.45, _mountainMask.Fbm(x / MountainMaskWavelength, z / MountainMaskWavelength, 2));
-            double flat = 1.0 - e;
-            double mountains = p.HeightScale * pv * pv * flat * flat * land * (0.25 + 0.75 * mask);
+            double mountains = p.HeightScale * pv * pv * (1.0 - 0.8 * e) * land * (0.25 + 0.75 * mask);
+
+            // Escarpments: a sharp step on a warped low-frequency field gives climbable cliff bands.
+            double cliffField = _cliffs.Fbm(wx / CliffWavelength, wz / CliffWavelength, 2);
+            double cliffs = WorldMath.SmoothStep(0.10, 0.125, cliffField) * 16.0 * rugged * land * (1.0 - 0.5 * e);
 
             // 5. Hills and detail octaves, scaled by ruggedness.
-            double hills = _hills.Fbm(wx / HillsWavelength, wz / HillsWavelength, 4) * 30.0 * rugged * (1.0 - 0.55 * e) * (0.35 + 0.65 * land);
+            double hills = _hills.Fbm(wx / HillsWavelength, wz / HillsWavelength, 4) * 36.0 * rugged * (1.0 - 0.55 * e) * (0.35 + 0.65 * land);
             double detail = _detail.Fbm(wx / DetailWavelength, wz / DetailWavelength, 3) * 2.4 * rugged * (0.5 + 0.5 * land);
 
-            double h = baseH + mountains + hills + detail;
+            double h = baseH + mountains + cliffs + hills + detail;
 
             // Local water: the sea, or a lake water table a few meters under the continental base.
             water = WorldMath.Max(SeaLevel, baseH + p.WaterLevelBias);
