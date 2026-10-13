@@ -120,11 +120,13 @@ Bosses and rare enemies drop **essences** themed by what they were. A **Libraria
 - Your next character can make a **corpse run** to recover the grave, possibly deep in dangerous territory.
 - **Multiplayer:** anyone can loot it. Other players' graves become treasure on the map, and that makes stories.
 
-## Maps as items (proposal)
-- **Each character has its own fog of war** that clears as you explore. It dies with the character.
-- **A map is an item.** At a cartographer, copy what you've explored onto a map you can carry, vault, sell or trade. Reading a map clears fog for any character.
-- **Treasure maps and charts drop as loot.** They're leads (pillar 2), and they're how you find hidden places.
-- **The Reliquary stays account-wide** (lore and relic entries). Map knowledge doesn't, so cartography matters.
+## Maps are physical (grounded, pillar 7)
+- **There's no automatic minimap or world-map feature.** Your character carries a **journal map** that they sketch as they travel, so it fills in where you've been. Opening it means the character actually looking at it (lowering it during a fight is a risk).
+- **It's an item.** It can be dropped, stolen, vaulted, sold or copied. **It lands in your grave when you die**, so recovering your old map is a reason to make the corpse run.
+- **Cartographers** in sanctuaries copy maps, merge two maps into one, and sell charts of nearby land. Charts can be wrong or outdated when the seller lies or the world has changed.
+- **Navigation tools are items too:** a compass, a spyglass to scout from high ground, landmarks you can recognize.
+- **Treasure maps and charts drop as loot.** They're leads (pillar 2).
+- **The Reliquary is a real place**, a library or shrine in sanctuaries where found relics and lore are recorded. A new character can read what their predecessors wrote. That's why knowledge "carries over."
 - **Later in multiplayer:** a skilled scout's map of a far region becomes valuable trade goods.
 
 ## Resolved follow-ups

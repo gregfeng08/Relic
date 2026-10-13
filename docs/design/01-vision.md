@@ -52,11 +52,17 @@ Build crafting, item memory, and an endless map give long-term goals without a l
 There are no level gates. A skilled player can sprint from the starting sanctuary to a deadly far-off city with starter gear, the way you can run from Mondstadt to Liyue at level 5. A stock character *can* beat any boss, even if it takes hours of chipping away like Star Cathedral on a stock Duskwing. **Skill is the shortcut; power is the staircase.** Gear, trained stats and permanent boosts have a very high ceiling, so less-skilled players get there too, and lucky rolls can push past it. Farther regions are dangerous through enemy *behavior* (patterns, density, combinations) as well as numbers.
 **Test:** *Is this possible, however slowly, for a great player with starter gear? And reachable through power for everyone else?*
 
+### 7. Grounded in the world
+Every rule can be explained by the world itself, with no game "voodoo." A dodge moves your body; it doesn't make you briefly untouchable. A map is a physical item you carry and can lose, not a menu feature. Stats grow because you trained. Knowledge survives death because it was written down in a real place. Where something magical happens (essences, relics), the world's lore explains it, and that explanation is consistent.
+**Test:** *Could a character inside the world explain why this works?*
+
 ## Non-goals (for now)
 
 - Turn-based combat (D&D *systems* yes, D&D *turns* no)
 - Character levels or level gates (stats grow through training, not XP levels)
 - Classes. One hero, and the build comes from gear.
+- Unexplained game mechanics: invulnerability frames, automatic minimaps, teleporting respawns
+- Elemental reaction systems (for now). Plain physical status effects only.
 - Crafting or survival busywork (food and water meters)
 - Handcrafted main story. Story emerges from the world graph.
 - Multiplayer in the first milestones. Generation stays deterministic so it can be added later.

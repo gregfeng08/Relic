@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2026-10-13 — Grounded-world pass
+
+- Greg: everything should be grounded and explainable by the world, with no "voodoo" (no i-frames, maps as physical items). Status effects only, no elements. Power target about 5 min with top gear, about 30 with starter, "with a focus on group fights" (meaning unclear, asked).
+- Added pillar 7, "Grounded in the world," plus non-goals. Combat rev 2: physical status table, real shadows and physical tells instead of UI decals, the body as hitbox with no floating marker, the ultimate reframed as relic resonance, power bands 1×/2.5×/6×/8×.
+- Core loop: physical journal map (sketched as you travel, drops in the grave), cartographers, compass and spyglass, the Reliquary as a real library.
+- Open: RLC-005 (meaning of group fights), RLC-021 (does grounding apply to the HUD; per-sanctuary vaults and no teleport fast travel).
+
 ## 2026-10-12 (night) — Combat spec drafted
 
 - Greg: third-person camera, readable projectiles; gear slots as proposed; the dash moves your hitbox with NO i-frames (positioning like RotMG).
