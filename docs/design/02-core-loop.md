@@ -115,6 +115,12 @@ Bosses and rare enemies drop **essences** themed by what they were. A **Libraria
 | Rumor board / NPCs | Leads to dungeons, relics, other sanctuaries |
 | Reliquary shrine | Collection and unsolved leads |
 
+## Travel and storage (grounded, Greg 2026-10-13)
+- **One vault per sanctuary.** Items stay where you left them.
+- **Couriers and caravans** move items between sanctuaries for a fee and over time. Caravans travel real routes, so they could be ambushed (a later event hook).
+- **No teleporting.** You travel on foot, by glider, by mount or by boat. Waystones are allowed only if the world's lore explains them, and they would be rare, costly or limited.
+- **HUD:** grounded rules, but a minimal honest HUD. HP, mana and stamina bars stay for combat readability.
+
 ## Death and graves
 - On death, carried and equipped items drop into a **grave** at that spot. Vaulted items are safe.
 - Your next character can make a **corpse run** to recover the grave, possibly deep in dangerous territory.

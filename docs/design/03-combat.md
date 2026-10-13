@@ -1,6 +1,6 @@
 # 03 — Combat & Character
 
-Status: **DRAFT — revision 2 (grounded pass), one question open** · Last updated 2026-10-13
+Status: **AGREED (revision 3)** · Last updated 2026-10-13
 
 ## Decisions (Greg, 2026-10-12)
 
@@ -80,7 +80,7 @@ VIT shortens durations. Statuses interact in ways that make physical sense (soak
 | Top-ceiling gear, trained stats, essences | ~6× |
 | Plus overrolls (rare) | up to ~8× |
 
-Boss health is fixed by region tier. Target (Greg, 2026-10-13): **a far boss takes about 5 minutes with top gear and about 30 with starter gear.** That's grueling but **possible**, which is the StarBreak feel. *Open: whether "a focus on group fights" means these times are for a party or for solo players fighting groups of enemies (see open questions).*
+Boss health is fixed by region tier. Target (Greg, 2026-10-13): **a far boss takes about 5 minutes with top gear and about 30 with starter gear.** That's grueling but **possible**, which is the StarBreak feel. Boss health scales with group size, so these times hold solo or in a group (see Group boss fights).
 
 **Consequence: no hard enrage timers.** A timer that wipes you at 10 minutes would be a power gate in disguise. Bosses can change phases or patterns over time, but never "kill if the fight runs long."
 
@@ -125,8 +125,12 @@ Farther regions raise danger mostly by **how enemies act**:
 - Plain physical status effects only, no elemental reactions.
 - Power target: about 5 minutes with top gear, about 30 with starter gear.
 
-## Open questions (for Greg)
-1. **"A focus on group fights"** could mean either:
-   a. **Bosses are designed for groups of players** (RotMG-style crowds at a boss), with health that scales with player count.
-   b. **Combat focuses on fighting groups of enemies** (packs, mixed squads) more than one-on-one duels.
-   c. Both.
+- **"Group fights" means bosses are designed for groups of players** (Greg, 2026-10-13), like RotMG crowds at a boss.
+- HUD: grounded rules, but a **minimal honest HUD** (HP, mana and stamina bars stay).
+
+## Group boss fights
+- **Health scales with players present:** `bossHP = baseHP × (1 + 0.8 × (players − 1))`, recalculated when players join or leave the arena. The 5- and 30-minute targets hold whether you're solo or in a group.
+- **Patterns built for crowds:** attacks that split targets (a beam on the farthest player, rings centered on each player), zones that need people spread out, adds that go after whoever is alone. Every pattern still works solo.
+- **Loot per player:** each player gets their own roll from the boss's table (RotMG soulbound style). Nobody steals a drop, and groups never punish you.
+- **Contribution threshold:** you must deal a minimum share of damage (or heal or protect allies) to qualify for loot, which stops players from parking at a boss and doing nothing.
+- **Single-player first:** solo is the only case until multiplayer exists, but the formulas and patterns are built for groups from day one.

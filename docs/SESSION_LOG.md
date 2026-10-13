@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2026-10-13 (later) — Combat agreed, spellcraft concept
+
+- Greg: group fights = bosses designed for groups of players; minimal honest HUD OK; per-sanctuary vaults, couriers, no teleporting.
+- 03-combat marked AGREED (group boss health scaling, crowd patterns, per-player loot, contribution threshold). 02-core-loop gained a travel and storage section.
+- Greg proposed Witch Hat Atelier-style spell design with semantic interpretation. Wrote the 04-spellcraft concept: glyph circles (core, modifiers, shape ring) compile into the shared effect grammar; stroke recognition plus precision sets quality; the LLM provides flavor only; spells written beforehand with crafted ink.
+- Open: RLC-022 (draw vs place; pre-written spells on found gear), RLC-003 (pillars review), RLC-002 (push).
+
 ## 2026-10-13 — Grounded-world pass
 
 - Greg: everything should be grounded and explainable by the world, with no "voodoo" (no i-frames, maps as physical items). Status effects only, no elements. Power target about 5 min with top gear, about 30 with starter, "with a focus on group fights" (meaning unclear, asked).
