@@ -321,7 +321,7 @@ namespace Relic.Items.Text
                 case "frost": detail = $"Rime gathers on the {material} even at midsummer."; break;
                 case "thorn": detail = $"Briar has grown through the {material}, and the thorns are still sharp."; break;
                 case "storm": detail = $"The {material} hums before a squall, and the air near it tastes of copper."; break;
-                case "venom": detail = $"The {material} is stained green where something was kept in it."; break;
+                case "venom": detail = $"The {material} is stained dark where something bitter was kept in it."; break;
                 case "stone": detail = $"It is heavier than it looks, as if the {material} remembers being a quarry wall."; break;
                 case "bell": detail = "When it is moved it rings once, and a little too long."; break;
                 case "ink": detail = $"Tiny handwriting covers the {material}, in a cipher no one in {fac} will read aloud."; break;

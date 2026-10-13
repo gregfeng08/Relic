@@ -27,6 +27,7 @@ namespace Relic.Items.Tests
                 double empirical = atLeast[m] / (double)n;
                 double expected = Math.Exp(-m);
                 // relative tolerance 5% (n = 400k gives ~1% standard error at m = 4)
+                TestContext.WriteLine($"P(k >= {m}): empirical {empirical:0.00000}, e^-{m} = {expected:0.00000}");
                 Assert.AreEqual(expected, empirical, expected * 0.05, $"P(k ≥ {m})");
             }
             Assert.LessOrEqual(max, Overroll.HiddenCap);
@@ -210,6 +211,30 @@ namespace Relic.Items.Tests
                 foreach (var w in StyleGuide.Words(item.Name)) counts[w] = (counts.TryGetValue(w, out int c) ? c : 0) + 1;
             }
             foreach (var kv in counts) Assert.LessOrEqual(kv.Value, 3, $"\"{kv.Key}\" used in {kv.Value} of 50 names");
+        }
+
+        [Test]
+        public void DescriberWritesPlainEnglish()
+        {
+            var undertow = new EffectRule
+            {
+                Name = "Undertow",
+                Trigger = new TriggerSpec { Kind = TriggerKind.OnHit },
+                Conditions = { new ConditionSpec { Kind = ConditionKind.TargetHasStatus, Status = StatusId.Soaked } },
+                Actions =
+                {
+                    new ActionSpec { Kind = ActionKind.Pull, Amount = 3f },
+                    new ActionSpec { Kind = ActionKind.ApplyStatus, Status = StatusId.Rooted, Duration = 1.5f },
+                },
+                Cooldown = 2f,
+            };
+            Assert.AreEqual("On hit (at most once every 2 s), if the target is Soaked: pull the target 3 m toward you; inflict Rooted for 1.5 s.",
+                EffectDescriber.Describe(undertow));
+            var ult = new EffectRule { Trigger = new TriggerSpec { Kind = TriggerKind.Active }, Cooldown = 30f, CostResource = Relic.Core.Stats.ResourceId.Resonance, CostAmount = 100f,
+                Actions = { new ActionSpec { Kind = ActionKind.Heal, Amount = 20f, Target = TargetKind.Self } } };
+            Assert.AreEqual("Release (Q) (30 s cooldown, uses a full resonance bar): heal 20 HP.", EffectDescriber.Describe(ult, "Release (Q)"));
+            // bosses: timing comes from the rotation, so no cooldown text
+            StringAssert.DoesNotContain("cooldown", EffectDescriber.Describe(ult, "Attack", boss: true));
         }
 
         [Test]

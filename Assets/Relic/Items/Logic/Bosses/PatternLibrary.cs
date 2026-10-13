@@ -224,7 +224,7 @@ namespace Relic.Items.Bosses
                     foreach (var a in o.Program.Rules[0].Actions)
                     {
                         if (a.Emitter != null) a.Emitter.Delay = Math.Min(5f, a.Emitter.Delay + shift);
-                        if (a.Area != null && a.Kind != ActionKind.CreateBarrier) a.Area.Delay = Math.Min(5f, a.Area.Delay + shift);
+                        if (a.Area != null) a.Area.Delay = Math.Min(5f, a.Area.Delay + shift);
                         rule.Actions.Add(a);
                     }
                     p.Name = src.Name + " into " + other.Name;
@@ -241,7 +241,7 @@ namespace Relic.Items.Bosses
                 case "returning":
                     emit.Emitter.Returning = true;
                     p.Name = "Returning " + src.Name;
-                    p.Tell = src.Tell + " The shots stop at the wall and come back.";
+                    p.Tell = src.Tell + " The shots fly out, stall, and come back the way they went.";
                     break;
                 case "shattering":
                     emit.Emitter.SplitCount = 2;

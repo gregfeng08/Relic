@@ -22,12 +22,12 @@ namespace Relic.Items
         public static string Describe(EffectRule r, string activeLabel = "On use", bool boss = false)
         {
             if (r == null) return "(empty rule)";
-            var head = new List<string>();
             string trigger = Trigger(r.Trigger, activeLabel, boss);
             var quals = new List<string>();
             if (r.Chance < 1f) quals.Add((r.Chance * 100f).ToString("0", Ci) + "% chance");
             bool active = r.Trigger?.Kind == TriggerKind.Active;
-            if (r.Cooldown > 0f && !boss) // boss timing comes from the rotation quals.Add(active ? N(r.Cooldown) + " s cooldown" : "at most once every " + N(r.Cooldown) + " s");
+            // boss timing comes from the rotation, so boss cooldowns are not shown
+            if (r.Cooldown > 0f && !boss) quals.Add(active ? N(r.Cooldown) + " s cooldown" : "at most once every " + N(r.Cooldown) + " s");
             if (r.CostAmount > 0f)
                 quals.Add(r.CostResource == ResourceId.Resonance && r.CostAmount >= 100f ? "uses a full resonance bar" : "costs " + N(r.CostAmount) + " " + r.CostResource.ToString().ToLowerInvariant());
             string text = trigger + (quals.Count > 0 ? " (" + string.Join(", ", quals) + ")" : "");
@@ -77,7 +77,7 @@ namespace Relic.Items
                 case ConditionKind.DistanceToTargetAbove: return "if the target is " + (not ? "within " : "more than ") + N(c.Value) + " m away";
                 case ConditionKind.IsNight: return not ? "by day" : "at night";
                 case ConditionKind.IsRaining: return not ? "when it is dry" : "in the rain";
-                case ConditionKind.InRegionTag: return (not ? "outside " : "in ") + c.Tag + " regions";
+                case ConditionKind.InRegionTag: return c.Tag != null && c.Tag.EndsWith("s") ? (not ? "away from regions with " : "in regions with ") + c.Tag : (not ? "outside " : "in ") + c.Tag + " regions";
             }
             return c.Kind.ToString();
         }

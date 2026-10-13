@@ -292,7 +292,7 @@ Rotation: Returning Cavalry Sweep → Siege Stones → Shattering Javelin Volley
   - *Tell:* Fixes on one player and draws back; its banner snaps taut and the drummers stop. Each shot bursts into splinters where it strikes.
   - *Does:* Attack: loose a burst of 4 projectiles across 15° (12.8 m/s, 22 m; 0.3 m radius; each splits into 2 on impact; 0.62 s wind-up) — each hit: 18 physical damage.
 - **Returning Cavalry Sweep** *(remix — returning Cavalry Sweep)* · Cone · wind-up 0.82 s · lasts 2.4 s
-  - *Tell:* Sweeps an arm back across its body; its banner snaps taut and the drummers stop. The shots stop at the wall and come back.
+  - *Tell:* Sweeps an arm back across its body; its banner snaps taut and the drummers stop. The shots fly out, stall, and come back the way they went.
   - *Does:* Attack: fire 4 projectiles in a 60° cone (9.9 m/s, 16 m; 0.35 m radius; they return; 0.82 s wind-up) — each hit: 22 physical damage, Exhausted 2.6 s.
 
 ### Phase 3 — below 33% health
@@ -413,7 +413,7 @@ Rotation: Spray → Breakwater, Lingering → Returning Breakwater into Whirlpoo
   - *Tell:* Fixes on one player and draws back; the water at its feet draws back, the way the sea does before a wave.
   - *Does:* Attack: loose a burst of 4 projectiles across 25° (13.4 m/s, 22 m; 0.3 m radius; 0.56 s wind-up) — each hit: 21 magical damage, Soaked 2.8 s.
 - **Returning Breakwater into Whirlpool** *(remix — returning Breakwater into Whirlpool)* · Ring + Spiral · wind-up 0.76 s · lasts 6.2 s
-  - *Tell:* Plants its feet and spreads its arms; the water at its feet draws back, the way the sea does before a wave. The shots stop at the wall and come back.
+  - *Tell:* Plants its feet and spreads its arms; the water at its feet draws back, the way the sea does before a wave. The shots fly out, stall, and come back the way they went.
   - *Does:* Attack: fire a ring of 13 projectiles (7.6 m/s, 18 m; 0.4 m radius; they return; 0.76 s wind-up) — each hit: 26 magical damage; release a spiral of 17 projectiles (6.2 m/s, 20 m; 0.35 m radius; 2.96 s wind-up) — each hit: 26 magical damage, Chilled 2.8 s.
 - **Breakwater, Lingering** *(remix — lingering Breakwater)* · Ring · wind-up 0.76 s · lasts 3.1 s
   - *Tell:* Plants its feet and spreads its arms; the water at its feet draws back, the way the sea does before a wave. Where the shots land, the floor stays dangerous.
@@ -533,7 +533,7 @@ Rotation: Returning Fan Snap → The Waltz (then repeats; 1.12 s recovery after 
   - *Tell:* Starts to turn on the spot, slowly at first; the musicians in the gallery stop mid-phrase.
   - *Does:* Attack: release a spiral of 17 projectiles (6.8 m/s, 20 m; 0.35 m radius; 0.64 s wind-up) — each hit: 34 magical damage, Poisoned 3.2 s.
 - **Returning Fan Snap** *(remix — returning Fan Snap)* · Cone · wind-up 0.64 s · lasts 2.1 s
-  - *Tell:* Sweeps an arm back across its body; the musicians in the gallery stop mid-phrase. The shots stop at the wall and come back.
+  - *Tell:* Sweeps an arm back across its body; the musicians in the gallery stop mid-phrase. The shots fly out, stall, and come back the way they went.
   - *Does:* Attack: fire 8 projectiles in a 80° cone (10.8 m/s, 16 m; 0.35 m radius; they return; 0.64 s wind-up) — each hit: 34 magical damage.
 
 **Readability:** passed · smallest opening 1.52 m at 6 m · shortest wind-up 0.5 s · airborne patterns: none
@@ -654,7 +654,7 @@ Rotation: Twice Foreseen Ground → Returning The Wheel Turns → Sightline (the
   - *Tell:* The ground under a player cracks and starts to glow; the star-chart on the floor brightens under the next target. A second wave follows the first.
   - *Does:* Attack: create a 3.9 m circle at a player's feet for 6.1 s, after a 0.78 s tell — every 0.5 s: 13 magical damage, Silenced 3.4 s; create a 3.9 m circle at a player's feet for 6.1 s, after a 2.08 s tell — every 0.5 s: 13 magical damage, Silenced 3.4 s.
 - **Returning The Wheel Turns** *(remix — returning The Wheel Turns)* · Spiral · wind-up 0.58 s · lasts 3.4 s
-  - *Tell:* Starts to turn on the spot, slowly at first; the star-chart on the floor brightens under the next target. The shots stop at the wall and come back.
+  - *Tell:* Starts to turn on the spot, slowly at first; the star-chart on the floor brightens under the next target. The shots fly out, stall, and come back the way they went.
   - *Does:* Attack: release a spiral of 19 projectiles (7.1 m/s, 20 m; 0.35 m radius; they return; 0.58 s wind-up) — each hit: 38 magical damage, Dazed 3.4 s.
 
 **Readability:** passed · smallest opening 1.28 m at 6 m · shortest wind-up 0.5 s · airborne patterns: none
@@ -755,10 +755,10 @@ Rotation: Returning Nail Shot → Spark Fan → Returning Anvil Drop (then repea
   - *Tell:* Sweeps an arm back across its body; the forge-vents roar and the floor grates glow orange.
   - *Does:* Attack: fire 9 projectiles in a 70° cone (11.4 m/s, 16 m; 0.35 m radius; 0.52 s wind-up) — each hit: 42 physical damage, Burning 3.6 s.
 - **Returning Anvil Drop** *(remix — returning Anvil Drop)* · Wall · wind-up 1.32 s · lasts 5 s
-  - *Tell:* Slams the ground and a barrier grinds up; the forge-vents roar and the floor grates glow orange. The shots stop at the wall and come back.
+  - *Tell:* Slams the ground and a barrier grinds up; the forge-vents roar and the floor grates glow orange. The shots fly out, stall, and come back the way they went.
   - *Does:* Attack: raise a 6 m wall that blocks projectiles for 5 s; fire a ring of 18 projectiles (9.4 m/s, 20 m; 0.4 m radius; they return; 1.32 s wind-up) — each hit: 42 physical damage.
 - **Returning Nail Shot** *(remix — returning Nail Shot)* · AimedBurst · wind-up 0.5 s · lasts 1.9 s
-  - *Tell:* Fixes on one player and draws back; the forge-vents roar and the floor grates glow orange. The shots stop at the wall and come back.
+  - *Tell:* Fixes on one player and draws back; the forge-vents roar and the floor grates glow orange. The shots fly out, stall, and come back the way they went.
   - *Does:* Attack: loose a burst of 5 projectiles across 20° (15.8 m/s, 22 m; 0.3 m radius; they return; 0.5 s wind-up) — each hit: 34 physical damage.
 
 ### Phase 3 — below 50% health
@@ -786,7 +786,7 @@ Rotation: Twice Nail Shot → Rivet Burst → Twice Spark Fan into Returning Anv
 - **Twice Nail Shot** *(remix — doubled Nail Shot)* · AimedBurst · wind-up 0.5 s · lasts 2.9 s
   - *Tell:* Fixes on one player and draws back; the forge-vents roar and the floor grates glow orange. A second wave follows the first.
   - *Does:* Attack: loose a burst of 5 projectiles across 20° (15.8 m/s, 22 m; 0.3 m radius; 0.5 s wind-up) — each hit: 34 physical damage; loose a burst of 5 projectiles across 20° (15.8 m/s, 22 m; 0.3 m radius; 1.5 s wind-up) — each hit: 34 physical damage.
-- **Twice Spark Fan into Returning Anvil Drop** *(remix — fused Twice Spark Fan)* · Cone + Wall · wind-up 0.52 s · lasts 5.5 s
+- **Twice Spark Fan into Returning Anvil Drop** *(remix — fused Twice Spark Fan)* · Cone + Wall · wind-up 0.52 s · lasts 7.1 s
   - *Tell:* Sweeps an arm back across its body; the forge-vents roar and the floor grates glow orange. A second wave follows the first.
   - *Does:* Attack: fire 9 projectiles in a 70° cone (11.4 m/s, 16 m; 0.35 m radius; 0.52 s wind-up) — each hit: 42 physical damage, Burning 3.6 s; fire 9 projectiles in a 70° cone (11.4 m/s, 16 m; 0.35 m radius; 1.52 s wind-up) — each hit: 42 physical damage, Burning 3.6 s; raise a 6 m wall that blocks projectiles for 5 s; fire a ring of 18 projectiles (9.4 m/s, 20 m; 0.4 m radius; they return; 3.42 s wind-up) — each hit: 42 physical damage.
 
@@ -857,7 +857,7 @@ Rotation: Twice Nail Shot → Rivet Burst → Twice Spark Fan into Returning Anv
 **Twice Spark Fan into Returning Anvil Drop**
 
 ```json
-{"version":1,"rules":[{"name":"Twice Spark Fan into Returning Anvil Drop","trigger":{"kind":"Active"},"actions":[{"kind":"Emit","emitter":{"shape":"Cone","count":9,"speed":11.4,"range":16.0,"spreadDegrees":70.0,"delay":0.52,"size":0.35},"payload":[{"kind":"Damage","amount":42.0},{"kind":"ApplyStatus","status":"Burning","duration":3.6}]},{"kind":"Emit","emitter":{"shape":"Cone","count":9,"speed":11.4,"range":16.0,"spreadDegrees":70.0,"delay":1.52,"size":0.35},"payload":[{"kind":"Damage","amount":42.0},{"kind":"ApplyStatus","status":"Burning","duration":3.6}]},{"kind":"CreateBarrier","area":{"shape":"Wall","length":6.0,"duration":5.0}},{"kind":"Emit","emitter":{"shape":"Ring","count":18,"speed":9.4,"range":20.0,"delay":3.4199998,"returning":true,"size":0.4},"payload":[{"kind":"Damage","amount":42.0}]}],"cooldown":5.5}]}
+{"version":1,"rules":[{"name":"Twice Spark Fan into Returning Anvil Drop","trigger":{"kind":"Active"},"actions":[{"kind":"Emit","emitter":{"shape":"Cone","count":9,"speed":11.4,"range":16.0,"spreadDegrees":70.0,"delay":0.52,"size":0.35},"payload":[{"kind":"Damage","amount":42.0},{"kind":"ApplyStatus","status":"Burning","duration":3.6}]},{"kind":"Emit","emitter":{"shape":"Cone","count":9,"speed":11.4,"range":16.0,"spreadDegrees":70.0,"delay":1.52,"size":0.35},"payload":[{"kind":"Damage","amount":42.0},{"kind":"ApplyStatus","status":"Burning","duration":3.6}]},{"kind":"CreateBarrier","area":{"shape":"Wall","length":6.0,"duration":5.0,"delay":2.1}},{"kind":"Emit","emitter":{"shape":"Ring","count":18,"speed":9.4,"range":20.0,"delay":3.4199998,"returning":true,"size":0.4},"payload":[{"kind":"Damage","amount":42.0}]}],"cooldown":7.1}]}
 ```
 
 </details>

@@ -25,12 +25,14 @@ namespace Relic.Items.Tests
             Directory.CreateDirectory(dir);
 
             var relics = SampleWriter.GenerateRelics(seed);
-            File.WriteAllText(Path.Combine(dir, $"relics-{seed}.md"), SampleWriter.RelicsMarkdown(relics));
+            File.WriteAllText(Path.Combine(dir, $"relics-{seed}.md"), Lf(SampleWriter.RelicsMarkdown(relics)));
 
             var bosses = SampleWriter.GenerateBosses(seed);
-            File.WriteAllText(Path.Combine(dir, $"bosses-{seed}.md"), SampleWriter.BossesMarkdown(seed, bosses, relics.World));
+            File.WriteAllText(Path.Combine(dir, $"bosses-{seed}.md"), Lf(SampleWriter.BossesMarkdown(seed, bosses, relics.World)));
             TestContext.WriteLine("wrote samples to " + dir);
         }
+
+        static string Lf(string s) => s.Replace("\r\n", "\n");
 
         /// <summary>The sample set itself is checked in the normal run (no files written).</summary>
         [Test]
