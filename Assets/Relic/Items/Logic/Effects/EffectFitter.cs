@@ -15,7 +15,7 @@ namespace Relic.Items
         public delegate EffectRule RuleBuilder(float s);
 
         /// <summary>Build, tidy and fit. Returns the rule (never over target unless even s = min is over).</summary>
-        public static EffectRule Fit(RuleBuilder build, float targetPp, Func<EffectRule, float> cost = null, float minS = 0.02f, float maxS = 60f)
+        public static EffectRule Fit(RuleBuilder build, float targetPp, Func<EffectRule, float> cost = null, float minS = 0.02f, float maxS = 1000f)
         {
             if (cost == null) cost = PowerBudget.Cost;
             float lo = minS, hi = maxS;

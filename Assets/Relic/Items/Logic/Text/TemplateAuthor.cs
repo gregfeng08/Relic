@@ -159,6 +159,13 @@ namespace Relic.Items.Text
 
         static string FirstName(WorldFigure f) => f.Name.Split(' ')[0];
 
+        static string WordKey(string name)
+        {
+            var w = StyleGuide.Words(name);
+            w.Sort(StringComparer.Ordinal);
+            return string.Join(" ", w);
+        }
+
         static string Name(RelicBrief b, Refs refs)
         {
             var rng = Pcg32.ForPurpose(b.Seed, "relic.template.name");
@@ -190,13 +197,19 @@ namespace Relic.Items.Text
             }
 
             var banned = new HashSet<string>(b.BannedWords ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+            var taken = new HashSet<string>(b.TakenNames ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+            var takenWordSets = new HashSet<string>();
+            foreach (var t in taken) takenWordSets.Add(WordKey(t));
             foreach (var cand in candidates)
             {
                 if (cand.Length > DraftValidator.MaxNameLength) continue;
                 if (cand.Split(' ').Length > DraftValidator.MaxNameWords) continue;
                 if (StyleGuide.ForbiddenIn(cand).Count > 0) continue;
+                if (taken.Contains(cand) || takenWordSets.Contains(WordKey(cand))) continue; // also "Sloe and Hawthorn" after "Hawthorn and Sloe"
+                var words = StyleGuide.Words(cand);
+                if (new HashSet<string>(words).Count != words.Count) continue; // "Boulder and Boulder"
                 bool ok = true;
-                foreach (var w in StyleGuide.Words(cand)) if (banned.Contains(w)) { ok = false; break; }
+                foreach (var w in words) if (banned.Contains(w)) { ok = false; break; }
                 if (ok) return cand;
             }
             // Everything is overused (only possible with a tiny vocabulary): fall back to the least-bad candidate.

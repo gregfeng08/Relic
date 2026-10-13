@@ -70,17 +70,29 @@ namespace Relic.Items
 
         public NameFreshness(int window = 200) { _window = Math.Max(1, window); }
 
+        readonly Queue<string> _names = new Queue<string>();
+
         public int Count => _recent.Count;
 
         public void Add(string name)
         {
             var words = new List<string>(new HashSet<string>(StyleGuide.Words(name)));
             _recent.Enqueue(words);
+            _names.Enqueue((name ?? "").Trim().ToLowerInvariant());
             foreach (var w in words) _counts[w] = (_counts.TryGetValue(w, out int c) ? c : 0) + 1;
             while (_recent.Count > _window)
+            {
+                _names.Dequeue();
                 foreach (var w in _recent.Dequeue())
                     if (--_counts[w] == 0) _counts.Remove(w);
+            }
         }
+
+        /// <summary>True when exactly this name (case-insensitive) is among the recent names.</summary>
+        public bool Contains(string name) => name != null && _names.Contains(name.Trim().ToLowerInvariant());
+
+        /// <summary>Recent names, oldest first (lower case).</summary>
+        public List<string> RecentNames() => new List<string>(_names);
 
         /// <summary>
         /// True when one more use would put the word above 5% of recent names.

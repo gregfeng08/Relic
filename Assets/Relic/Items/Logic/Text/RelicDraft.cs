@@ -41,6 +41,8 @@ namespace Relic.Items.Text
         public WorldRegion HomeRegion;
         /// <summary>Words currently overused in recent names (5% rule).</summary>
         public List<string> BannedWords = new List<string>();
+        /// <summary>Recent names that must not be reused exactly.</summary>
+        public List<string> TakenNames = new List<string>();
         /// <summary>Stat lines already rolled, for the writer's context.</summary>
         public List<ItemStat> Stats = new List<ItemStat>();
     }
@@ -86,6 +88,7 @@ namespace Relic.Items.Text
                 if (d.Name.Length > MaxNameLength) errors.Add($"name is longer than {MaxNameLength} characters");
                 if (d.Name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length > MaxNameWords) errors.Add($"name has more than {MaxNameWords} words");
                 foreach (var w in StyleGuide.ForbiddenIn(d.Name)) errors.Add($"name uses the banned word \"{w}\"");
+                if (freshness != null && freshness.Contains(d.Name)) errors.Add("name is already used by another recent item");
                 if (freshness != null)
                     foreach (var w in freshness.OverusedIn(d.Name)) errors.Add($"name uses \"{w}\", which is overused in recent names; pick another word");
             }

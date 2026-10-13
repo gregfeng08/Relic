@@ -27,7 +27,7 @@ namespace Relic.Items
             var quals = new List<string>();
             if (r.Chance < 1f) quals.Add((r.Chance * 100f).ToString("0", Ci) + "% chance");
             bool active = r.Trigger?.Kind == TriggerKind.Active;
-            if (r.Cooldown > 0f) quals.Add(active ? N(r.Cooldown) + " s cooldown" : "at most once every " + N(r.Cooldown) + " s");
+            if (r.Cooldown > 0f && !boss) // boss timing comes from the rotation quals.Add(active ? N(r.Cooldown) + " s cooldown" : "at most once every " + N(r.Cooldown) + " s");
             if (r.CostAmount > 0f)
                 quals.Add(r.CostResource == ResourceId.Resonance && r.CostAmount >= 100f ? "uses a full resonance bar" : "costs " + N(r.CostAmount) + " " + r.CostResource.ToString().ToLowerInvariant());
             string text = trigger + (quals.Count > 0 ? " (" + string.Join(", ", quals) + ")" : "");
@@ -38,7 +38,8 @@ namespace Relic.Items
                 text += ", " + string.Join(" and ", conds);
             }
             var acts = new List<string>();
-            if (r.Actions != null) foreach (var a in r.Actions) acts.Add(Action(a, boss));
+            bool passive = r.Trigger?.Kind == TriggerKind.Passive;
+            if (r.Actions != null) foreach (var a in r.Actions) acts.Add(Action(a, boss, passive));
             return text + ": " + string.Join("; ", acts) + ".";
         }
 
@@ -101,7 +102,7 @@ namespace Relic.Items
         }
 
         /// <summary>Top-level action with a verb.</summary>
-        public static string Action(ActionSpec a, bool boss = false)
+        public static string Action(ActionSpec a, bool boss = false, bool inPassiveRule = false)
         {
             if (a == null) return "(nothing)";
             string who = Who(a.Target, boss);
@@ -125,7 +126,7 @@ namespace Relic.Items
                     return "pull " + who + " " + N(a.Amount) + " m toward " + (boss ? "the boss" : "you");
                 case ActionKind.ModifyStat:
                 {
-                    string dur = a.Duration > 0f ? " for " + N(a.Duration) + " s" : (boss ? "" : " while equipped");
+                    string dur = a.Duration > 0f ? " for " + N(a.Duration) + " s" : (boss || inPassiveRule ? "" : " while equipped");
                     if (a.Target == TargetKind.Self) return (boss ? "the boss gets " : "you get ") + StatChange(a) + dur;
                     return "give " + who + " " + StatChange(a) + dur;
                 }
@@ -161,6 +162,8 @@ namespace Relic.Items
                 case ActionKind.Knockback: return "knockback " + N(a.Amount) + " m";
                 case ActionKind.Pull: return "pull " + N(a.Amount) + " m";
                 case ActionKind.ModifyStat: return StatChange(a) + (a.Duration > 0 ? " " + N(a.Duration) + " s" : "") + onSelf;
+                case ActionKind.CreateArea:
+                    return "(" + AreaText(a.Area, boss, whereShotLands: true) + Payload(a.Payload, boss, a.Area != null && a.Area.TickInterval > 0f ? "every " + N(a.Area.TickInterval) + " s: " : "once: ") + ")";
                 default: return "(" + Action(a, boss) + ")";
             }
         }
@@ -194,10 +197,10 @@ namespace Relic.Items
             return s + " (" + string.Join("; ", extra) + ")";
         }
 
-        static string AreaText(AreaSpec a, bool boss)
+        static string AreaText(AreaSpec a, bool boss, bool whereShotLands = false)
         {
             if (a == null) return "create nothing";
-            string where = a.FollowsSelf ? (boss ? " around the boss" : " around you") : (boss ? " at a player's feet" : " at the target");
+            string where = whereShotLands ? " where it lands" : a.FollowsSelf ? (boss ? " around the boss" : " around you") : (boss ? " at a player's feet" : " at the target");
             string shape;
             switch (a.Shape)
             {

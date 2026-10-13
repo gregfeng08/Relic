@@ -251,6 +251,7 @@ namespace Relic.Items
                 World = _world,
                 HomeRegion = home,
                 BannedWords = _freshness.Banned(),
+                TakenNames = _freshness.RecentNames(),
                 Stats = item.Stats,
             };
         }
