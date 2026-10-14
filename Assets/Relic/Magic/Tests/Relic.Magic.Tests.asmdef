@@ -1,7 +1,7 @@
 {
     "name": "Relic.Magic.Tests",
     "rootNamespace": "Relic.Magic.Tests",
-    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Magic.Logic"],
+    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Core.Tests", "Relic.Magic.Logic"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
