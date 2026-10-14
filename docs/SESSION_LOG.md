@@ -2,6 +2,15 @@
 
 Newest first.
 
+## 2026-10-13 (late night) — M1 merged, budget calibrated, LLM downloaded
+
+- **Agents:** all three stopped early (a 429 rate limit, then 600 s stall watchdogs during long Unity imports). They were resumed one or two at a time, with Unity run in the background. Lesson: at most 2 concurrent agents, and long Unity runs always in the background.
+- **Merged into `rebuild`:** stream/magic (Writing Desk, 99.4% recognizer), stream/world (terrain sandbox, IRegionField with warped and weighted regions, golden hash matching across .NET and Mono), stream/items (relic and boss generators, template samples). The URP shadow distance went from 50 to 150 m, per stream W's request.
+- **Calibration v2** (`ec31fe6`): the new PowerBandTests (real items through Relic.Combat) measured top-vs-starter at 20.8×, now about 7×. Details in 05-effect-grammar.
+- **LLM:** downloaded llama.cpp b11607 (CUDA 13.4) plus Qwen3.5-4B and 9B Q4_K_M into `models/`. The 4B runs on the GPU at about 35 tok/s. The server was stopped immediately because Greg was in a League match. The benchmark (RLC-031) waits for an idle GPU.
+- **Feel reviews waiting on Greg:** RLC-013 (terrain), RLC-024 (Writing Desk), RLC-014 (read the samples).
+- **Open stream requests:** grammar additions (Summon; area anchor/orientation; emitter angle offset/spin; ring barrier) and player baselines (body width 0.6 m, run 6 m/s, dash 4 m, HP baseline). Also small effects rounding to silly values ("0.5 damage") in templates.
+
 ## 2026-10-13 (night) — Lead specs and combat engine while streams run
 
 - Greg approved the LLM downloads (RLC-026). The exact files get posted once stream I recommends models. Region-shape direction agreed (09): warped, weighted cells now (sent to stream W mid-run, behind `IRegionField`); travel-effort borders with passes and terrain characters in M2.
