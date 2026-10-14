@@ -31,7 +31,7 @@ namespace Relic.World.Tests
             return h;
         }
 
-        public const ulong GoldenHeightHash = 0xE75A06F4D494A0C0UL;
+        public const ulong GoldenHeightHash = 0x8568628B3ABA87ADUL;
 
         [Test]
         public void SameSeedGivesSameWorld()
@@ -69,8 +69,8 @@ namespace Relic.World.Tests
         [Test]
         public void HeightIsContinuous()
         {
-            // No cliffs steeper than ~85 degrees appear out of nowhere: walk lines at 0.1 m steps
-            // through many region borders and check every step's height change.
+            // Walk lines at 0.1 m steps through many region borders. Any big step is zoomed into
+            // (100 sub-steps): a steep cliff shrinks with the step size, a discontinuity would not.
             var g = new TerrainGenerator(4711);
             const double step = 0.1;
             double worst = 0;
@@ -84,11 +84,25 @@ namespace Relic.World.Tests
                     double t = i * step * 1.0;
                     float h = g.HeightAt(dx * t, dz * t);
                     double d = Math.Abs(h - prev);
-                    if (d > worst) worst = d;
+                    if (d > 0.3) worst = Math.Max(worst, RefinedStep(g, dx, dz, t - step, step));
                     prev = h;
                 }
             }
-            Assert.That(worst, Is.LessThan(1.2), "largest height step over 0.1 m: " + worst);
+            Assert.That(worst, Is.LessThan(0.08), "largest refined step (0.001 m): " + worst);
+        }
+
+        static double RefinedStep(TerrainGenerator g, double dx, double dz, double t0, double length)
+        {
+            double worst = 0;
+            float prev = g.HeightAt(dx * t0, dz * t0);
+            for (int k = 1; k <= 100; k++)
+            {
+                double t = t0 + length * k / 100.0;
+                float h = g.HeightAt(dx * t, dz * t);
+                worst = Math.Max(worst, Math.Abs(h - prev));
+                prev = h;
+            }
+            return worst;
         }
 
         [Test]

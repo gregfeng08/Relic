@@ -38,26 +38,26 @@ namespace Relic.World.Regions
     {
         public RegionFamily Family;
         /// <summary>Mountain amplitude in meters (peaks-and-valleys layer).</summary>
-        public float HeightScale;
+        public double HeightScale;
         /// <summary>Multiplier for hills, detail octaves and domain-warp strength.</summary>
-        public float Ruggedness;
+        public double Ruggedness;
         /// <summary>0 = sharp and rugged, 1 = worn flat.</summary>
-        public float Erosion;
+        public double Erosion;
         /// <summary>Offset of the local water table relative to the continental base height (meters). Higher means more lakes.</summary>
-        public float WaterLevelBias;
+        public double WaterLevelBias;
         /// <summary>Shifts continentalness: negative pulls the sea in (coasts), positive raises land.</summary>
-        public float ContinentBias;
-        public float TemperatureBias;
-        public float HumidityBias;
+        public double ContinentBias;
+        public double TemperatureBias;
+        public double HumidityBias;
         /// <summary>0..1 strength of mesa-style terracing.</summary>
-        public float Terrace;
+        public double Terrace;
         /// <summary>Palette: multiplies the biome ground color.</summary>
         public Rgb GroundTint;
         /// <summary>Palette: color of exposed rock on slopes and cliffs.</summary>
         public Rgb RockTint;
 
         /// <summary>Accumulates w * p into this (Family is left alone).</summary>
-        public void AddWeighted(in RegionParams p, float w)
+        public void AddWeighted(in RegionParams p, double w)
         {
             HeightScale += p.HeightScale * w;
             Ruggedness += p.Ruggedness * w;
@@ -67,8 +67,8 @@ namespace Relic.World.Regions
             TemperatureBias += p.TemperatureBias * w;
             HumidityBias += p.HumidityBias * w;
             Terrace += p.Terrace * w;
-            GroundTint = GroundTint + p.GroundTint * w;
-            RockTint = RockTint + p.RockTint * w;
+            GroundTint = GroundTint + p.GroundTint * (float)w;
+            RockTint = RockTint + p.RockTint * (float)w;
         }
     }
 

@@ -2,43 +2,49 @@ using Relic.Core.Random;
 
 namespace Relic.World.Regions
 {
-    /// <summary>Base parameters for each region family, plus seeded per-region variation.</summary>
+    /// <summary>
+    /// Base parameters for each region family, plus seeded per-region variation.
+    /// All arithmetic that feeds the height function is done in double (or integers): Unity's Mono
+    /// may evaluate float expressions at higher precision than .NET, which would make the same seed
+    /// give slightly different worlds on different runtimes.
+    /// </summary>
     public static class RegionCatalog
     {
         public const int FamilyCount = 7;
 
         /// <summary>Relative odds of each family away from spawn (index = RegionFamily).</summary>
-        static readonly float[] Odds = { 18f, 20f, 16f, 12f, 12f, 10f, 12f };
+        static readonly int[] Odds = { 18, 20, 16, 12, 12, 10, 12 };
+        static readonly int OddsTotal = 100;
 
         public static RegionFamily PickFamily(ref Pcg32 rng)
         {
-            float total = 0f;
-            for (int i = 0; i < Odds.Length; i++) total += Odds[i];
-            float r = rng.NextFloat() * total;
+            int r = rng.Range(0, OddsTotal);
             for (int i = 0; i < Odds.Length; i++)
             {
                 r -= Odds[i];
-                if (r < 0f) return (RegionFamily)i;
+                if (r < 0) return (RegionFamily)i;
             }
             return RegionFamily.Meadow;
         }
+
+        static double Range(ref Pcg32 rng, double min, double max) => min + (max - min) * rng.NextDouble();
 
         /// <summary>The family's base parameters, varied by the region's own generator.</summary>
         public static RegionParams Build(RegionFamily f, ref Pcg32 rng, int tier)
         {
             RegionParams p = Base(f);
             p.Family = f;
-            p.HeightScale *= rng.Range(0.8f, 1.2f) * (1f + 0.03f * tier);
-            p.Ruggedness *= rng.Range(0.85f, 1.15f) * (1f + 0.02f * tier);
-            p.Erosion = Clamp01(p.Erosion + rng.Range(-0.1f, 0.1f));
-            p.WaterLevelBias += rng.Range(-1.5f, 1.5f);
-            p.ContinentBias += rng.Range(-0.05f, 0.05f);
-            p.TemperatureBias += rng.Range(-0.1f, 0.1f);
-            p.HumidityBias += rng.Range(-0.1f, 0.1f);
-            float hue = rng.Range(-0.05f, 0.05f);
-            p.GroundTint = new Rgb(p.GroundTint.R * (1f + hue), p.GroundTint.G, p.GroundTint.B * (1f - hue));
-            float rockShade = rng.Range(0.92f, 1.08f);
-            p.RockTint = p.RockTint * rockShade;
+            p.HeightScale *= Range(ref rng, 0.8, 1.2) * (1.0 + 0.03 * tier);
+            p.Ruggedness *= Range(ref rng, 0.85, 1.15) * (1.0 + 0.02 * tier);
+            p.Erosion = WorldMath.Clamp01(p.Erosion + Range(ref rng, -0.1, 0.1));
+            p.WaterLevelBias += Range(ref rng, -1.5, 1.5);
+            p.ContinentBias += Range(ref rng, -0.05, 0.05);
+            p.TemperatureBias += Range(ref rng, -0.1, 0.1);
+            p.HumidityBias += Range(ref rng, -0.1, 0.1);
+            double hue = Range(ref rng, -0.05, 0.05);
+            p.GroundTint = new Rgb((float)(p.GroundTint.R * (1.0 + hue)), p.GroundTint.G, (float)(p.GroundTint.B * (1.0 - hue)));
+            double rockShade = Range(ref rng, 0.92, 1.08);
+            p.RockTint = new Rgb((float)(p.RockTint.R * rockShade), (float)(p.RockTint.G * rockShade), (float)(p.RockTint.B * rockShade));
             return p;
         }
 
@@ -63,8 +69,8 @@ namespace Relic.World.Regions
             }
         }
 
-        static RegionParams Make(float heightScale, float rugged, float erosion, float waterBias, float continentBias,
-                                 float tempBias, float humidBias, float terrace, Rgb ground, Rgb rock)
+        static RegionParams Make(double heightScale, double rugged, double erosion, double waterBias, double continentBias,
+                                 double tempBias, double humidBias, double terrace, Rgb ground, Rgb rock)
         {
             return new RegionParams
             {
@@ -81,6 +87,5 @@ namespace Relic.World.Regions
             };
         }
 
-        static float Clamp01(float v) => v < 0f ? 0f : v > 1f ? 1f : v;
     }
 }

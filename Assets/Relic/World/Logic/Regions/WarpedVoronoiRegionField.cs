@@ -102,20 +102,19 @@ namespace Relic.World.Regions
             double sum = w0 + w1 + w2;
             if (sum < 1e-9) { w0 = 1.0; w1 = 0.0; w2 = 0.0; sum = 1.0; }
 
+            double n0 = w0 / sum, n1 = w1 / sum, n2 = w2 / sum;
             var s = new RegionSample
             {
                 Id0 = top.Id0, Id1 = top.Id1, Id2 = top.Id2,
-                W0 = (float)(w0 / sum), W1 = (float)(w1 / sum), W2 = (float)(w2 / sum),
+                W0 = (float)n0, W1 = (float)n1, W2 = (float)n2,
             };
-            // Re-normalize in float so the three weights sum to 1 as closely as float allows.
-            s.W2 = 1f - s.W0 - s.W1;
-            if (s.W2 < 0f) { s.W2 = 0f; }
 
+            // Blend in double: float expressions can round differently under Unity's Mono than .NET.
             RegionParams p0 = ParamsOf(top.Id0);
             var blended = new RegionParams();
-            blended.AddWeighted(p0, s.W0);
-            if (s.W1 > 0f) { RegionParams p1 = ParamsOf(top.Id1); blended.AddWeighted(p1, s.W1); }
-            if (s.W2 > 0f) { RegionParams p2 = ParamsOf(top.Id2); blended.AddWeighted(p2, s.W2); }
+            blended.AddWeighted(p0, n0);
+            if (n1 > 0.0) { RegionParams p1 = ParamsOf(top.Id1); blended.AddWeighted(p1, n1); }
+            if (n2 > 0.0) { RegionParams p2 = ParamsOf(top.Id2); blended.AddWeighted(p2, n2); }
             blended.Family = p0.Family;
             s.Blended = blended;
             s.Family = p0.Family;
