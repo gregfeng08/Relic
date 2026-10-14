@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &260856734
+--- !u!1 &1753185954
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 260856736}
-  - component: {fileID: 260856735}
+  - component: {fileID: 1753185956}
+  - component: {fileID: 1753185955}
   m_Layer: 0
   m_Name: TerrainSandbox
   m_TagString: Untagged
@@ -136,13 +136,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &260856735
+--- !u!114 &1753185955
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 260856734}
+  m_GameObject: {fileID: 1753185954}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dcc97fe6a67da3b2a03b45e080529345, type: 3}
@@ -163,13 +163,13 @@ MonoBehaviour:
   ShowOverlay: 1
   BenchmarkDistance: 3000
   BenchmarkOnStart: 0
---- !u!4 &260856736
+--- !u!4 &1753185956
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 260856734}
+  m_GameObject: {fileID: 1753185954}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -182,4 +182,4 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 260856736}
+  - {fileID: 1753185956}
