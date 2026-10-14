@@ -34,13 +34,13 @@ ItemSpec (world seed, index, tier, rarity, [base type], [region])
   → parse strictly (unknown fields = error) → DraftValidator → retry ≤ 3 with errors fed back
        → still failing: template relic (GenerationMode.LlmFallback)
   → ScaleToFit if only over budget; ultimate capped at 40% of the budget (see "Resonance pricing")
-  → EffectValidator.Validate(effects, PowerBudget.For(rarity, tier)) must pass → store
+  → EffectValidator.Validate(effects, ItemGenerator.Budget(baseType, rarity, tier)) must pass → store
 ```
 
 * **Determinism.** Everything except LLM text is a pure function of the seed. Name freshness (below) makes names depend on generation *order* too, so written text (template or LLM) is treated like LLM output: generated once and persisted (`IItemStore`; `JsonFileItemStore` writes one JSON file per item).
 * **Forge reroll** (`ItemGenerator.Reroll`) re-samples stat *values* from sub-seed `Hash.Combine(itemSeed, rerollCount)`; which stat lines an item has, its effects and its text are kept.
 * **Overrolls.** `k = floor(Exponential(λ = 1))`, capped at 10 (hidden). A roll with k ≥ 1 is `ceiling × (1 + 0.05k)` (and always at least one display unit above the ceiling). Test: empirical P(k ≥ n) within 5% of e^−n for n = 1..4 over 400k samples.
-* **Stat tables** (`StatTables`): tier-0 Common ranges × rarity (1.0 / 1.15 / 1.3 / 1.5 / 1.75) × tier growth (power stats 1 + 0.5t, trained-stat bonuses 1 + 0.2t, rates 1 + 0.04t). Secondary lines: Uncommon +1, Rare +2, Epic/Legendary +3.
+* **Stat tables** (`StatTables`): tier-0 Common ranges × rarity (1.0 / 1.05 / 1.1 / 1.15 / 1.2) × tier growth (power stats `PowerBudget.TierFactor` = 1 + 0.2t, trained-stat bonuses 1 + 0.1t, rates 1 + 0.04t). Attack speed is fixed per weapon type (a feel stat). Calibrated by the lead against the 03-combat power bands (see `Relic.Game.Tests.PowerBandTests`). Secondary lines: Uncommon +1, Rare +2, Epic/Legendary +3.
 * **Effect templates** are functions of a magnitude `s`; `EffectFitter` binary-searches the largest `s` whose tidied rule (whole damage, half-second durations) fits a target pp. Template mode fills 85–98% of the budget. Cursed relics (chance set by the theme's mood) add a drawback action or a standing "Price of Keeping" stat penalty; the negative cost buys power for the other rules.
 
 ### Themes, world context, style guide
@@ -59,7 +59,7 @@ ItemSpec (world seed, index, tier, rarity, [base type], [region])
 Running it for real (after the download is approved): start `llama-server -m models/<model>.gguf -ngl 99 -c 8192 --port 8080`, then `new ItemGenerator(world, new LlamaServerGenerator())`.
 
 ### Resonance pricing (workaround)
-`PowerBudget` gives every rule a resource "relief" of `1 / (1 + cost / 40)`. An ultimate costs one full resonance bar (100), so it is priced at 29% of its power, on top of its 30 s cooldown. To keep ultimates from swallowing a relic, the pipeline forces every ultimate to `Resonance 100, cooldown 30 s` and caps its *unrelieved* cost (`EffectFitter.UnrelievedCost`) at 40% of the budget, shrinking it with `ScaleToFit` if needed. The samples show both numbers. Proper fix requested from the lead (see below).
+**Ultimates** are forced to `Resonance 100, cooldown 30 s` and fitted to their own allowance, `PowerBudget.Ultimate(tier)`. Since calibration v2, resource costs no longer discount power (the old `1 / (1 + cost / 40)` relief is gone), so an ultimate is priced by its cooldown alone.
 
 ## Bosses
 
@@ -125,8 +125,8 @@ Expectation (to verify): with schema-constrained decoding the valid-JSON rate sh
 1. **Summon action** for bosses (blocks list "summons (later)").
 2. **Area anchor**: an area can follow the wearer or sit "at the target"; there's no "here, static" (dash trails) and no explicit orientation for cone/line areas (from source toward target is assumed).
 3. **Emitter angle offset / spin direction**: interleaved rings and counter-rotating spirals can't be expressed, so "doubled" remixes repeat the same angles.
-4. **Resonance pricing**: price `CostResource = Resonance` by charge time instead of the generic relief (see above).
-5. **Budget scale check**: Legendary at tier 0 is 25 pp ≈ 62 extra DPS-equivalent against a starter weapon's ~15 DPS (≈ 6 pp), so a full-budget relic is ~4× a weapon at every tier and template numbers get large (e.g. 40–50 damage on-hit procs at tier 0). Intended?
+4. ~~Resonance pricing~~: resolved in calibration v2 (no resource relief; ultimates have their own allowance).
+5. ~~Budget scale check~~: resolved in calibration v2. Bonus budgets are now 0.5–3.0 pp × (1 + 0.2·tier), weapon skills and ultimates have their own allowances, and PowerBandTests confirms about 7× top-vs-starter.
 6. **Passive auras**: a Passive CreateArea has a duration (≤ 30 s); confirm it means "always on while equipped".
 7. Player numbers for readability (body width, run speed) and a player HP baseline for boss hit damage.
 

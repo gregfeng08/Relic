@@ -123,7 +123,7 @@ namespace Relic.Items.Tests
             Assert.AreEqual(GenerationMode.LlmFallback, item.Generator.Mode);
             Assert.AreEqual(TemplateAuthor.Source, item.Generator.TextSource);
             Assert.IsTrue(gen.Records[0].UsedFallback);
-            Assert.IsTrue(EffectValidator.Validate(item.Effects, PowerBudget.For(Rarity.Legendary, 3)).IsValid);
+            Assert.IsTrue(EffectValidator.Validate(item.Effects, ItemGenerator.Budget(BaseType.Relic, Rarity.Legendary, 3)).IsValid);
             Assert.IsNotNull(item.Lore.History);
         }
 
@@ -155,7 +155,7 @@ namespace Relic.Items.Tests
             });
             var item = new ItemGenerator(StubWorld.Create(World), fake).Generate(RelicSpec());
             Assert.Less(item.Generator.ScaleApplied, 1f);
-            var v = EffectValidator.Validate(item.Effects, PowerBudget.For(Rarity.Legendary, 3));
+            var v = EffectValidator.Validate(item.Effects, ItemGenerator.Budget(BaseType.Relic, Rarity.Legendary, 3));
             Assert.IsTrue(v.IsValid, v.ToString());
         }
 
@@ -176,7 +176,7 @@ namespace Relic.Items.Tests
             var ult = item.Effects.Rules.Last();
             Assert.AreEqual(ResourceId.Resonance, ult.CostResource);
             Assert.AreEqual(EffectTemplates.UltimateCooldown, ult.Cooldown);
-            Assert.LessOrEqual(EffectFitter.UnrelievedCost(ult), 0.4f * PowerBudget.For(Rarity.Legendary, 3) + 1e-3f);
+            Assert.LessOrEqual(PowerBudget.Cost(ult), PowerBudget.Ultimate(3) + 1e-3f);
         }
 
         [Test]

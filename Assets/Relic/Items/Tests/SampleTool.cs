@@ -41,7 +41,7 @@ namespace Relic.Items.Tests
             var relics = SampleWriter.GenerateRelics(2026);
             Assert.AreEqual(50, relics.Relics.Count);
             foreach (var r in relics.Relics)
-                Assert.IsTrue(EffectValidator.Validate(r.Effects, PowerBudget.For(r.Rarity, r.Tier)).IsValid, r.Name);
+                Assert.IsTrue(EffectValidator.Validate(r.Effects, ItemGenerator.Budget(r.BaseType, r.Rarity, r.Tier)).IsValid, r.Name);
             string md = SampleWriter.RelicsMarkdown(relics);
             StringAssert.Contains("TEMPLATE MODE — not LLM output", md);
             StringAssert.DoesNotContain("INVALID", md);

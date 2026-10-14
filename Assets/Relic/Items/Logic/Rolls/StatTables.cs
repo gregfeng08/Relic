@@ -41,7 +41,8 @@ namespace Relic.Items
     {
         public const int Version = 1;
 
-        static readonly float[] RarityMultiplier = { 1.00f, 1.15f, 1.30f, 1.50f, 1.75f };
+        // Rarity mostly buys bonus effects and extra stat lines, not raw numbers (power bands, 03-combat).
+        static readonly float[] RarityMultiplier = { 1.00f, 1.05f, 1.10f, 1.15f, 1.20f };
         static readonly int[] SecondaryCount = { 0, 1, 2, 3, 3 };
 
         public static float RarityFactor(Rarity r) => RarityMultiplier[(int)r];
@@ -51,8 +52,8 @@ namespace Relic.Items
             int t = Math.Max(0, Math.Min(tier, Difficulty.MaxTier));
             switch (g)
             {
-                case TierGrowth.Power: return 1f + 0.5f * t;
-                case TierGrowth.Moderate: return 1f + 0.2f * t;
+                case TierGrowth.Power: return PowerBudget.TierFactor(t); // shared with effect budgets (1 + 0.2·tier)
+                case TierGrowth.Moderate: return 1f + 0.1f * t; // trained-stat bonus lines: gear shouldn't outgrow training
                 default: return 1f + 0.04f * t;
             }
         }
@@ -197,7 +198,8 @@ namespace Relic.Items
 
         public static ItemStat RollLine(StatLine line, Rarity r, int tier, ref Pcg32 rng)
         {
-            float f = StatTables.RarityFactor(r) * StatTables.TierFactor(line.Growth, tier);
+            // Attack speed is a feel stat: a weapon type swings at its own pace at every rarity and tier.
+            float f = line.Stat == ItemStatKind.AttackSpeed ? 1f : StatTables.RarityFactor(r) * StatTables.TierFactor(line.Growth, tier);
             float min = Round(line.Min * f, line.Decimals);
             float ceiling = Round(line.Ceiling * f, line.Decimals);
             float uniform = rng.Range(min, ceiling);

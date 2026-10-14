@@ -110,13 +110,22 @@ namespace Relic.Core.Tests
         };
 
         [Test]
-        public void ExamplesAreValidWithinLegendaryBudget()
+        public void ExamplesFitTheirAllowances()
         {
-            float budget = PowerBudget.For(Rarity.Legendary, 0);
-            var u = EffectValidator.Validate(Undertow(), budget);
-            var w = EffectValidator.Validate(WaterBolts(), budget);
+            // Undertow is a relic enchantment (bonus budget); Tide Seekers is a spell page.
+            var u = EffectValidator.Validate(Undertow(), PowerBudget.For(Rarity.Legendary, 0));
+            var w = EffectValidator.Validate(WaterBolts(), PowerBudget.Spell(0));
             Assert.IsTrue(u.IsValid, u.ToString());
             Assert.IsTrue(w.IsValid, w.ToString());
+        }
+
+        [Test]
+        public void ResourceCostsDoNotDiscountPower()
+        {
+            var cheap = WaterBolts();
+            var pricey = WaterBolts();
+            pricey.Rules[0].CostAmount = 200f;
+            Assert.AreEqual(PowerBudget.Cost(cheap), PowerBudget.Cost(pricey), 1e-5);
         }
 
         [Test]

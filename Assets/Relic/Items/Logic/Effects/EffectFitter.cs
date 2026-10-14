@@ -28,10 +28,6 @@ namespace Relic.Items
             return Tidy(build(lo));
         }
 
-        /// <summary>Cost of an ultimate as if its resonance cost gave no relief (see README: resonance pricing).</summary>
-        public static float UnrelievedCost(EffectRule rule) =>
-            PowerBudget.Cost(rule) * (1f + Math.Max(0f, rule.CostAmount) / 40f);
-
         /// <summary>Rounds magnitudes to numbers a player can read (whole damage, half-second durations...).</summary>
         public static EffectRule Tidy(EffectRule rule)
         {

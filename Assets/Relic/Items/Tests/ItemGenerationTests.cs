@@ -97,7 +97,7 @@ namespace Relic.Items.Tests
                     var rarity = AllRarities[i % AllRarities.Length];
                     int tier = (i / 5) % 11;
                     var item = gen.Generate(new ItemSpec { WorldSeed = world, Index = i, Tier = tier, Rarity = rarity });
-                    float budget = PowerBudget.For(item.Rarity, item.Tier);
+                    float budget = ItemGenerator.Budget(item.BaseType, item.Rarity, item.Tier);
                     var v = EffectValidator.Validate(item.Effects, budget);
                     if (item.Effects.Rules.Count > 0) Assert.IsTrue(v.IsValid, $"{item.Name} ({item.Rarity} t{item.Tier}): {v}");
                     Assert.LessOrEqual(item.Effects.Rules.Count, EffectValidator.MaxRules);

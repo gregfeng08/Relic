@@ -567,7 +567,8 @@ namespace Relic.Items
         {
             switch (rng.Range(0, 3))
             {
-                case 0: return new ActionSpec { Kind = ActionKind.Damage, Target = TargetKind.Self, Amount = (float)Math.Round(4f * ctx.PowerBand), DamageKind = DamageKind.Physical };
+                // Self-damage stays survivable: about 2% of a tier-appropriate HP pool per proc.
+                case 0: return new ActionSpec { Kind = ActionKind.Damage, Target = TargetKind.Self, Amount = (float)Math.Round(2f * PowerBudget.TierFactor(ctx.Tier)), DamageKind = DamageKind.Physical };
                 case 1: return new ActionSpec { Kind = ActionKind.ApplyStatus, Target = TargetKind.Self, Status = StatusId.Exhausted, Duration = 2f, Stacks = 1 };
                 default: return new ActionSpec { Kind = ActionKind.ApplyStatus, Target = TargetKind.Self, Status = ctx.Theme?.Motif.Primary == StatusId.Burning ? StatusId.Burning : StatusId.Bleeding, Duration = 2f, Stacks = 1 };
             }

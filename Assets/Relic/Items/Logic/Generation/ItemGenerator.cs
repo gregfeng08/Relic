@@ -117,7 +117,7 @@ namespace Relic.Items
             int tier = Math.Max(0, Math.Min(Difficulty.MaxTier, spec.Tier));
             var home = spec.RegionId != null ? _world.Region(spec.RegionId) : NearestRegion(tier);
             Theme theme = rarity >= Rarity.Rare ? ThemePicker.Pick(seed, home?.Tags) : null;
-            float budget = PowerBudget.For(rarity, tier);
+            float budget = Budget(bt, rarity, tier);
 
             var item = new Item
             {
@@ -181,17 +181,30 @@ namespace Relic.Items
 
         // ---------- table effects ----------
 
+        /// <summary>
+        /// An item's total power budget: the rarity bonus (PowerBudget.For) plus the kit
+        /// allowance its slot carries, which is a weapon's skill (E) or a relic's ultimate (Q).
+        /// </summary>
+        public static float Budget(BaseType bt, Rarity rarity, int tier)
+        {
+            float b = PowerBudget.For(rarity, tier);
+            var slot = ItemSlots.For(bt);
+            if (slot == ItemSlot.Weapon) b += PowerBudget.ActiveSkill(tier);
+            if (bt == BaseType.Relic) b += PowerBudget.Ultimate(tier);
+            return b;
+        }
+
         static readonly float[] BaseShare = { 0.7f, 0.55f, 0.5f, 0.4f, 0f };
 
         void AddTableEffects(Item item, TemplateContext ctx, float budget)
         {
             if (item.BaseType == BaseType.Relic) return;
             var rng = Pcg32.ForPurpose(item.Seed, "item.effects");
-            float share = BaseShare[(int)item.Rarity];
-            EffectFitter.RuleBuilder baseBuilder = null;
-            if (item.Slot == ItemSlot.Weapon) baseBuilder = EffectTemplates.WeaponSkill(ctx);
-            else if (item.Rarity >= Rarity.Uncommon || rng.Chance(0.4f)) baseBuilder = EffectTemplates.SlotPassive(ctx, ref rng);
-            if (baseBuilder != null) AddFitted(item, baseBuilder, budget * share);
+            float bonus = PowerBudget.For(item.Rarity, item.Tier);
+            if (item.Slot == ItemSlot.Weapon)
+                AddFitted(item, EffectTemplates.WeaponSkill(ctx), PowerBudget.ActiveSkill(item.Tier));
+            else if (item.Rarity >= Rarity.Uncommon || rng.Chance(0.4f))
+                AddFitted(item, EffectTemplates.SlotPassive(ctx, ref rng), bonus * BaseShare[(int)item.Rarity]);
 
             // "Maybe one simple effect from a template list": Uncommon half the time, Rare always.
             bool extra = item.Rarity == Rarity.Rare || (item.Rarity == Rarity.Uncommon && rng.Chance(0.5f));
@@ -200,7 +213,7 @@ namespace Relic.Items
                 string templateId = item.Slot == ItemSlot.Armor ? "retort" : "rider";
                 var t = EffectTemplates.EnchantmentById(templateId);
                 float left = budget - PowerBudget.Cost(item.Effects);
-                AddFitted(item, t.Factory(ctx, ref rng), Math.Min(left, budget * 0.4f));
+                AddFitted(item, t.Factory(ctx, ref rng), Math.Min(left, bonus * 0.4f));
             }
         }
 
@@ -360,13 +373,12 @@ namespace Relic.Items
                 {
                     item.Lore = new ItemLore { History = d.Lore.Trim(), WorldRefs = d.WorldRefs };
                     DraftValidator.NormalizeUltimate(d.Ultimate);
-                    // Cap the ultimate's share, priced as if resonance gave no relief (see README).
-                    float cap = _options.UltimateMaxShare * itemBudget;
-                    if (EffectFitter.UnrelievedCost(d.Ultimate) > cap)
+                    // The ultimate may use at most its own allowance (PowerBudget.Ultimate).
+                    float cap = Math.Min(_options.UltimateMaxShare * itemBudget, PowerBudget.Ultimate(item.Tier));
+                    if (PowerBudget.Cost(d.Ultimate) > cap)
                     {
                         var u = new EffectProgram { Rules = { d.Ultimate } };
-                        float relief = PowerBudget.Cost(d.Ultimate) / Math.Max(1e-6f, EffectFitter.UnrelievedCost(d.Ultimate));
-                        scale = EffectValidator.ScaleToFit(u, cap * relief);
+                        scale = EffectValidator.ScaleToFit(u, cap);
                         d.Ultimate = u.Rules[0];
                     }
                     var all = new EffectProgram();

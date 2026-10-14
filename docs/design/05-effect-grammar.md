@@ -41,12 +41,18 @@ camelCase fields, enums as strings, unknown fields are an **error** (malformed L
 }
 ```
 
-## Power budget (`PowerBudget`)
-- Programs are priced in **power points (pp)**: 1 pp ≈ one baseline hit every ~4 s.
-- `cost = Σ(action costs) × trigger frequency × chance × condition factor × resource-cost relief`
-- **Drawbacks have negative cost** (self-damage, debuffing yourself, buffing enemies), so cursed relics can trade a downside for more power.
-- **Budget** = `rarityBudget × (1 + 0.5 × tier)`, with tier clamped to 0–10. Rarity budgets: Common 3, Uncommon 6, Rare 10, Epic 16, Legendary 25. At tier 10 this is about 6× tier 0, matching the power bands in 03-combat.
-- All coefficients are first-pass guesses, to be tuned in playtests. **Only the lead edits them.**
+## Power budget (`PowerBudget`), calibration v2 (2026-10-13)
+- Programs are priced in **power points (pp)**: 1 pp ≈ one baseline hit (10 damage) every ~4 s. A starter sword's plain swings are about 5–6 pp.
+- `cost = Σ(action costs) × trigger frequency × chance × condition factor`. **Resource costs (mana, resonance) don't discount power.** Cooldown already prices frequency, and mana is a separate, in-game limit.
+- **Trigger frequency** is relative to an Active ability on a 4 s cooldown (= 1). **OnHit is 6** (about 1.5 basic attacks per second, measured), Periodic is `4 / interval`, and a cooldown caps any trigger at `4 / cooldown`.
+- **Drawbacks have negative cost** (self-damage, debuffing yourself, buffing enemies), so cursed relics can trade a downside for more power. Self-damage drawbacks must stay survivable: about 2% of a tier-appropriate HP pool per proc.
+- **Budgets:**
+  - `TierFactor(tier) = 1 + 0.2·tier` (3× at tier 10). It's shared with weapon base damage.
+  - `For(rarity, tier)` is the **bonus** budget: Common 0.5, Uncommon 0.9, Rare 1.4, Epic 2.0, Legendary 3.0, each × TierFactor.
+  - **Kit allowances** on top of that: `ActiveSkill(tier)` = 1.6 × TierFactor for a weapon's skill (E); `Ultimate(tier)` = 2.0 × TierFactor for a relic's ultimate (Q); `Spell(tier)` = 14 × TierFactor for a drawn spell circle (weapon-scale, since a tome's pages are its attack; mana holds back the top end).
+  - Items validate against `ItemGenerator.Budget` = bonus + their slot's kit allowance.
+- **Verified end to end** by `Relic.Game.Tests.PowerBandTests`: items from the real generator, fought through `Relic.Combat` with `BalanceSim`. A tier-10 kit (Epic sword, Legendary relic, two Epic trinkets, Epic armor, +12 trained STR/INT) kills a boss **≈ 7× faster** than a Common starter sword (target 6×, accepted 4.5–8×). A stock character still kills anything, just slowly.
+- **Only the lead edits these coefficients.** Re-run PowerBandTests after any change.
 
 ## Validation (`EffectValidator`)
 1. `Validate(program, budget)` returns structural errors plus cost versus budget.

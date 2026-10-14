@@ -30,7 +30,8 @@ namespace Relic.Combat
             ulong seed,
             float maxSeconds = 7200f,
             float dt = 0.05f,
-            float hitChance = 0.7f)
+            float hitChance = 0.7f,
+            float resonancePerSecond = 100f / 45f)
         {
             var space = new AbstractSpace(seed) { HitChance = hitChance };
             var sim = new CombatSim(space, seed);
@@ -49,8 +50,13 @@ namespace Relic.Combat
                     for (int i = 0; i < eq.Program.Rules.Count; i++)
                         if (eq.Program.Rules[i].Trigger.Kind == TriggerKind.Active && eq.CooldownRemaining(i) <= 0f)
                             sim.Use(attacker, eq, i, target);
+                // Offense-only measurement: drawbacks that hurt the wielder (curses) cost pp but
+                // must not end the measurement, so the attacker is kept topped up.
+                attacker.Hp = attacker.MaxHp;
                 // Simple regen so mana-costed skills keep flowing (refined once the stats spec lands).
                 attacker.Mana = Math.Min(attacker.MaxMana, attacker.Mana + 5f * dt);
+                // Resonance builds from fighting; default: a full bar about every 45 s.
+                attacker.Resonance = Math.Min(100f, attacker.Resonance + resonancePerSecond * dt);
                 sim.Tick(dt);
             }
             return new Result { Seconds = sim.Time, Killed = !target.Alive, DamageDealt = dealt };

@@ -8,8 +8,8 @@ namespace Relic.Magic
 {
     public sealed class SpellCompileOptions
     {
-        /// <summary>Power budget (pp) the validator checks against: the caster's skill. Default: Rare at tier 0.</summary>
-        public float Budget = PowerBudget.For(Rarity.Rare, 0);
+        /// <summary>Power budget (pp) the validator checks against. Default: PowerBudget.Spell at tier 0 (weapon-scale; mana limits the top end).</summary>
+        public float Budget = PowerBudget.Spell(0);
         public ISpellNamer Namer = new StubSpellNamer();
     }
 

@@ -24,18 +24,42 @@ namespace Relic.Core.Effects
     public static class PowerBudget
     {
         // ---------- Budgets ----------
+        //
+        // Calibration (v2, 2026-10-13). A starter sword is about 5–6 pp of offense. The
+        // 03-combat power bands want a full top-tier kit with trained stats to land near
+        // 6× that (8× with overrolls). Tier growth is shared with weapon base damage
+        // (1 + 0.2·tier = 3× at tier 10). Trained stats and essences add about 1.25×,
+        // and bonus enchantments the remaining ~1.6×. Active kit (weapon skill E, relic
+        // ultimate Q) gets its own allowance so rarity only buys *bonus* effects.
+        // Verified by Relic.Game.Tests.PowerBandTests with BalanceSim.
 
-        static readonly float[] RarityBudget = { 3f, 6f, 10f, 16f, 25f };
+        static readonly float[] RarityBonus = { 0.5f, 0.9f, 1.4f, 2.0f, 3.0f };
 
-        /// <summary>
-        /// Budget for an item of a rarity at a region tier (0 = starting area).
-        /// Tier scaling follows the power bands in 03-combat: about 6× from tier 0 to tier 10.
-        /// </summary>
-        public static float For(Rarity rarity, int tier)
+        /// <summary>1 + 0.2·tier, tier clamped to 0–10: the shared growth curve for item power.</summary>
+        public static float TierFactor(int tier)
         {
             int t = Math.Max(0, Math.Min(tier, 10));
-            return RarityBudget[(int)rarity] * (1f + 0.5f * t);
+            return 1f + 0.2f * t;
         }
+
+        /// <summary>
+        /// Budget for an item's <b>bonus</b> effects (enchantments, passives, curses
+        /// and their pay-offs) at a rarity and region tier (0 = starting area).
+        /// </summary>
+        public static float For(Rarity rarity, int tier) => RarityBonus[(int)rarity] * TierFactor(tier);
+
+        /// <summary>Allowance for a weapon's skill (E) or a spell page: about a 20-damage hit every 5 s at tier 0.</summary>
+        public static float ActiveSkill(int tier) => 1.6f * TierFactor(tier);
+
+        /// <summary>Allowance for a relic's ultimate (Q). With a 30 s cooldown this is about a 150-damage burst at tier 0.</summary>
+        public static float Ultimate(int tier) => 2.0f * TierFactor(tier);
+
+        /// <summary>
+        /// Allowance for one drawn spell circle. A tome's pages are its main attack, so a
+        /// spell is weapon-scale (a starter sword is about 5–6 pp), and the big end is
+        /// held back by mana rather than by this number.
+        /// </summary>
+        public static float Spell(int tier) => 14f * TierFactor(tier);
 
         // ---------- Costs ----------
 
@@ -54,9 +78,9 @@ namespace Relic.Core.Effects
             float freq = Frequency(rule.Trigger, rule.Cooldown);
             float chance = Clamp(rule.Chance, 0f, 1f);
             float conditions = ConditionFactor(rule.Conditions);
-            // Paying a resource makes an effect cheaper to own, up to a point.
-            float costRelief = 1f / (1f + Math.Max(0f, rule.CostAmount) / 40f);
-            return actions * freq * chance * conditions * costRelief;
+            // Resource costs (mana, resonance) don't discount power: how often a rule can
+            // fire is already priced through its cooldown. Mana is a separate, in-game limit.
+            return actions * freq * chance * conditions;
         }
 
         /// <summary>How often a trigger fires, relative to an Active ability on a 4 s cooldown (= 1).</summary>
@@ -67,7 +91,7 @@ namespace Relic.Core.Effects
             {
                 case TriggerKind.Active: baseFreq = 1f; break;
                 case TriggerKind.Passive: baseFreq = 1f; break;
-                case TriggerKind.OnHit: baseFreq = 2.5f; break;
+                case TriggerKind.OnHit: baseFreq = 6f; break; // ~1.5 basic attacks/s × 4 s (measured with BalanceSim)
                 case TriggerKind.OnKill: baseFreq = 0.5f; break;
                 case TriggerKind.OnTakeDamage: baseFreq = 1.2f; break;
                 case TriggerKind.OnDash: baseFreq = 1f; break;

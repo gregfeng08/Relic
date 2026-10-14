@@ -42,7 +42,7 @@ namespace Relic.Items.Text
             // Legendary: ultimate first (its share is measured without resonance relief), then enchantments share what's left.
             var ultTemplate = EffectTemplates.Ultimates[rng.Range(0, EffectTemplates.Ultimates.Length)];
             var ultBuilder = ultTemplate.Factory(ctx, ref rng);
-            draft.Ultimate = EffectFitter.Fit(ultBuilder, b.BudgetPp * (0.25f + 0.1f * rng.NextFloat()), EffectFitter.UnrelievedCost);
+            draft.Ultimate = EffectFitter.Fit(ultBuilder, b.BudgetPp * (0.25f + 0.1f * rng.NextFloat()));
             float remaining = b.BudgetPp - PowerBudget.Cost(draft.Ultimate);
 
             draft.Enchantments = new EffectProgram();
