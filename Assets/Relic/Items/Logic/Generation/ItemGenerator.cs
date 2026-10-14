@@ -90,8 +90,15 @@ namespace Relic.Items
 
         public static string ItemId(ulong seed) => "itm-" + seed.ToString("x16");
 
-        /// <summary>Synchronous convenience for template mode and tests (fakes complete synchronously).</summary>
-        public Item Generate(ItemSpec spec) => GenerateAsync(spec).GetAwaiter().GetResult();
+        /// <summary>
+        /// Synchronous convenience (template mode, tests, editor tools). With a real network generator
+        /// on a thread that has a SynchronizationContext (Unity's main thread), it runs off-thread so
+        /// continuations can't deadlock. In the game, prefer GenerateAsync from the background pool.
+        /// </summary>
+        public Item Generate(ItemSpec spec) =>
+            SynchronizationContext.Current == null || IsTemplateMode
+                ? GenerateAsync(spec).GetAwaiter().GetResult()
+                : Task.Run(() => GenerateAsync(spec)).GetAwaiter().GetResult();
 
         public async Task<Item> GenerateAsync(ItemSpec spec, CancellationToken ct = default)
         {

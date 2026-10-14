@@ -282,11 +282,14 @@ namespace Relic.Items.Tests
             public Func<HttpRequestMessage, string, HttpResponseMessage> Respond;
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
             {
-                string body = request.Content == null ? null : await request.Content.ReadAsStringAsync();
+                string body = request.Content == null ? null : await request.Content.ReadAsStringAsync().ConfigureAwait(false);
                 Seen.Add((request.RequestUri.AbsolutePath, body));
                 return Respond(request, body);
             }
         }
+
+        /// <summary>Blocks off the caller's synchronization context (Unity's main thread would deadlock on continuations).</summary>
+        static T Sync<T>(Func<Task<T>> f) => Task.Run(f).GetAwaiter().GetResult();
 
         static HttpResponseMessage Json(string json, HttpStatusCode code = HttpStatusCode.OK) =>
             new HttpResponseMessage(code) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
@@ -306,7 +309,7 @@ namespace Relic.Items.Tests
             var h = new StubHandler { Respond = (r, b) => Json("{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"name\\\":\\\"Isel's Weir\\\"}\"}}],\"usage\":{\"prompt_tokens\":12,\"completion_tokens\":8}}") };
             using (var g = new LlamaServerGenerator(new LlamaServerOptions { BaseUrl = "http://127.0.0.1:9999" }, h))
             {
-                var res = g.GenerateAsync(Request()).GetAwaiter().GetResult();
+                var res = Sync(() => g.GenerateAsync(Request()));
                 Assert.AreEqual("{\"name\":\"Isel's Weir\"}", res.Text);
                 Assert.AreEqual(12, res.PromptTokens);
                 Assert.AreEqual(8, res.CompletionTokens);
@@ -326,7 +329,7 @@ namespace Relic.Items.Tests
             var h = new StubHandler { Respond = (r, b) => Json("{\"content\":\"{\\\"name\\\":\\\"x\\\"}\",\"tokens_predicted\":5,\"tokens_evaluated\":40}") };
             using (var g = new LlamaServerGenerator(new LlamaServerOptions { Endpoint = LlamaEndpoint.Completion }, h))
             {
-                var res = g.GenerateAsync(Request()).GetAwaiter().GetResult();
+                var res = Sync(() => g.GenerateAsync(Request()));
                 Assert.AreEqual("{\"name\":\"x\"}", res.Text);
                 Assert.AreEqual(5, res.CompletionTokens);
             }
@@ -343,13 +346,13 @@ namespace Relic.Items.Tests
         {
             var h = new StubHandler { Respond = (r, b) => Json("{\"error\":\"model not loaded\"}", HttpStatusCode.ServiceUnavailable) };
             using (var g = new LlamaServerGenerator(null, h))
-                Assert.Throws<TextGenerationException>(() => g.GenerateAsync(Request()).GetAwaiter().GetResult());
+                Assert.Throws<TextGenerationException>(() => Sync(() => g.GenerateAsync(Request())));
             var h2 = new StubHandler { Respond = (r, b) => Json("<html>proxy</html>") };
             using (var g = new LlamaServerGenerator(null, h2))
-                Assert.Throws<TextGenerationException>(() => g.GenerateAsync(Request()).GetAwaiter().GetResult());
+                Assert.Throws<TextGenerationException>(() => Sync(() => g.GenerateAsync(Request())));
             var h3 = new StubHandler { Respond = (r, b) => throw new HttpRequestException("connection refused") };
             using (var g = new LlamaServerGenerator(null, h3))
-                Assert.Throws<TextGenerationException>(() => g.GenerateAsync(Request()).GetAwaiter().GetResult());
+                Assert.Throws<TextGenerationException>(() => Sync(() => g.GenerateAsync(Request())));
         }
 
         [Test]
@@ -358,7 +361,7 @@ namespace Relic.Items.Tests
             var slow = new SlowHandler();
             using (var g = new LlamaServerGenerator(new LlamaServerOptions { Timeout = TimeSpan.FromMilliseconds(100) }, slow))
             {
-                var ex = Assert.Throws<TextGenerationException>(() => g.GenerateAsync(Request()).GetAwaiter().GetResult());
+                var ex = Assert.Throws<TextGenerationException>(() => Sync(() => g.GenerateAsync(Request())));
                 StringAssert.Contains("timed out", ex.Message);
             }
         }
@@ -367,7 +370,7 @@ namespace Relic.Items.Tests
         {
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
             {
-                await Task.Delay(5000, ct);
+                await Task.Delay(5000, ct).ConfigureAwait(false);
                 return Json("{}");
             }
         }
@@ -376,9 +379,9 @@ namespace Relic.Items.Tests
         public void HealthCheck()
         {
             var ok = new StubHandler { Respond = (r, b) => Json("{\"status\":\"ok\"}") };
-            using (var g = new LlamaServerGenerator(null, ok)) Assert.IsTrue(g.IsReadyAsync().GetAwaiter().GetResult());
+            using (var g = new LlamaServerGenerator(null, ok)) Assert.IsTrue(Sync(() => g.IsReadyAsync()));
             var loading = new StubHandler { Respond = (r, b) => Json("{\"status\":\"loading model\"}", HttpStatusCode.ServiceUnavailable) };
-            using (var g = new LlamaServerGenerator(null, loading)) Assert.IsFalse(g.IsReadyAsync().GetAwaiter().GetResult());
+            using (var g = new LlamaServerGenerator(null, loading)) Assert.IsFalse(Sync(() => g.IsReadyAsync()));
         }
 
         [Test]

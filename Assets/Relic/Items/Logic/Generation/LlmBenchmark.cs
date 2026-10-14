@@ -46,7 +46,7 @@ namespace Relic.Items
             "|---|---|---|---|---|---|---|---|";
 
         public static BenchmarkReport Run(ITextGenerator generator, WorldContext world, ulong worldSeed, int relics) =>
-            RunAsync(generator, world, worldSeed, relics).GetAwaiter().GetResult();
+            Task.Run(() => RunAsync(generator, world, worldSeed, relics)).GetAwaiter().GetResult();
 
         public static async Task<BenchmarkReport> RunAsync(ITextGenerator generator, WorldContext world, ulong worldSeed, int relics, CancellationToken ct = default)
         {
