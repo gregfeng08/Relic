@@ -74,7 +74,7 @@ namespace Relic.Magic
         public float Confidence = 1f;
         public Emphasis Emphasis = Emphasis.Normal;
         public CircleBand Band;
-        /// <summary>Radians clockwise from the top of the circle.</summary>
+        /// <summary>Radians clockwise from the top of the circle (slightly negative just left of the top, which reads first).</summary>
         public float Angle;
         /// <summary>Distance of the glyph's center from the circle's center, in circle radii.</summary>
         public float Radius;
