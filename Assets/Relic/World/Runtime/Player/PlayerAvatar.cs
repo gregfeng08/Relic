@@ -12,7 +12,7 @@ namespace Relic.World.Runtime
     {
         public PlayerController Player;
 
-        Transform _body, _torso, _head, _legL, _legR, _armL, _armR, _cape, _glider;
+        Transform _body, _torso, _head, _legL, _legR, _armL, _armR, _cape;
         float _phase;
         float _lean;
         float _stretch;
@@ -29,7 +29,6 @@ namespace Relic.World.Runtime
             Material hair = Tint(toon, new Color(0.28f, 0.18f, 0.13f));
             Material trousers = Tint(toon, new Color(0.20f, 0.18f, 0.24f));
             Material cape = Tint(toon, new Color(0.86f, 0.26f, 0.22f));
-            Material glider = Tint(toon, new Color(0.96f, 0.88f, 0.62f));
 
             _torso = Part(PrimitiveType.Capsule, root, new Vector3(0f, 1.08f, 0f), new Vector3(0.52f, 0.42f, 0.40f), tunic);
             _head = Part(PrimitiveType.Sphere, root, new Vector3(0f, 1.66f, 0f), new Vector3(0.40f, 0.42f, 0.40f), skin);
@@ -49,10 +48,6 @@ namespace Relic.World.Runtime
             _cape = Pivot(root, new Vector3(0f, 1.42f, -0.2f));
             Part(PrimitiveType.Cube, _cape, new Vector3(0f, -0.36f, 0f), new Vector3(0.46f, 0.72f, 0.04f), cape);
 
-            _glider = Pivot(root, new Vector3(0f, 1.9f, -0.05f));
-            Part(PrimitiveType.Cube, _glider, new Vector3(0f, 0f, 0f), new Vector3(2.6f, 0.04f, 0.9f), glider);
-            Part(PrimitiveType.Cube, _glider, new Vector3(0f, -0.2f, 0f), new Vector3(0.04f, 0.4f, 0.04f), trousers);
-            _glider.gameObject.SetActive(false);
         }
 
         Material Tint(Material baseMat, Color c)
@@ -92,7 +87,6 @@ namespace Relic.World.Runtime
             float speed = Player.HorizontalSpeed;
             float runAmount = Mathf.Clamp01(speed / 9.5f);
 
-            _glider.gameObject.SetActive(s == MoveState.Gliding);
 
             float swing = 0f, armSwing = 0f, bob = 0f, targetLean = 0f, armSpread = 0f, armUp = 0f;
             switch (s)
@@ -108,11 +102,6 @@ namespace Relic.World.Runtime
                     swing = 18f;
                     armSwing = -25f;
                     armSpread = 25f;
-                    break;
-                case MoveState.Gliding:
-                    targetLean = 55f;
-                    armUp = 150f;
-                    swing = 8f;
                     break;
                 case MoveState.Climbing:
                     _phase += dt * Player.Velocity.magnitude * 3f;

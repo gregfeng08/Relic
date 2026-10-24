@@ -19,7 +19,7 @@ Status: **AGREED (revision 4)** · Last updated 2026-10-12
 
 ### Moment to moment (seconds)
 **Traverse → spot → engage.**
-Run, climb and glide (Genshin). Spot silhouettes, glints, ruins, camps. Action combat with dodges, gear-granted abilities and readable tells. Loot pops with rarity colors. Permadeath gives every fight real tension.
+Run, dash and climb (Genshin, no glider). Spot silhouettes, glints, ruins, camps. Action combat with dodges, gear-granted abilities and readable tells. Loot pops with rarity colors. Permadeath gives every fight real tension.
 
 ### Session (30–90 minutes)
 **Sanctuary → follow a lead → explore → dungeon → boss → loot → get it home (or push on).**
@@ -90,7 +90,7 @@ Every character has all three bars. Their gear decides which ones they rely on.
 |---|---|---|---|
 | HP | Staying alive | VIT | VIT |
 | Mana | Spells and magical abilities (from staves, tomes, relics) | INT | INS |
-| Stamina | Dodges, sprinting, climbing, gliding, heavy attacks | VIT | AGI |
+| Stamina | Dodges, sprinting, climbing, heavy attacks | VIT | AGI |
 
 - **A mage is a gear build, not a class.** Equip a staff and tomes and your abilities draw on mana, so you train INT and INS. A warrior build lives on stamina and STR. Hybrids, like a spellblade, juggle both.
 - **Why INT and INS split mana:** INT is how much you can hold, INS is how fast it comes back. Mages want both, and studying the world (INS) literally fuels magic.
@@ -118,7 +118,7 @@ Bosses and rare enemies drop **essences** themed by what they were. A **Libraria
 ## Travel and storage (grounded, Greg 2026-10-13)
 - **One vault per sanctuary.** Items stay where you left them.
 - **Couriers and caravans** move items between sanctuaries for a fee and over time. Caravans travel real routes, so they could be ambushed (a later event hook).
-- **No teleporting.** You travel on foot, by glider, by mount or by boat. Waystones are allowed only if the world's lore explains them, and they would be rare, costly or limited.
+- **No teleporting.** You travel on foot, by mount or by boat (no glider: Greg, 2026-10-23). Waystones are allowed only if the world's lore explains them, and they would be rare, costly or limited.
 - **HUD:** grounded rules, but a minimal honest HUD. HP, mana and stamina bars stay for combat readability.
 
 ## Death and graves

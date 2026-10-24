@@ -25,7 +25,7 @@ Status: **AGREED (revision 3)** · Last updated 2026-10-13
 | Q | Release relic (ultimate) | Relic |
 | Shift (tap) | Dash | Stamina |
 | Shift (hold) | Sprint | Stamina |
-| Space | Jump, climb, glide | Stamina |
+| Space | Jump, climb-jump | Stamina |
 | 1 / 2 | HP potion / mana potion | Consumables |
 | Tab | Boss camera toggle (see below) | — |
 
@@ -37,7 +37,7 @@ Status: **AGREED (revision 3)** · Last updated 2026-10-13
 - **No floating hitbox marker** (it isn't grounded). Precise dodging is learned by reading your character's silhouette, helped by a clean toon-shaded outline in combat. An accessibility setting can add a marker, off by default.
 - **Dash:** about 4 m in about 0.18 s, costs stamina, short cooldown. **No invulnerability frames.** It's a burst of movement, so a dash *into* a projectile still hits you.
 - **Sprint:** faster movement that drains stamina. It's the main way to escape dense patterns.
-- **Air:** jumping and gliding move you over ground-level patterns but expose you to aerial ones. Bosses use that trade-off.
+- **Air:** jumping clears ground-level patterns but exposes you to aerial ones. Bosses use that trade-off. (No glider.)
 
 ## Readable projectiles (third-person bullet hell)
 
@@ -90,7 +90,7 @@ Boss health is fixed by region tier. Target (Greg, 2026-10-13): **a far boss tak
 |---|---|---|---|
 | HP | VIT, armor | VIT | HP potions on hotkey 1; slow regen out of combat |
 | Mana | INT, gear | INS | Spent by mana abilities; mana potions on hotkey 2 |
-| Stamina | VIT | AGI | Dash, sprint, climb, glide, heavy attacks |
+| Stamina | VIT | AGI | Dash, sprint, climb, heavy attacks |
 | Relic resonance | — | Danger and combat | The relic's ultimate. In-world, relics feed on the intensity of battle: hits you land and close calls (projectiles passing within a hand's width) build resonance until the relic can be released. Rewards precise play, and the lore explains it. |
 
 ## Gear slots

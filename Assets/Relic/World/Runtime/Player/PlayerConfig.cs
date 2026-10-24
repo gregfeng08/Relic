@@ -32,7 +32,8 @@ namespace Relic.World.Runtime
 
         [Header("Dash (no invulnerability)")]
         public float DashDistance = 4f;
-        public float DashDuration = 0.18f;
+        [Tooltip("Seconds. The dash eases out from a fast start into run or sprint speed.")]
+        public float DashDuration = 0.24f;
         public float DashStamina = 18f;
         public float DashCooldown = 0.3f;
 
@@ -49,14 +50,11 @@ namespace Relic.World.Runtime
         public float ClimbJumpHeight = 1.4f;
         [Tooltip("Speed of the vault when topping out a climb.")]
         public float VaultUpSpeed = 6.5f;
+        [Tooltip("Surfaces must be at least this steep (degrees) to be grabbed as a wall.")]
+        public float ClimbMinAngle = 65f;
+        [Tooltip("Seconds of pushing into a wall on foot before grabbing it (airborne grabs are immediate).")]
+        public float ClimbGrabDelay = 0.2f;
 
-        [Header("Glide")]
-        public float GlideSpeed = 9f;
-        public float GlideFallSpeed = 2.4f;
-        public float GlideTurnSpeed = 150f;
-        public float GlideDrain = 5f;
-        [Tooltip("Minimum height above ground to open the glider.")]
-        public float GlideMinHeight = 2.2f;
 
         [Header("Swim")]
         public float SwimSpeed = 3.6f;

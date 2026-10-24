@@ -26,7 +26,7 @@ MonoBehaviour:
   CoyoteTime: 0.12
   JumpBuffer: 0.12
   DashDistance: 4
-  DashDuration: 0.18
+  DashDuration: 0.24
   DashStamina: 18
   DashCooldown: 0.3
   MaxStamina: 240
@@ -38,11 +38,8 @@ MonoBehaviour:
   ClimbJumpStamina: 22
   ClimbJumpHeight: 1.4
   VaultUpSpeed: 6.5
-  GlideSpeed: 9
-  GlideFallSpeed: 2.4
-  GlideTurnSpeed: 150
-  GlideDrain: 5
-  GlideMinHeight: 2.2
+  ClimbMinAngle: 65
+  ClimbGrabDelay: 0.2
   SwimSpeed: 3.6
   SwimDepth: 1.15
   MouseSensitivity: 0.12

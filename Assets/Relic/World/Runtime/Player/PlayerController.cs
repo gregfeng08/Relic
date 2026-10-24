@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Relic.World.Runtime
 {
-    public enum MoveState { Grounded, Airborne, Gliding, Climbing, Swimming, Flying }
+    public enum MoveState { Grounded, Airborne, Climbing, Swimming, Flying }
 
     /// <summary>Asks the world for the terrain and water height at a scene position (pure height function, no colliders needed).</summary>
     public delegate void TerrainProbe(Vector3 scenePosition, out float groundHeight, out float waterLevel);
@@ -11,7 +11,7 @@ namespace Relic.World.Runtime
     /// M1 third-person movement on a CharacterController: run, sprint (stamina), dash (~4 m in
     /// ~0.18 s, stamina, NO invulnerability: it only moves the body), jump, climb steep surfaces,
     /// glide from heights, swim. Movement is relative to the camera's yaw, Genshin style.
-    /// Shift: tap = dash, keep holding = sprint. Space: jump, climb-jump, open/close glider.
+    /// Shift: press = dash, keep holding = sprint (Genshin). Space: jump, climb-jump. No glider.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public sealed class PlayerController : MonoBehaviour
@@ -47,6 +47,7 @@ namespace Relic.World.Runtime
         float _dashTimeLeft;
         float _dashReadyTime;
         Vector3 _dashDir;
+        float _climbPushTime;
         Vector3 _groundNormal = Vector3.up;
         Vector3 _wallNormal = Vector3.forward;
         float _climbJumpLeft;
@@ -102,7 +103,6 @@ namespace Relic.World.Runtime
             {
                 case MoveState.Grounded:
                 case MoveState.Airborne: UpdateLocomotion(dt, input, moveWorld); break;
-                case MoveState.Gliding: UpdateGlide(dt, input, moveWorld); break;
                 case MoveState.Climbing: UpdateClimb(dt, input); break;
                 case MoveState.Swimming: UpdateSwim(dt, input, moveWorld); break;
                 case MoveState.Flying: UpdateFly(dt, input, moveWorld); break;
@@ -135,8 +135,14 @@ namespace Relic.World.Runtime
             IsSprinting = false;
             if (_dashTimeLeft > 0f)
             {
+                // Genshin-style: a fast start that eases out into the speed you'll keep, so
+                // a held Shift flows straight into sprint and a tap settles into a run. The
+                // linear ramp from v0 down to vExit covers DashDistance exactly.
+                float vExit = input.SprintHeld && !Exhausted ? Config.SprintSpeed : Config.RunSpeed;
+                float v0 = Mathf.Max(vExit, 2f * Config.DashDistance / Config.DashDuration - vExit);
+                float t01 = 1f - Mathf.Clamp01(_dashTimeLeft / Config.DashDuration);
                 _dashTimeLeft -= dt;
-                horizontal = _dashDir * (Config.DashDistance / Config.DashDuration);
+                horizontal = _dashDir * Mathf.Lerp(v0, vExit, t01);
                 FaceDirection(_dashDir, dt * 3f);
             }
             else
@@ -189,55 +195,39 @@ namespace Relic.World.Runtime
             else if (State == MoveState.Grounded && !nowGrounded) SetState(MoveState.Airborne);
 
             if (TryEnterSwim()) return;
-            if (moveWorld.sqrMagnitude > 0.01f && _dashTimeLeft <= 0f && TryStartClimb(moveWorld)) return;
-
-            // Open the glider: Space in the air, high enough, not just after jumping.
-            if (State == MoveState.Airborne && input.JumpPressed && !jumped && Stamina > 0f && !Exhausted && HeightAboveGround() >= Config.GlideMinHeight)
-            {
-                _jumpPressedTime = -10f;
-                SetState(MoveState.Gliding);
-            }
-        }
-
-        // --- Glide -----------------------------------------------------------------------
-
-        void UpdateGlide(float dt, PlayerInputState input, Vector3 moveWorld)
-        {
-            if (input.JumpPressed || Stamina <= 0f)
-            {
-                SetState(MoveState.Airborne);
-                return;
-            }
-            if (moveWorld.sqrMagnitude > 0.01f)
-            {
-                Quaternion target = Quaternion.LookRotation(moveWorld, Vector3.up);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, target, Config.GlideTurnSpeed * dt);
-            }
-            Vector3 forward = transform.forward;
-            Vector3 horizontal = new Vector3(_velocity.x, 0f, _velocity.z);
-            float speed = moveWorld.sqrMagnitude > 0.01f ? Config.GlideSpeed : Config.GlideSpeed * 0.6f;
-            horizontal = Vector3.MoveTowards(horizontal, forward * speed, 12f * dt);
-            float vy = Mathf.MoveTowards(_velocity.y, -Config.GlideFallSpeed, Config.Gravity * dt);
-            _velocity = new Vector3(horizontal.x, vy, horizontal.z);
-            UseStamina(Config.GlideDrain * dt);
-
-            CollisionFlags flags = _cc.Move(_velocity * dt);
-            if ((flags & CollisionFlags.Below) != 0) { SetState(MoveState.Grounded); return; }
-            if (TryEnterSwim()) return;
-            TryStartClimb(forward);
+            if (moveWorld.sqrMagnitude > 0.01f && _dashTimeLeft <= 0f && TryStartClimb(moveWorld, dt)) return;
         }
 
         // --- Climb -----------------------------------------------------------------------
 
-        bool TryStartClimb(Vector3 moveWorld)
+        /// <summary>
+        /// Grab a wall only when it's really a wall: steep (ClimbMinAngle), at least as tall as
+        /// the hero (the head ray hits it too), and either we're airborne/swimming or we've
+        /// been pushing into it on foot for ClimbGrabDelay. Small cliff bands and steep bumps
+        /// are run over or slid down instead of grabbed.
+        /// </summary>
+        bool TryStartClimb(Vector3 moveWorld, float dt = 0f, bool immediate = false)
         {
-            if (Stamina <= 0f || Exhausted) return false;
+            if (Stamina <= 0f || Exhausted) { _climbPushTime = 0f; return false; }
             Vector3 dir = moveWorld.normalized;
             Vector3 chest = transform.position + Vector3.up * 1.1f;
-            if (!Physics.SphereCast(chest, 0.2f, dir, out RaycastHit hit, _cc.radius + 0.35f, TerrainMask, QueryTriggerInteraction.Ignore))
+            float reach = _cc.radius + 0.35f;
+            float wallCos = Mathf.Cos(Config.ClimbMinAngle * Mathf.Deg2Rad);
+            if (!Physics.SphereCast(chest, 0.2f, dir, out RaycastHit hit, reach, TerrainMask, QueryTriggerInteraction.Ignore)
+                || hit.normal.y > wallCos                                             // not steep enough to be a wall
+                || Vector3.Dot(dir, -FlatNormal(hit.normal)) < 0.5f                    // not pushing into it
+                || !Physics.Raycast(transform.position + Vector3.up * 1.75f, dir, reach + 0.3f, TerrainMask, QueryTriggerInteraction.Ignore)) // shorter than us: step/slide, don't grab
+            {
+                _climbPushTime = 0f;
                 return false;
-            if (hit.normal.y >= SlopeCos) return false;              // walkable, not a wall
-            if (Vector3.Dot(dir, -FlatNormal(hit.normal)) < 0.5f) return false; // not pushing into it
+            }
+            bool airborne = State == MoveState.Airborne || State == MoveState.Swimming;
+            if (!immediate && !airborne)
+            {
+                _climbPushTime += dt;
+                if (_climbPushTime < Config.ClimbGrabDelay) return false;
+            }
+            _climbPushTime = 0f;
             _wallNormal = hit.normal;
             _velocity = Vector3.zero;
             _climbJumpLeft = 0f;
@@ -351,7 +341,7 @@ namespace Relic.World.Runtime
                 SetState(MoveState.Grounded);
                 return;
             }
-            if (moveWorld.sqrMagnitude > 0.01f) TryStartClimb(moveWorld);
+            if (moveWorld.sqrMagnitude > 0.01f) TryStartClimb(moveWorld, dt, immediate: true);
         }
 
         // --- Debug fly and benchmark -----------------------------------------------------
@@ -396,7 +386,7 @@ namespace Relic.World.Runtime
 
         void UpdateStamina(float dt)
         {
-            bool draining = State == MoveState.Gliding || State == MoveState.Climbing || IsSprinting || IsDashing;
+            bool draining = State == MoveState.Climbing || IsSprinting || IsDashing;
             if (!draining && Time.time - _staminaUsedTime >= Config.StaminaRegenDelay)
                 Stamina = Mathf.Min(Config.MaxStamina, Stamina + Config.StaminaRegen * dt);
             if (Stamina <= 0f) Exhausted = true;

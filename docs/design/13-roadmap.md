@@ -6,7 +6,7 @@ Milestones are **playable checkpoints** Greg can review. Dates are deliberately 
 | Milestone | Playable result | Streams |
 |---|---|---|
 | **M0 — Groundwork** ✅ | Specs, Unity 6 URP skeleton, effect grammar, test harness | Lead |
-| **M1 — Three sandboxes** (in progress) | (a) Walk, glide and dash across endless toon-shaded terrain; (b) draw spells at a Writing Desk; (c) read 50 generated relics and 10 bosses | W, M, I in parallel |
+| **M1 — Three sandboxes** (in progress) | (a) Walk, climb and dash across endless toon-shaded terrain; (b) draw spells at a Writing Desk; (c) read 50 generated relics and 10 bosses | W, M, I in parallel |
 | **M2 — One living region** | Geography-following borders with passes (09), the first terrain characters, the world graph v1 (10) with a few POIs and landmarks, LLM-written relics from a real local model | W, Lore, I |
 | **M3 — First fight** | The combat runtime executes EffectPrograms: weapon basic and skill, a spell from your tome, a relic ultimate, enemies with readable patterns, statuses, HP, mana, stamina, and death leaving a grave | Lead + I + M |
 | **M4 — First dungeon** | A graph-generated dungeon in the region, with a boss built by the boss generator, loot, essences, and relic lore pointing to a place in the world | Dungeons, I |

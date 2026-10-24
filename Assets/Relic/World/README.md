@@ -9,10 +9,10 @@
 |---|---|
 | WASD | Move (camera-relative) |
 | Mouse / wheel | Orbit camera / zoom |
-| Shift tap | Dash (~4 m in 0.18 s, stamina, **no invulnerability**) |
-| Shift hold | Sprint (stamina) |
-| Space | Jump · in the air: open/close glider · on a wall: climb-jump (S + Space leaps off) |
-| Walk into a steep wall | Climb (stamina) |
+| Shift press | Dash (~4 m, eases out over 0.24 s, stamina, **no invulnerability**) |
+| Keep holding Shift | Sprint after the dash (Genshin-style, stamina) |
+| Space | Jump · on a wall: climb-jump (S + Space leaps off). No glider. |
+| Push into a real wall (≥65°, taller than you) | Climb (stamina). Grabs after 0.2 s on foot, instantly from a jump |
 | F3 | Debug overlay: seed, world/scene position, origin, chunk, region + family, tier, biome, fps, streaming stats |
 | F4 | Debug fly (Space/Ctrl up/down, Shift fast) |
 | F5 | Rebuild the world with the next seed |

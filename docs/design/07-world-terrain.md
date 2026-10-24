@@ -7,7 +7,7 @@ Scope: terrain, regions, blending, biomes, chunk streaming, look, and a characte
 1. An **endless** world from one seed. Walk any direction; it keeps going with no seams.
 2. **Regions** that feel distinct (coastal, highland, forest, badlands, …) and **blend** smoothly at their borders.
 3. **Genshin-like readability:** toon/cel shading, clear silhouettes, slope-based rock on cliffs, vistas.
-4. A **third-person character**: run, sprint, dash, jump, climb, glide, with a Genshin-style camera.
+4. A **third-person character**: run, dash (Shift; keep holding to sprint), jump and climb, with a Genshin-style camera. No glider (Greg, 2026-10-23).
 5. Smooth: 60 fps on the dev laptop while streaming chunks.
 
 ## World model
@@ -47,12 +47,12 @@ Noise is implemented in `Logic` (OpenSimplex2 or Perlin, seeded through Pcg32/Ha
 
 ## Player controller (M1 version)
 - Third-person orbit camera (mouse), collision-aware, Genshin-like framing.
-- Move, **sprint** (stamina), **dash** (about 4 m in about 0.18 s, stamina, **no invulnerability**), jump, **climb** steep surfaces (stamina drain), **glide** from heights (stamina drain).
+- Move, **sprint** (stamina), **dash** (about 4 m in about 0.18 s, stamina, **no invulnerability**), jump, **climb** real walls (≥65°, taller than the hero; stamina drain).
 - A stamina bar on a minimal HUD. HP and mana bars can be stubs.
 - Stats affecting speed and stamina come later. Use constants in one config ScriptableObject.
 
 ## Acceptance (Greg reviews on the board)
-- [ ] Walk or glide 3 km in a straight line from the origin: no seams, holes or visible chunk pops at normal play distance.
+- [ ] Walk 3 km in a straight line from the origin: no seams, holes or visible chunk pops at normal play distance.
 - [ ] At least 3 visibly different region types reachable within 2 km of spawn, with smooth borders.
 - [ ] Frame time ≤ 16.6 ms on average and no hitch over 50 ms while sprinting across chunks (log a perf summary).
 - [ ] Same seed gives the same world (a test hashes the heights of N sample points).
