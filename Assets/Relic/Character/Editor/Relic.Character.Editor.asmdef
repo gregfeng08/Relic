@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Character.Editor",
+    "rootNamespace": "Relic.Character.Editor",
+    "references": ["Relic.Core", "Relic.Items.Logic", "Relic.Character.Logic", "Relic.Character", "Relic.World", "Relic.World.Logic", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
