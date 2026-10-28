@@ -38,7 +38,7 @@ namespace Relic.World.Terrain
     public sealed class TerrainGenerator
     {
         /// <summary>Bump when the height function changes, so saves can tell old terrain from new.</summary>
-        public const int Version = 1;
+        public const int Version = 2;
         public const float SeaLevel = 0f;
 
         // Wavelengths in meters.
@@ -55,6 +55,8 @@ namespace Relic.World.Terrain
         const double CliffWavelength = 900.0;
 
         const double TerraceStep = 13.0;
+        // Rounds ridge crests over ~0.1 noise units (~40 m at the peaks wavelength) instead of a razor V.
+        const double RidgeSoftness = 0.1;
 
         readonly ulong _seed;
         readonly IRegionField _regions;
@@ -176,7 +178,7 @@ namespace Relic.World.Terrain
             double wz = z + warpAmp * _warpZ.Fbm(x / WarpWavelength, z / WarpWavelength, 2);
 
             // 3. Peaks and valleys: ridged noise, gathered into ranges by a low-frequency mask.
-            double pv = _peaks.Ridged(wx / PeaksWavelength, wz / PeaksWavelength, 3);
+            double pv = _peaks.Ridged(wx / PeaksWavelength, wz / PeaksWavelength, 3, 2.0, 0.5, RidgeSoftness);
             double mask = WorldMath.SmoothStep(-0.35, 0.45, _mountainMask.Fbm(x / MountainMaskWavelength, z / MountainMaskWavelength, 2));
             double mountains = p.HeightScale * pv * pv * (1.0 - 0.8 * e) * land * (0.25 + 0.75 * mask);
 
@@ -199,7 +201,11 @@ namespace Relic.World.Terrain
             {
                 double k = h / TerraceStep;
                 double fl = Math.Floor(k);
-                double stepped = (fl + WorldMath.SmoothStep(0.38, 0.62, k - fl)) * TerraceStep;
+                // Risers about 3x the underlying slope (was 6x) and treads that keep 15% of it:
+                // still reads as mesas, but a riser spans several vertices even at 4 m LODs
+                // instead of aliasing into sawtooth triangles.
+                double f = k - fl;
+                double stepped = (fl + 0.85 * WorldMath.SmoothStep(0.3, 0.7, f) + 0.15 * f) * TerraceStep;
                 h = WorldMath.Lerp(h, stepped, terrace);
             }
 

@@ -45,7 +45,9 @@ namespace Relic.World.Runtime
                 float day = Mathf.Clamp01(SunElevation / 15f);
                 Sun.color = Color.Lerp(new Color(1f, 0.6f, 0.4f), SunColor, day);
                 Sun.intensity = SunIntensity * Mathf.Lerp(0.15f, 1f, day);
-                Sun.shadows = LightShadows.Hard; // crisp shadows: players dodge by them
+                // Soft = filtered; the toon shader re-sharpens it into a crisp, anti-aliased edge
+                // (players dodge by shadows, so they stay crisp, just without texel stairs).
+                Sun.shadows = LightShadows.Soft;
                 Sun.shadowStrength = 1f;
                 RenderSettings.sun = Sun;
             }

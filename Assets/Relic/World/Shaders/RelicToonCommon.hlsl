@@ -14,11 +14,21 @@ float4 _RelicWorldOffset;    // xz: floating-origin offset modulo RELIC_NOISE_PE
 
 #define RELIC_NOISE_PERIOD 4096.0
 
-// Three bands: shade (0), mid (~0.55), lit (1), with narrow smooth edges against aliasing.
+// A cel step at `edge`, anti-aliased in screen space: the transition is about 1.5 pixels wide
+// (fwidth) but never narrower than `soft` in value. A fixed-width step traces the triangle
+// edges of the interpolated normals as a staircase; this keeps band edges clean lines.
+// Fragment shaders only (fwidth).
+half RelicStep(half edge, half soft, half x)
+{
+    half w = max(fwidth(x) * 0.75h, soft);
+    return smoothstep(edge - w, edge + w, x);
+}
+
+// Three bands: shade (0), mid (~0.55), lit (1).
 half RelicCelRamp(half ndl)
 {
-    half a = smoothstep(0.00h, 0.05h, ndl);
-    half b = smoothstep(0.50h, 0.55h, ndl);
+    half a = RelicStep(0.025h, 0.025h, ndl);
+    half b = RelicStep(0.525h, 0.025h, ndl);
     return a * 0.55h + b * 0.45h;
 }
 
@@ -34,7 +44,9 @@ half3 RelicToonLight(half3 albedo, float3 positionWS, half3 normalWS, half3 view
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
     Light mainLight = GetMainLight(shadowCoord, positionWS, half4(1, 1, 1, 1));
     half ndl = dot(normalWS, mainLight.direction);
-    half shadow = smoothstep(0.35h, 0.65h, mainLight.shadowAttenuation);
+    // The sun uses soft (filtered) shadows; re-sharpening the filtered value gives a crisp,
+    // anti-aliased edge instead of shadow-map texel stairs.
+    half shadow = RelicStep(0.5h, 0.12h, mainLight.shadowAttenuation);
     half lit = RelicCelRamp(ndl) * lerp(0.0h, 1.0h, shadow);
     // A shadowed surface that faces the sun keeps a hint of the mid band so form stays readable.
     lit = max(lit, RelicCelRamp(ndl) * 0.18h);

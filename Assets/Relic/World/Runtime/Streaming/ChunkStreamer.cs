@@ -256,15 +256,8 @@ namespace Relic.World.Runtime
             EnsureObjects(c);
             DropCollider(c);
 
-            Mesh m = c.Mesh;
-            m.Clear();
-            m.SetVertices(d.Positions, 0, d.VertexCount);
-            m.SetNormals(d.Normals, 0, d.VertexCount);
-            m.SetColors(d.Colors, 0, d.VertexCount);
-            m.SetUVs(0, d.Rock, 0, d.VertexCount);
-            m.SetIndices(ChunkMeshBuilder.IndicesFor(d.Lod), MeshTopology.Triangles, 0, false);
+            ChunkMeshBuilder.CreateTerrainMesh(d, c.Mesh);
             float size = ChunkMath.ChunkSize;
-            m.bounds = new Bounds(new Vector3(size * 0.5f, (d.MinY + d.MaxY) * 0.5f, size * 0.5f), new Vector3(size, d.MaxY - d.MinY + 0.1f, size));
             c.Renderer.shadowCastingMode = d.Lod <= 1 ? ShadowCastingMode.On : ShadowCastingMode.Off;
 
             if (d.HasWater)

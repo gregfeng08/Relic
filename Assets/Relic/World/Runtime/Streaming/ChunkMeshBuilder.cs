@@ -27,6 +27,8 @@ namespace Relic.World.Runtime
 
         public readonly float[] Heights;   // (Side + 2)^2, includes a one-vertex border for normals
         public readonly float[] Water;     // Side^2
+        /// <summary>Terrain triangles: each cell split along its flatter diagonal, then the skirts.</summary>
+        public readonly int[] Indices;
 
         public bool HasWater;
         public readonly Vector3[] WaterPositions;
@@ -52,6 +54,7 @@ namespace Relic.World.Runtime
             WaterPositions = new Vector3[Side * Side];
             WaterColors = new Color32[Side * Side];
             WaterIndices = new int[(Side - 1) * (Side - 1) * 6];
+            Indices = (int[])ChunkMeshBuilder.IndicesFor(lod).Clone();
         }
     }
 
@@ -66,6 +69,21 @@ namespace Relic.World.Runtime
         }
 
         public static int[] IndicesFor(int lod) => TerrainIndices[lod];
+
+        /// <summary>Writes the chunk's terrain into a mesh (main thread). Creates the mesh when m is null.</summary>
+        public static Mesh CreateTerrainMesh(ChunkMeshData d, Mesh m = null)
+        {
+            if (m == null) m = new Mesh { name = "TerrainChunk" };
+            else m.Clear();
+            m.SetVertices(d.Positions, 0, d.VertexCount);
+            m.SetNormals(d.Normals, 0, d.VertexCount);
+            m.SetColors(d.Colors, 0, d.VertexCount);
+            m.SetUVs(0, d.Rock, 0, d.VertexCount);
+            m.SetIndices(d.Indices, MeshTopology.Triangles, 0, false);
+            float size = ChunkMath.ChunkSize;
+            m.bounds = new Bounds(new Vector3(size * 0.5f, (d.MinY + d.MaxY) * 0.5f, size * 0.5f), new Vector3(size, d.MaxY - d.MinY + 0.1f, size));
+            return m;
+        }
 
         /// <summary>Fills d for d.Coord at d.Lod. Thread-safe (the generator is immutable).</summary>
         public static void Build(TerrainGenerator gen, ChunkMeshData d)
@@ -123,6 +141,8 @@ namespace Relic.World.Runtime
                     d.Normals[i + j * n] = new Vector3(hl - hr, 2f * step, hd - hu).normalized;
                 }
             }
+
+            Triangulate(d);
 
             // Skirts: a copy of each edge vertex pushed down, same normal and color.
             float skirt = ChunkMath.SkirtDepth(lod);
@@ -205,6 +225,39 @@ namespace Relic.World.Runtime
                 case 1: return k + (n - 1) * n;    // j = n-1
                 case 2: return k * n;              // i = 0
                 default: return (n - 1) + k * n;   // i = n-1
+            }
+        }
+
+        /// <summary>
+        /// Splits each grid cell along its flatter diagonal (the two corners with the closest
+        /// heights). A fixed diagonal cuts across crests, valleys and terrace edges that run the
+        /// other way and turns them into a sawtooth of hard triangle ridges; following the
+        /// surface keeps them straight. Uses only the cell's own heights, so neighbours and
+        /// colliders agree. Skirt indices (after the cells) are left as built.
+        /// </summary>
+        static void Triangulate(ChunkMeshData d)
+        {
+            int n = d.Side;
+            int[] idx = d.Indices;
+            Vector3[] p = d.Positions;
+            int t = 0;
+            for (int j = 0; j < n - 1; j++)
+            {
+                for (int i = 0; i < n - 1; i++)
+                {
+                    int a = i + j * n, b = a + n, c = a + n + 1, e = a + 1;
+                    float ac = Mathf.Abs(p[a].y - p[c].y), be = Mathf.Abs(p[b].y - p[e].y);
+                    if (ac <= be)
+                    {
+                        idx[t++] = a; idx[t++] = b; idx[t++] = c;
+                        idx[t++] = a; idx[t++] = c; idx[t++] = e;
+                    }
+                    else
+                    {
+                        idx[t++] = a; idx[t++] = b; idx[t++] = e;
+                        idx[t++] = b; idx[t++] = c; idx[t++] = e;
+                    }
+                }
             }
         }
 

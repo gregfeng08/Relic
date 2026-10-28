@@ -98,6 +98,8 @@ Shader "Relic/World/ToonTerrain"
                 half strata = smoothstep(0.35h, 0.5h, abs(frac(strataCoord) - 0.5h) * 2.0h);
                 // Fade strata out with distance: thin stripes alias into moire far away.
                 half strataFade = saturate(1.0h - (half)(distance(_WorldSpaceCameraPos, i.positionWS) / 220.0));
+                // ...and wherever a stripe gets thinner than a few pixels (grazing views, steep walls far off).
+                strataFade *= saturate(1.5h - (half)fwidth(strataCoord) * 4.0h);
                 half3 rock = i.rock * (1.0h - _StrataStrength * strata * strataFade) * (0.92h + 0.16h * nSmall);
 
                 half3 ground = i.ground * (1.0h - _GroundVariation * 0.5h + _GroundVariation * nBig);
