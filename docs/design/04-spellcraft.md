@@ -69,6 +69,30 @@ The rules that matter for fairness are **deterministic**: same drawing, same spe
 | Too complex for new players | Start with three glyphs and premade pages; complexity grows as you discover more |
 | Scope | Ship a small glyph set first (6 cores, 8 modifiers, 7 shapes). Glyphs are data, so more can come later. |
 
+## v2 direction (PROPOSAL, from Greg's review 2026-10-28)
+Greg: "Seems a bit complex. Maybe we can just understand it semantically via its attributes? We construct a base language with rules, maybe element types, and then everything on top is semantically understood. That way, people can make extremely complex spells so long as it's understandable by the LLM reviewing it."
+
+**Proposal: a small base language plus a semantic interpreter.**
+- **Fewer, very distinct glyphs, typed like words:**
+  - **Elements** (nouns): water, fire, stone, wind, light, growth
+  - **Verbs:** strike, shield, bind, seek, scatter, return, linger
+  - **Qualities** (adjectives): more, less, far, swift, heavy
+  - **Relations** (connectors): *then*, *around*, *when hit*, *toward*, *on self*
+
+  Drawing stays simple and recognition stays near-perfect, because the meaning comes from **combination**, not from a big glyph set.
+- **The spatial layout becomes a sentence.** The parser turns glyph positions and connectors into a structured sentence (a tree), for example "water · scatter · seek · *then* · bind · *when hit*". Any well-formed composition is allowed, with no fixed recipe slots, so spells can grow as complex as players like.
+- **The interpreter reads the sentence and writes the effect.**
+  1. A **deterministic core** compiles common patterns instantly.
+  2. Novel or complex sentences go to an **LLM "Magister"**, which turns the sentence into an EffectProgram.
+  3. **Every result passes the validator and the power budget.** Complexity costs mana and cast time, so power stays bounded however clever the spell.
+- **Deterministic and fair:**
+  - Each interpretation is **cached by the sentence's canonical form**, so the same drawing always gives the same spell.
+  - In multiplayer, the server interprets and shares.
+  - Spells are written at a desk, not in combat, so LLM latency doesn't matter.
+- **Grounded (pillar 7):** in-world, spells are "read" by the world's magic. A glyph sentence is an instruction the magic understands. That's the lore explanation for the Magister (Lore Bible, 16).
+
+The v1 recognizer and the Writing Desk carry over. What changes is the glyph set, the parser (connectors and a tree instead of fixed rings) and the compiler (core plus Magister).
+
 ## Brief for stream M (v1)
 
 **Glyph set v0.** Small on purpose; glyphs are data, so more can come later.
