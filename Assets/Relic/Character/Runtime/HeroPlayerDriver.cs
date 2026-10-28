@@ -64,20 +64,26 @@ namespace Relic.Character
         void Update()
         {
             if (Hero == null) return;
-            if (PlayerInput.KeyDown(Key.F7))
-            {
-                _tier = CurrentTier();
-                Hero.Kit = Roller().Roll(_tier, ++_roll);
-                Hero.ArmorOverride = null;
-                Hero.Rebuild();
-                Debug.Log("[Relic.Character] Kit " + _roll + " (tier " + _tier + "): " + string.Join(" | ", Hero.Look.ItemNames) + " — " + Hero.TriangleCount + " tris");
-            }
-            if (PlayerInput.KeyDown(Key.F9))
-            {
-                ArmorWeight current = Hero.Look != null ? Hero.Look.Armor.Weight : ArmorWeight.Light;
-                Hero.ArmorOverride = (ArmorWeight)(((int)current + 1) % 3);
-                Hero.Rebuild();
-            }
+            if (PlayerInput.KeyDown(Key.F7)) RollRandomKit();
+            if (PlayerInput.KeyDown(Key.F9)) CycleArmor();
+        }
+
+        /// <summary>F7: a random kit for the tier at the player's world position.</summary>
+        public void RollRandomKit()
+        {
+            _tier = CurrentTier();
+            Hero.Kit = Roller().Roll(_tier, ++_roll);
+            Hero.ArmorOverride = null;
+            Hero.Rebuild();
+            Debug.Log("[Relic.Character] Kit " + _roll + " (tier " + _tier + "): " + string.Join(" | ", Hero.Look.ItemNames) + " (" + Hero.TriangleCount + " tris)");
+        }
+
+        /// <summary>F9: Light → Medium → Heavy → Light (overrides the equipped armor's weight).</summary>
+        public void CycleArmor()
+        {
+            ArmorWeight current = Hero.Look != null ? Hero.Look.Armor.Weight : ArmorWeight.Light;
+            Hero.ArmorOverride = (ArmorWeight)(((int)current + 1) % 3);
+            Hero.Rebuild();
         }
 
         void LateUpdate()

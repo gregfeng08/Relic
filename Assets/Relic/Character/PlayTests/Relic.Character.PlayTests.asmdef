@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Character.PlayTests",
+    "rootNamespace": "Relic.Character.PlayTests",
+    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Items.Logic", "Relic.Character.Logic", "Relic.Character", "Relic.World", "Relic.World.Logic"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll", "Newtonsoft.Json.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
