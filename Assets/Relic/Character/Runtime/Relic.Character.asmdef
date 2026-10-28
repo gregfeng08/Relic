@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Character",
+    "rootNamespace": "Relic.Character",
+    "references": ["Relic.Core", "Relic.Items.Logic", "Relic.Character.Logic", "Relic.World", "Relic.World.Logic", "Unity.InputSystem", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
