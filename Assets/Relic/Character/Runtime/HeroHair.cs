@@ -29,7 +29,7 @@ namespace Relic.Character
             // An ellipsoid shell around the skull, tilted so its rim runs from the hairline
             // (front, high) down to the nape (back, low).
             var c = new Vector3(0f, HeroRig.HeadCenterY + 0.012f, -0.006f);
-            b.Kit.Xf = Matrix4x4.TRS(c, Quaternion.Euler(-40f, 0f, 0f), Vector3.one);
+            b.Kit.Xf = Matrix4x4.TRS(c, Quaternion.Euler(-46f, 0f, 0f), Vector3.one);
             var rings = new List<Ring>();
             const int stacks = 10;
             for (int i = 4; i < stacks; i++)
@@ -102,6 +102,14 @@ namespace Relic.Character
         static void BackCurtain(HeroBuild b)
         {
             b.Toon(MaterialPalette.Hair, 1.5f);
+            // Underlayer: one wide, thin sheet down the back so the curtain reads as a mass of
+            // hair (no gaps between strands), riding its own chain.
+            var under = new List<Vector3>
+            {
+                new Vector3(0f, 1.62f, -0.085f), new Vector3(0f, 1.47f, -0.13f), new Vector3(0f, 1.32f, -0.215f),
+                new Vector3(0f, 1.15f, -0.27f), new Vector3(0f, 1.0f, -0.265f),
+            };
+            Strand(b, under, 0.12f, 0.035f, Vector3.back, true, 0.35f, 2, 0.1f);
             const int n = 13;
             for (int i = 0; i < n; i++)
             {
@@ -122,7 +130,7 @@ namespace Relic.Character
                     new Vector3(spread * 0.27f, 0.98f, -0.13f - 0.15f * side - layer),
                     new Vector3(spread * 0.29f, tipY, -0.12f - 0.14f * side - layer),
                 };
-                Strand(b, j, 0.05f, 0.008f, dir, true, 0.3f, 2, 0.26f);
+                Strand(b, j, 0.05f, 0.016f, dir, true, 0.3f, 2, 0.26f);
             }
         }
 

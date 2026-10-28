@@ -86,7 +86,7 @@ namespace Relic.Character
             Chains.AddCollider(B(HeroRig.Spine), new Vector3(0f, -0.06f, 0f), new Vector3(0f, 0.1f, 0f), 0.13f);
             Chains.AddCollider(B(HeroRig.Hips), new Vector3(-0.05f, -0.04f, 0f), new Vector3(0.05f, -0.04f, 0f), 0.13f);
             // The backpack keeps the hair and scarf off the back.
-            Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.06f, -0.06f, -0.20f), new Vector3(0.06f, -0.06f, -0.20f), 0.10f);
+            Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.06f, -0.06f, -0.185f), new Vector3(0.06f, -0.06f, -0.185f), 0.08f);
             for (int s = -1; s <= 1; s += 2)
             {
                 Chains.AddCollider(B(HeroRig.Thigh(s)), new Vector3(0f, -0.06f, 0.0f), new Vector3(0f, -0.40f, 0.01f), 0.075f, SpringChains.Legs);
