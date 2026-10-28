@@ -32,6 +32,7 @@ namespace Relic.Character
             public Transform Bone;
             public Vector3 A, B;   // bone-local endpoints
             public float Radius;
+            public int Mask;
         }
 
         const float StepTime = 1f / 90f;
@@ -65,8 +66,13 @@ namespace Relic.Character
             }
         }
 
-        public void AddCollider(Transform bone, Vector3 a, Vector3 b, float radius) =>
-            _colliders.Add(new Capsule { Bone = bone, A = a, B = b, Radius = radius });
+        public const int Body = 1, Legs = 2;
+
+        /// <summary>Multiplies gravity on every chain (negative = buoyant, e.g. underwater).</summary>
+        public float GravityScale = 1f;
+
+        public void AddCollider(Transform bone, Vector3 a, Vector3 b, float radius, int mask = Body) =>
+            _colliders.Add(new Capsule { Bone = bone, A = a, B = b, Radius = radius, Mask = mask });
 
         /// <summary>Snap every chain to its rest shape under the current pose.</summary>
         public void Reset()
@@ -121,9 +127,10 @@ namespace Relic.Character
                 ChainDef d = c.Def;
                 float pull = 1f - Mathf.Exp(-d.Stiffness * 30f * h);
                 float keep = Mathf.Exp(-d.Drag * 6f * h);
-                Vector3 accel = (Physics.gravity * d.Gravity + Wind) * (h * h);
-                foreach (Joint j in c.Joints)
+                Vector3 accel = (Physics.gravity * (d.Gravity * GravityScale) + Wind) * (h * h);
+                for (int ji = 0; ji < c.Joints.Count; ji++)
                 {
+                    Joint j = c.Joints[ji];
                     Vector3 pos = j.T.position - root;
                     Quaternion restRot = j.T.parent.rotation;
                     Vector3 restDir = restRot * j.Axis;
@@ -131,7 +138,7 @@ namespace Relic.Character
                     Vector3 next = j.Tail + (j.Tail - j.Prev) * keep * velScale;
                     next += (target - next) * pull + accel;
                     next = pos + SafeDir(next - pos, restDir) * j.Length;
-                    next = Collide(next, pos, root, d.Radius, j.Length, restDir);
+                    if (ji >= d.CollideFrom) next = Collide(next, pos, root, d.Radius, j.Length, restDir, d.CollideMask);
                     j.Prev = j.Tail;
                     j.Tail = next;
                     j.T.rotation = Quaternion.FromToRotation(restDir, next - pos) * restRot;
@@ -139,12 +146,12 @@ namespace Relic.Character
             }
         }
 
-        Vector3 Collide(Vector3 tail, Vector3 pos, Vector3 root, float radius, float length, Vector3 restDir)
+        Vector3 Collide(Vector3 tail, Vector3 pos, Vector3 root, float radius, float length, Vector3 restDir, int mask)
         {
             for (int i = 0; i < _colliders.Count; i++)
             {
                 Capsule k = _colliders[i];
-                if (k.Bone == null) continue;
+                if (k.Bone == null || (k.Mask & mask) == 0) continue;
                 Vector3 a = k.Bone.TransformPoint(k.A) - root, b = k.Bone.TransformPoint(k.B) - root;
                 Vector3 ab = b - a;
                 float t = Mathf.Clamp01(Vector3.Dot(tail - a, ab) / Mathf.Max(1e-6f, ab.sqrMagnitude));

@@ -16,6 +16,10 @@ namespace Relic.Character
         /// <summary>How much the chain reacts to the body's motion (0..1).</summary>
         public float Inertia = 1f;
         public string Kind;
+        /// <summary>Which collider groups push this chain (SpringChains.Body / Legs).</summary>
+        public int CollideMask = 1;
+        /// <summary>Joints before this index ignore colliders (roots that start inside the body).</summary>
+        public int CollideFrom;
     }
 
     /// <summary>

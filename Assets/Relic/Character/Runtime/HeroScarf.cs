@@ -11,20 +11,30 @@ namespace Relic.Character
             Rgb red = MaterialPalette.Scarf;
             b.Toon(red, 1.6f);
             b.Kit.Weigh = HeroBuild.TorsoWeight;
-            // Three overlapping wraps, slightly tilted, fuller at the front.
-            b.Kit.Torus(new Vector3(0f, 1.432f, 0.006f), new Vector3(0f, 1f, -0.12f), 0.104f, 0.098f, 0.028f, 18, 7, 0.9f);
-            b.Kit.Torus(new Vector3(0.003f, 1.468f, 0.004f), new Vector3(0.06f, 1f, 0.08f), 0.090f, 0.088f, 0.026f, 18, 7, 0.9f);
-            b.Kit.Torus(new Vector3(0f, 1.50f, 0.0f), new Vector3(-0.04f, 1f, -0.05f), 0.078f, 0.077f, 0.020f, 18, 7, 0.9f);
+            // A puffy cowl wrapped high around the neck, with one wrap line across it.
+            var cowl = new List<Ring>
+            {
+                new Ring(new Vector3(0f, 1.405f, 0.004f), 0.104f, 0.100f),
+                new Ring(new Vector3(0f, 1.432f, 0.010f), 0.118f, 0.114f),
+                new Ring(new Vector3(0f, 1.468f, 0.010f), 0.110f, 0.107f),
+                new Ring(new Vector3(0f, 1.50f, 0.006f), 0.094f, 0.092f),
+                new Ring(new Vector3(0f, 1.518f, 0.004f), 0.080f, 0.078f),
+            };
+            b.Kit.Loft(cowl, 14, false, false);
+            b.Kit.Loft(cowl, 14, false, false, 0f, Mathf.PI * 2f, true, true, 0.014f);
+            b.Toon(red.Scale(0.88f), 1.4f);
+            b.Kit.Torus(new Vector3(0f, 1.452f, 0.012f), new Vector3(0.12f, 1f, 0.18f), 0.116f, 0.112f, 0.014f, 16, 5, 1.1f);
+            b.Toon(red, 1.6f);
             // A soft knot where the tails come out (back right).
-            b.Kit.Ellipsoid(new Vector3(0.062f, 1.445f, -0.075f), new Vector3(0.034f, 0.03f, 0.03f), 10, 6);
+            b.Kit.Ellipsoid(new Vector3(0.066f, 1.45f, -0.105f), new Vector3(0.036f, 0.032f, 0.03f), 10, 6);
             Tail(b, new[]
             {
-                new Vector3(0.065f, 1.44f, -0.09f), new Vector3(0.085f, 1.37f, -0.17f), new Vector3(0.10f, 1.27f, -0.25f),
+                new Vector3(0.068f, 1.445f, -0.115f), new Vector3(0.085f, 1.37f, -0.19f), new Vector3(0.10f, 1.27f, -0.25f),
                 new Vector3(0.11f, 1.16f, -0.29f), new Vector3(0.115f, 1.05f, -0.31f),
             }, 0.036f);
             Tail(b, new[]
             {
-                new Vector3(0.05f, 1.43f, -0.095f), new Vector3(0.05f, 1.36f, -0.18f), new Vector3(0.05f, 1.27f, -0.25f),
+                new Vector3(0.05f, 1.44f, -0.115f), new Vector3(0.05f, 1.36f, -0.20f), new Vector3(0.05f, 1.27f, -0.25f),
                 new Vector3(0.05f, 1.18f, -0.29f),
             }, 0.032f);
         }

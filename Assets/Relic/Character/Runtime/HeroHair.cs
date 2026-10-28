@@ -74,7 +74,7 @@ namespace Relic.Character
                 if (i == 0) w *= 0.8f;
                 rad.Add(w);
             }
-            b.Kit.Path(pts, rad, 6, flat, outward);
+            b.Kit.Path(pts, rad, simulate ? 5 : 6, flat, outward);
         }
 
         static void Bangs(HeroBuild b)
@@ -82,27 +82,27 @@ namespace Relic.Character
             b.Toon(MaterialPalette.Hair, 1.5f);
             // Swept bangs: roots along the front hairline, tips over the brow, parting on the right
             // so they sweep toward the character's left (the side lock side).
-            float[] rootX = { 0.075f, 0.05f, 0.022f, -0.006f, -0.034f, -0.06f, -0.082f };
-            float[] tipX = { 0.092f, 0.056f, 0.020f, -0.020f, -0.052f, -0.080f, -0.100f };
-            float[] tipY = { 1.585f, 1.605f, 1.602f, 1.590f, 1.598f, 1.578f, 1.555f };
+            float[] rootX = { 0.075f, 0.05f, 0.025f, 0.0f, -0.025f, -0.05f, -0.075f };
+            float[] tipX = { 0.098f, 0.062f, 0.02f, -0.018f, -0.05f, -0.082f, -0.106f };
+            float[] tipY = { 1.565f, 1.60f, 1.612f, 1.595f, 1.605f, 1.585f, 1.545f };
             for (int i = 0; i < rootX.Length; i++)
             {
                 float rx = rootX[i], tx = tipX[i], ty = tipY[i];
                 var j = new List<Vector3>
                 {
-                    new Vector3(rx * 0.8f, 1.728f, 0.035f),
+                    new Vector3(rx * 0.7f, 1.745f, 0.01f),
                     new Vector3(Mathf.Lerp(rx, tx, 0.4f), 1.69f, HeroBody.FrontZ(1.69f, Mathf.Lerp(rx, tx, 0.4f)) + 0.016f),
                     new Vector3(Mathf.Lerp(rx, tx, 0.8f), Mathf.Lerp(1.69f, ty, 0.7f), HeroBody.FrontZ(Mathf.Lerp(1.69f, ty, 0.7f), tx) + 0.012f),
                     new Vector3(tx, ty, HeroBody.FrontZ(ty, tx) + 0.009f),
                 };
-                Strand(b, j, 0.019f, 0.002f, Vector3.forward, false, 0f, 3, 0.36f);
+                Strand(b, j, i == 0 || i == 6 ? 0.026f : 0.032f, 0.0015f, Vector3.forward, false, 0f, 2, 0.3f);
             }
         }
 
         static void BackCurtain(HeroBuild b)
         {
             b.Toon(MaterialPalette.Hair, 1.5f);
-            const int n = 11;
+            const int n = 13;
             for (int i = 0; i < n; i++)
             {
                 float u = (i + 0.5f) / n;                     // 0..1 across the back
@@ -110,18 +110,19 @@ namespace Relic.Character
                 var dir = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
                 float side = Mathf.Abs(Mathf.Cos(a));          // 1 at the very back... 0 at the sides
                 float spread = Mathf.Sin(a);                   // -1..1, left/right
-                float tipY = Mathf.Lerp(0.80f, 0.92f, Mathf.Abs(spread)) + (i % 2) * 0.03f;
+                float tipY = Mathf.Lerp(0.80f, 0.94f, Mathf.Abs(spread)) + (i % 2) * 0.035f;
+                float layer = (i % 2) * 0.018f;
                 // Over the shoulders/backpack, then straight down, widening into a curtain.
                 var j = new List<Vector3>
                 {
                     new Vector3(dir.x * 0.085f, 1.69f, dir.z * 0.10f - 0.01f),
                     new Vector3(dir.x * 0.125f, 1.53f, dir.z * 0.13f - 0.02f),
-                    new Vector3(spread * 0.17f, 1.36f, -0.10f - 0.12f * side),
-                    new Vector3(spread * 0.19f, 1.16f, -0.13f - 0.15f * side),
-                    new Vector3(spread * 0.20f, 0.98f, -0.13f - 0.15f * side),
-                    new Vector3(spread * 0.21f, tipY, -0.12f - 0.14f * side),
+                    new Vector3(spread * 0.18f, 1.36f, -0.10f - 0.12f * side - layer),
+                    new Vector3(spread * 0.235f, 1.16f, -0.13f - 0.15f * side - layer),
+                    new Vector3(spread * 0.27f, 0.98f, -0.13f - 0.15f * side - layer),
+                    new Vector3(spread * 0.29f, tipY, -0.12f - 0.14f * side - layer),
                 };
-                Strand(b, j, 0.034f, 0.006f, dir, true, 0.3f, 3);
+                Strand(b, j, 0.05f, 0.008f, dir, true, 0.3f, 2, 0.26f);
             }
         }
 

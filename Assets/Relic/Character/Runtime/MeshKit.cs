@@ -292,23 +292,42 @@ namespace Relic.Character
                 new Ring(c + Vector3.up * (h.y - bev), h.x, h.z, square),
                 new Ring(c + Vector3.up * h.y, h.x - bev, h.z - bev, square),
             };
-            Loft(rings, 12, true, true);
+            Loft(rings, 8, true, true);
         }
 
         /// <summary>A ring (torus) around axis, e.g. belts, cuffs, scarf wraps.</summary>
         public void Torus(Vector3 c, Vector3 axis, float radiusX, float radiusZ, float minor, int major = 16, int minorSides = 6, float flatten = 1f)
         {
             Frame(axis, out Vector3 x, out Vector3 z);
-            var pts = new List<Vector3>();
-            for (int i = 0; i <= major; i++)
+            Vector3 up = axis.normalized;
+            int first = _v.Count;
+            // A truly closed loop (no seam): rings wrap around, so normals are smooth all the way.
+            for (int i = 0; i < major; i++)
             {
                 float a = Mathf.PI * 2f * i / major;
-                pts.Add(c + z * (Mathf.Cos(a) * radiusZ) + x * (Mathf.Sin(a) * radiusX));
+                Vector3 radial = (z * Mathf.Cos(a) * radiusZ + x * Mathf.Sin(a) * radiusX);
+                Vector3 center = c + radial;
+                Vector3 outDir = radial.normalized;
+                for (int j = 0; j < minorSides; j++)
+                {
+                    float b = Mathf.PI * 2f * j / minorSides;
+                    Vert(center + outDir * (Mathf.Cos(b) * minor) + up * (Mathf.Sin(b) * minor * flatten));
+                }
             }
-            // A closed path: duplicate end ring, no caps. Seam normals are close enough.
-            var rad = new List<float>();
-            for (int i = 0; i <= major; i++) rad.Add(minor);
-            Path(pts, rad, minorSides, flatten, axis, false);
+            for (int i = 0; i < major; i++)
+            {
+                int i1 = (i + 1) % major;
+                float a = Mathf.PI * 2f * (i + 0.5f) / major;
+                Vector3 center = c + z * Mathf.Cos(a) * radiusZ + x * Mathf.Sin(a) * radiusX;
+                for (int j = 0; j < minorSides; j++)
+                {
+                    int j1 = (j + 1) % minorSides;
+                    int p0 = first + i * minorSides + j, p1 = first + i * minorSides + j1;
+                    int p2 = first + i1 * minorSides + j1, p3 = first + i1 * minorSides + j;
+                    Vector3 mid = (Local(p0) + Local(p2)) * 0.5f;
+                    Quad(p0, p1, p2, p3, mid - center);
+                }
+            }
         }
 
         /// <summary>Catmull-Rom through pts with perSeg samples per segment (includes both ends).</summary>

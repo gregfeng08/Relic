@@ -70,9 +70,9 @@ namespace Relic.Character
                 Matrix4x4 m = Matrix4x4.TRS(new Vector3(x, y, z), Quaternion.Euler(0f, 16f * s, 0f), Vector3.one);
                 b.Kit.Xf = m;
                 b.Flat(new Color(1f, 0.98f, 0.95f));
-                b.Kit.Ellipsoid(new Vector3(0f, 0f, 0f), new Vector3(0.017f, 0.020f, 0.0045f), 10, 4);
+                b.Kit.Ellipsoid(new Vector3(0f, 0f, 0f), new Vector3(0.017f, 0.020f, 0.0045f), 12, 4);
                 b.Flat(iris);
-                b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.002f, 0.0022f), new Vector3(0.0125f, 0.0165f, 0.0042f), 10, 4);
+                b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.002f, 0.0022f), new Vector3(0.0125f, 0.0165f, 0.0042f), 12, 4);
                 b.Flat(new Color(0.08f, 0.20f, 0.12f));
                 b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.001f, 0.0042f), new Vector3(0.0062f, 0.0095f, 0.0035f), 8, 4);
                 b.Flat(Color.white, 1.1f);
@@ -87,10 +87,10 @@ namespace Relic.Character
                     pts.Add(new Vector3(Mathf.Sin(a) * 0.019f * s, Mathf.Cos(a) * 0.019f + 0.002f + (i == 6 ? 0.003f : 0f), 0.004f));
                     rad.Add(Mathf.Lerp(0.0018f, 0.0032f, Mathf.Sin(Mathf.PI * i / 6f)));
                 }
-                b.Kit.Path(pts, rad, 5, 0.6f, Vector3.forward);
+                b.Kit.Path(pts, rad, 4, 0.6f, Vector3.forward);
                 // Brow (pale, mostly under the bangs).
                 b.Flat(new Color(0.78f, 0.72f, 0.66f));
-                b.Kit.Tube(new Vector3(-0.012f * s, 0.033f, 0.002f), new Vector3(0.014f * s, 0.035f, -0.002f), 0.0018f, 0.0012f, 4);
+                b.Kit.Tube(new Vector3(-0.010f * s, 0.034f, 0.001f), new Vector3(0.012f * s, 0.036f, -0.002f), 0.0011f, 0.0007f, 4);
             }
             b.Kit.Xf = Matrix4x4.identity;
             // Small closed smile and a hint of a nose.
@@ -121,7 +121,7 @@ namespace Relic.Character
             // Yellow belt with a gold buckle.
             b.Toon(MaterialPalette.Belt);
             b.Kit.Weigh = p => MeshKit.W1(HeroRig.Hips);
-            b.Kit.Torus(new Vector3(0f, 0.985f, 0.002f), Vector3.up, 0.128f, 0.094f, 0.008f, 20, 6, 2.6f);
+            b.Kit.Torus(new Vector3(0f, 0.985f, 0.002f), Vector3.up, 0.128f, 0.094f, 0.008f, 16, 5, 2.6f);
             b.Toon(MaterialPalette.Gold);
             b.Kit.Box(new Vector3(0f, 0.985f, 0.099f), new Vector3(0.038f, 0.03f, 0.012f));
         }
@@ -151,7 +151,6 @@ namespace Relic.Character
                 b.Kit.Loft(r, 12, false, true);
                 // Folds where the cloth bunches.
                 b.Kit.Torus(new Vector3(x, 0.205f, 0.002f), Vector3.up, 0.079f, 0.081f, 0.008f, 14, 4);
-                b.Kit.Torus(new Vector3(x, 0.30f, 0.0f), new Vector3(0.1f * s, 1f, 0.15f), 0.072f, 0.074f, 0.006f, 14, 4);
             }
         }
 
@@ -186,9 +185,9 @@ namespace Relic.Character
             b.Kit.Loft(sole, 12, true, true);
             // Laces: three crosses up the front of the shaft.
             b.Leg(s);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
-                float y = 0.085f + i * 0.04f;
+                float y = 0.095f + i * 0.05f;
                 float zf = i == 0 ? 0.064f : 0.058f;
                 b.Kit.Tube(new Vector3(x - 0.02f, y - 0.012f, zf), new Vector3(x + 0.02f, y + 0.012f, zf), 0.0035f, 0.0035f, 4);
                 b.Kit.Tube(new Vector3(x + 0.02f, y - 0.012f, zf), new Vector3(x - 0.02f, y + 0.012f, zf), 0.0035f, 0.0035f, 4);
@@ -232,7 +231,7 @@ namespace Relic.Character
                     pts.Add(p); rad.Add(0.0078f - k * 0.0008f);
                 }
                 b.Toon(metal, 1.2f);
-                b.Kit.Path(pts, rad, 6, 0.85f, Vector3.right);
+                b.Kit.Path(pts, rad, 5, 0.85f, Vector3.right);
                 // Claw: a curved cone.
                 b.Toon(clawCol, 1.2f);
                 Vector3 c0 = p, c1 = p + Quaternion.AngleAxis(-22f * s, Vector3.forward) * dir * 0.022f;

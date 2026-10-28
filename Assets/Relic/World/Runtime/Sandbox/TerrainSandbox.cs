@@ -20,6 +20,13 @@ namespace Relic.World.Runtime
         [Tooltip("Set before Start (e.g. by tests) to override Seed.")]
         public static long? SeedOverride;
 
+        /// <summary>
+        /// Optional hero builder, registered by a higher layer (Game registers the procedural
+        /// Character hero): (player object, controller, toon material) → the avatar component.
+        /// Null, or a factory that fails, falls back to the placeholder PlayerAvatar.
+        /// </summary>
+        public static System.Func<GameObject, PlayerController, Material, Component> AvatarFactory;
+
         [Header("Assets (created by Relic > World > Build Terrain Sandbox)")]
         public Material TerrainMaterial;
         public Material WaterMaterial;
@@ -101,9 +108,18 @@ namespace Relic.World.Runtime
             Player.Config = PlayerConfig;
             Player.Probe = Probe;
             Player.Frozen = true;
-            var avatar = playerGo.AddComponent<PlayerAvatar>();
-            avatar.Player = Player;
-            avatar.Build(toonMat);
+            Component hero = null;
+            if (AvatarFactory != null)
+            {
+                try { hero = AvatarFactory(playerGo, Player, toonMat); }
+                catch (System.Exception e) { Debug.LogException(e); }
+            }
+            if (hero == null)
+            {
+                var avatar = playerGo.AddComponent<PlayerAvatar>();
+                avatar.Player = Player;
+                avatar.Build(toonMat);
+            }
 
             // Camera.
             var camGo = Track(new GameObject("Main Camera"));

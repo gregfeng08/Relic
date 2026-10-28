@@ -123,10 +123,10 @@ namespace Relic.Character
         // ---- skirt ------------------------------------------------------------------------
 
         static readonly float[] SkirtY = { 0.99f, 0.90f, 0.79f, 0.66f, 0.53f, 0.41f };
-        static readonly float[] SkirtRx = { 0.142f, 0.160f, 0.186f, 0.222f, 0.258f, 0.292f };
-        static readonly float[] SkirtRz = { 0.106f, 0.124f, 0.148f, 0.180f, 0.210f, 0.238f };
+        static readonly float[] SkirtRx = { 0.142f, 0.158f, 0.178f, 0.203f, 0.230f, 0.258f };
+        static readonly float[] SkirtRz = { 0.106f, 0.122f, 0.140f, 0.163f, 0.186f, 0.208f };
         const int ChainsPerPanel = 4;
-        const int Cols = 12;
+        const int Cols = 10;
 
         static float FrontGap(float y01) => Mathf.Lerp(0.24f, 0.62f, y01 * y01);
         static float BackVent(float y) => y > 0.74f ? 0.004f : Mathf.Lerp(0.004f, 0.16f, Mathf.Clamp01((0.74f - y) / 0.33f));
@@ -159,10 +159,12 @@ namespace Relic.Character
                     var joints = new List<Vector3>();
                     for (int i = 0; i <= rows; i++) joints.Add(SkirtPoint(s, i, u, heavy) - Outward(s, i, u, heavy) * 0.03f);
                     chains[c] = b.Chain("Coat" + (s < 0 ? "L" : "R") + c, HeroRig.Hips, joints, "coat");
-                    chains[c].Stiffness = 0.55f;
+                    chains[c].Stiffness = 0.75f;
+                    chains[c].CollideMask = SpringChains.Legs;
+                    chains[c].CollideFrom = 1;
                     chains[c].Drag = 0.5f;
-                    chains[c].Gravity = 0.6f;
-                    chains[c].Radius = 0.03f;
+                    chains[c].Gravity = 0.45f;
+                    chains[c].Radius = 0.015f;
                 }
                 int side = s;
                 BoneWeight W(float row, float u)
