@@ -1,0 +1,49 @@
+{
+  "id": "wendle",
+  "name": "the Wendle",
+  "adjective": "Wendle",
+  "identity": "Meadow farmers, millers and bakers who think most problems improve with a pie and a long talk.",
+  "families": ["Meadow", "Forest"],
+  "climates": ["Temperate"],
+  "phonology": {
+    "starts": ["Bram", "Tam", "Wil", "Pell", "Mer", "Os", "Fen", "Tib", "Cor", "Dab", "Hal", "Mab", "Nel", "Pip", "Rud", "Wen", "Al", "Ed", "Bet", "Gil", "Maud", "Lot", "Jem", "Hod"],
+    "middles": ["ri", "wi", "be", "li", "o", "a", "ne", "ber", "ly", "sel", "ro"],
+    "ends": ["wick", "sin", "ley", "wen", "by", "ric", "ton", "bet", "a", "ie", "win", "dry", "ny", "bel", "kin", "al", "mot", "ett", "row", "ock"],
+    "patterns": [ { "shape": "SE", "weight": 6 }, { "shape": "SME", "weight": 2 }, { "shape": "S", "weight": 1 } ],
+    "surnameChance": 0.5,
+    "surnamePattern": "SE",
+    "minLength": 3,
+    "maxLength": 10,
+    "places": {
+      "suffixes": ["fold", "wick", "ford", "by", "mere", "stead", "dale", "bury", "combe", "ley", "thorpe"],
+      "words": ["Green", "Mill", "Downs", "Crossing", "Hollow", "Common"],
+      "suffixChance": 0.7
+    }
+  },
+  "architecture": "Half-timbered cottages under deep thatch, round doors painted bright colors, a windmill on every rise, and stone bridges with a bench in the middle for talking.",
+  "crafts": ["baking", "milling", "cheesemaking", "beekeeping", "lantern-making", "quilting", "cider-pressing"],
+  "materials": ["oak", "wheat straw", "beeswax", "brass", "wool", "river stone"],
+  "foods": ["meat-and-onion pies", "honey cake", "hard cheeses", "apple cider", "griddle scones", "mushroom stew"],
+  "festivals": [
+    { "name": "the Lantern-Lighting", "season": "late autumn", "description": "Every household hangs one lantern for each family member who traveled that year, and the whole valley glows." },
+    { "name": "the Haymoot", "season": "midsummer", "description": "Hay-bale races, a tug-of-war across the millpond, and a pie judging that has ended friendships." },
+    { "name": "First Furrow", "season": "spring", "description": "The oldest farmer cuts the first furrow while the children follow behind, planting wishes with the seed." }
+  ],
+  "values": ["hospitality", "neighborliness", "honest work", "a good story", "being home before dark"],
+  "pride": "The Old Hearth, and the fact that no traveler has ever left a Wendle inn hungry.",
+  "factions": ["growers", "brewers", "festival-keepers", "archivists", "hearthwardens", "wayfarers"],
+  "itemForms": ["lantern", "walking staff", "shepherd's crook", "sickle", "cleaver", "wool cloak", "quilted coat", "pie-tin buckler", "hand-bell", "sling", "longbow"],
+  "motifs": ["lantern", "bloom", "hive", "bell", "song", "thorn"],
+  "itemNaming": {
+    "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "The {epithet} {form}"],
+    "epithets": ["Haymoot", "Hearthside", "Long-Rail", "Harvest", "First-Furrow"],
+    "adjectives": ["Good", "Steady", "Honest", "Mended", "Well-Loved", "Homely"],
+    "makersMarks": ["a wheat-ear stamped near the grip", "a tiny pie burned into the wood", "the maker's initials inside a lantern shape"]
+  },
+  "relations": [
+    { "culture": "lunnet", "kind": "FriendlyRivalry", "note": "Neighbors and trading partners with a centuries-old argument about who makes the better pie." },
+    { "culture": "aruvi", "kind": "Trade", "note": "Grain and cheese for honey and lacquer. The Aruvi think the Wendle cut too many trees." },
+    { "culture": "solanne", "kind": "Trade", "note": "Wendle wool goes to the coast; Solannish salt and glass come back." },
+    { "culture": "teskari", "kind": "Trade", "note": "Teskari tea is the Wendle's favorite import, and they brew it far too strong." }
+  ]
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "lamplit",
+    "name": "the Lamplit Age",
+    "order": 0,
+    "startYearsAgo": 1200,
+    "endYearsAgo": 600,
+    "summary": "Wren the First Scribe learns that the world listens; glyphcraft spreads; the Concord of Hearths joins the cultures with lamp-lit Long Roads.",
+    "echoes": [
+      "lamp-tower ruins", "Long Road milestones", "Concord seals", "peak-to-peak bridges",
+      "glass-ship shards on far beaches", "half-finished wonders", "bells that still carry"
+    ]
+  },
+  {
+    "id": "quarrel",
+    "name": "the Quarrel",
+    "order": 1,
+    "startYearsAgo": 600,
+    "endYearsAgo": 520,
+    "summary": "The Imperative under Corvane the Loud tries to command the Listening with the Iron Sentence; the Concord resists; the war ends at the Silent Field.",
+    "echoes": [
+      "old battlefields gone to wildflowers", "constructs still guarding their posts", "broken bridges",
+      "sealed Imperative vaults", "fragments of the Iron Sentence", "a fort nobody remembers the name of"
+    ]
+  },
+  {
+    "id": "hush",
+    "name": "the Hush",
+    "order": 2,
+    "startYearsAgo": 520,
+    "endYearsAgo": 90,
+    "summary": "The Listening turns away; glyphs answer weakly and relics sleep; people gather in safe valleys and keep small crafts, songs and festivals alive.",
+    "echoes": [
+      "abandoned villages", "hidden family caches", "songs everyone sings slightly wrong",
+      "overgrown roads", "guarded recipes", "a flowering of local crafts"
+    ]
+  },
+  {
+    "id": "rekindling",
+    "name": "the Rekindling",
+    "order": 3,
+    "startYearsAgo": 90,
+    "endYearsAgo": 0,
+    "summary": "Maudry Tull relights the Old Hearth; the Lanternfold grows around it; hearthstones are relit and wayfarers set out to rediscover the Wide.",
+    "echoes": [
+      "newly relit hearthstones", "wayfarers' waycairns", "fresh lines on old maps",
+      "reopened roads", "rival expeditions", "festivals revived after centuries"
+    ]
+  }
+]

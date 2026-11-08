@@ -1,0 +1,19 @@
+{
+  "bannedWords": [
+    "ethereal", "whisper", "whispers", "whispering", "shadow-whisper", "eternal", "eternity",
+    "ancient power", "doom", "doomed", "void", "abyss", "eldritch", "otherworldly",
+    "gore", "gory", "viscera", "entrails", "carrion", "corpse", "corpses", "torment", "agony",
+    "despair", "dread", "forsaken", "accursed", "damned", "grimdark", "bloodsoaked", "blood-soaked",
+    "chosen one", "prophecy", "since time immemorial", "unspeakable", "untold", "darkness falls",
+    "mysterious", "mystical", "arcane energies", "a power beyond", "realm"
+  ],
+  "bannedNameSubstrings": [
+    "ass", "fuck", "shit", "cum", "cunt", "dick", "cock", "fag", "nig", "rape", "slut", "whore",
+    "piss", "tit", "porn", "nazi", "anal", "anus", "penis", "semen", "poop", "fart", "butt", "sex",
+    "kill", "blood", "gore", "death", "doom", "grim", "skull", "demon", "hell", "corpse", "rot",
+    "hyrule", "teyvat", "mondstadt", "liyue", "zelda", "ganon", "sauron", "mordor", "gondor",
+    "elden", "narnia", "westeros", "azeroth", "tamriel", "hobbit"
+  ],
+  "maxSentenceWords": 22,
+  "maxLoreSentences": 3
+}

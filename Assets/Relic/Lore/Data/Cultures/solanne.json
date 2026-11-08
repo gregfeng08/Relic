@@ -1,0 +1,48 @@
+{
+  "id": "solanne",
+  "name": "the Solanne",
+  "adjective": "Solannish",
+  "identity": "Sunny harbor folk: sailors, shipwrights, fishers and lens-grinders who keep the Wide's lighthouses lit.",
+  "families": ["Coast", "Meadow"],
+  "climates": ["Maritime", "Temperate"],
+  "phonology": {
+    "starts": ["Cor", "Ama", "Lis", "Bel", "Tes", "Mar", "Vel", "Ser", "Nel", "Ro", "Ces", "Ila", "Ot", "Fio", "Lu", "Ren"],
+    "middles": ["ra", "li", "ve", "sa", "ne", "ri", "lo", "ta"],
+    "ends": ["o", "a", "ello", "ine", "ane", "is", "etta", "ano", "iel", "ina", "ezo", "on"],
+    "patterns": [ { "shape": "SE", "weight": 4 }, { "shape": "SME", "weight": 3 } ],
+    "surnameChance": 0.7,
+    "surnamePattern": "SE",
+    "minLength": 3,
+    "maxLength": 11,
+    "places": {
+      "suffixes": ["port", "mar", "ello", "ara", "esca"],
+      "words": ["Harbor", "Light", "Strand", "Cove", "Quay", "Point"],
+      "suffixChance": 0.5
+    }
+  },
+  "architecture": "Whitewashed houses with blue shutters stacked up the cliffs, lighthouses crowned with great glass lenses, and markets spilling along the quays.",
+  "crafts": ["shipbuilding", "lens-grinding", "net-making", "sailmaking", "glassblowing", "salt-panning"],
+  "materials": ["sea-glass", "driftwood", "sailcloth", "salt", "brass", "coral", "white stone"],
+  "foods": ["grilled sardines", "saffron fish stew", "lemon bread", "salted almonds", "sea-salt caramels"],
+  "festivals": [
+    { "name": "the Regatta of Lights", "season": "summer", "description": "Boats race across the bay at dusk with lanterns on their masts, and the harbor cheers for whoever is losing." },
+    { "name": "Lens Day", "season": "spring", "description": "The lighthouse lenses are polished until they sing, and the whole town picnics on the rocks below." },
+    { "name": "the Homecoming Tide", "season": "autumn", "description": "When the fishing fleet returns, everyone meets it at the quay with bread, music and dry socks." }
+  ],
+  "values": ["courage", "generosity", "a well-told story", "never turning a stranger away from the quay"],
+  "pride": "Their lighthouses, which guided ships even through the Hush, and Captain Velisa Corro.",
+  "factions": ["shipwrights", "cartographers", "caravanners", "festival-keepers", "wayfarers"],
+  "itemForms": ["cutlass", "harpoon", "spyglass", "compass", "lighthouse lantern", "sailcloth coat", "sea-glass charm", "oar-staff"],
+  "motifs": ["tide", "sun", "star", "wind", "mist"],
+  "itemNaming": {
+    "patterns": ["{maker}'s {form}", "{form} of {place}", "The {adjective} {form}", "The {epithet} {form}"],
+    "epithets": ["Regatta", "Lighthouse", "Far-Sailing", "Harbor-Blessed", "Fair-Weather"],
+    "adjectives": ["Bold", "Bright", "Salt-Kissed", "Sunny", "Steadfast"],
+    "makersMarks": ["a tiny lighthouse etched into the metal", "a knot of blue thread wound around the grip", "the maker's ship-name stamped backward, for luck"]
+  },
+  "relations": [
+    { "culture": "ochrel", "kind": "FriendlyRivalry", "note": "Steady trade partners who still dispute who invented the lighthouse lens and who invented the sun-mirror." },
+    { "culture": "eskeln", "kind": "FriendlyRivalry", "note": "The Great Wager: Captain Corro by sea against Hjalla Osvik on foot. Both peoples follow the letters closely." },
+    { "culture": "wendle", "kind": "Trade", "note": "Salt and glass inland, wool and cheese back to the coast." }
+  ]
+}
