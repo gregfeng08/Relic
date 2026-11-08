@@ -14,6 +14,14 @@ namespace Relic.Character
         public float VerticalSpeed;
         public float ClimbSpeed;     // m/s along the wall
         public bool WeaponDrawn;
+        /// <summary>Step smoothing from the controller (added to the root height).</summary>
+        public float VisualYOffset;
+        /// <summary>0..1 landing squash spring from the controller.</summary>
+        public float LandingSquash;
+        /// <summary>Body pitch while diving (degrees, + = head down); 0 = use the default dive lean.</summary>
+        public float DivePitch;
+        /// <summary>Head below the surface: hair and scarf float.</summary>
+        public bool Underwater;
     }
 
     /// <summary>
@@ -152,7 +160,7 @@ namespace Relic.Character
                 bool dive = a.Motion == HeroMotion.Dive;
                 _swimPhase += dt * (dive ? 1.4f + a.Speed * 0.5f : 2.2f + a.Speed * 0.8f);
                 float s = Mathf.Sin(_swimPhase), c = Mathf.Cos(_swimPhase);
-                leanTarget = dive ? 82f : a.Speed > 0.5f ? 65f : 20f;
+                leanTarget = dive ? Mathf.Clamp(75f + a.DivePitch, 20f, 120f) : a.Speed > 0.5f ? 65f : 20f;
                 Add(HeroRig.Head, -leanTarget * 0.7f, 0f, 0f);
                 Add(HeroRig.UpperArmL, -100f + s * 60f, 0f, -30f - c * 25f);
                 Add(HeroRig.UpperArmR, -100f + s * 60f, 0f, 30f + c * 25f);
@@ -180,6 +188,17 @@ namespace Relic.Character
                 _target[HeroRig.HandR] = new Vector3(10f, 0f, 0f);
             }
 
+            // Landing: a quick squash through the knees (the controller springs LandingSquash back).
+            if (a.LandingSquash > 0.001f)
+            {
+                float q = Mathf.Clamp01(a.LandingSquash);
+                hips.y -= 0.1f * q;
+                Add(HeroRig.ThighL, -32f * q, 0f, 0f); Add(HeroRig.ShinL, 60f * q, 0f, 0f); Add(HeroRig.FootL, -26f * q, 0f, 0f);
+                Add(HeroRig.ThighR, -32f * q, 0f, 0f); Add(HeroRig.ShinR, 60f * q, 0f, 0f); Add(HeroRig.FootR, -26f * q, 0f, 0f);
+                Add(HeroRig.UpperArmL, 0f, 0f, -14f * q); Add(HeroRig.UpperArmR, 0f, 0f, 14f * q);
+                leanTarget += 12f * q;
+            }
+
             _lean = Ease(_lean, leanTarget, 9f, dt);
             Add(HeroRig.Hips, _lean * 0.55f, 0f, 0f);
             Add(HeroRig.Spine, _lean * 0.3f, 0f, 0f);
@@ -198,6 +217,8 @@ namespace Relic.Character
             }
             _hipsOffset = Vector3.Lerp(_hipsOffset, hips, 1f - Mathf.Exp(-14f * dt));
             _rig.Bones[HeroRig.Hips].localPosition = _rig.Bind[HeroRig.Hips] + _hipsOffset;
+            // Step smoothing is applied unfiltered so the feet track the controller exactly.
+            _rig.Bones[HeroRig.Root].localPosition = new Vector3(0f, a.VisualYOffset, 0f);
         }
 
         /// <summary>Jumps straight to the pose for the input (captures, first frame).</summary>

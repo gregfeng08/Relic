@@ -163,6 +163,8 @@ namespace Relic.Character.Editor
                 ("dash", new HeroAnimInput { Motion = HeroMotion.Run, Speed = 14f, Dash = true }, new Vector3(0f, 0f, 14f)),
                 ("jump", new HeroAnimInput { Motion = HeroMotion.Air, VerticalSpeed = 5f, Speed = 5f }, new Vector3(0f, 5f, 5f)),
                 ("climb", new HeroAnimInput { Motion = HeroMotion.Climb, ClimbSpeed = 2f }, new Vector3(0f, 1.5f, 0f)),
+                ("land", new HeroAnimInput { Motion = HeroMotion.Idle, LandingSquash = 0.8f }, Vector3.zero),
+                ("dive", new HeroAnimInput { Motion = HeroMotion.Dive, Speed = 2.5f, DivePitch = 10f, Underwater = true }, new Vector3(0f, -0.5f, 2.5f)),
             };
             var sheet = new Texture2D(W * poses.Length, H, TextureFormat.RGB24, false);
             for (int i = 0; i < poses.Length; i++)

@@ -111,7 +111,7 @@ namespace Relic.Character
             // Air drag on cloth and hair: things trail behind when moving, more so when dashing.
             Chains.Wind = -worldVelocity * (Input.Dash ? 2.2f : 1.1f);
             // Underwater, hair and scarf drift slowly upward; at the surface they float.
-            Chains.GravityScale = Input.Motion == HeroMotion.Dive ? -0.12f : Input.Motion == HeroMotion.Swim ? 0.3f : 1f;
+            Chains.GravityScale = Input.Underwater || Input.Motion == HeroMotion.Dive ? -0.12f : Input.Motion == HeroMotion.Swim ? 0.3f : 1f;
             if (Input.Motion == HeroMotion.Dive || Input.Motion == HeroMotion.Swim) Chains.Wind *= 0.4f;
             Chains.Step(dt);
         }

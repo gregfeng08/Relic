@@ -48,4 +48,4 @@ rejects unknown fields and enum names and then sanitizes (clamps ranges, repairs
 parts). Hair styles: LowTail (default), LongStraight, Ponytail, TwinTails, Bob; bangs: Swept, Straight,
 Parted. Outfit: coat on/off, length and colors (+ trim), scarf on/off and color, shirt, trousers or
 skirt over tights, boots, gauntlets/gloves/bare hands, belt; accessories: hair pin, flower, ribbon.
-**F10** in the sandbox cycles the built-in presets.
+**F11** in the sandbox cycles the built-in presets (F10 is the World props toggle).
