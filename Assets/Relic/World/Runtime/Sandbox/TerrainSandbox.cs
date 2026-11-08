@@ -122,6 +122,7 @@ namespace Relic.World.Runtime
             OrbitCam.Target = playerGo.transform;
             OrbitCam.Probe = Probe;
             Player.OrbitCam = OrbitCam;
+            Sky.View = OrbitCam; // underwater fog when the camera dips below the surface
 
             Origin.Target = playerGo.transform;
             Origin.Register(playerGo.transform);

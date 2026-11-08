@@ -67,8 +67,30 @@ Shader "Relic/World/Water"
                 return o;
             }
 
+            // The surface seen from below (diving): a bright, rippling ceiling inside Snell's window
+            // (~49 degrees around straight up), a mirror of the deep water outside it.
+            half4 FragBelow(Varyings i)
+            {
+                float t = _Time.y;
+                float3 wp = i.positionWS;
+                float n1 = RelicWorldNoise(wp + float3(t * 0.6, 0, t * 0.4), _WaveScale);
+                float n2 = RelicWorldNoise(wp + float3(-t * 0.5, 0, t * 0.7), _WaveScale * 0.5);
+                half3 toCam = SafeNormalize(_WorldSpaceCameraPos - wp);
+                half cosUp = saturate(-toCam.y) + (n2 - 0.5h) * 0.05h;
+                half window = smoothstep(0.58h, 0.72h, cosUp);
+                Light mainLight = GetMainLight();
+                half3 sky = _RelicAmbientSky.rgb * 1.25h + mainLight.color * 0.25h;
+                // Fine caustic-like ripples (1 m cells), soft-edged so they read as light, not blobs.
+                float n3 = RelicWorldNoise(wp + float3(t * 0.9, 0, -t * 0.6), 1.0);
+                half shimmer = smoothstep(0.62h, 0.8h, n3 * 0.6h + n2 * 0.4h) * window;
+                half3 col = lerp(_DeepColor.rgb * 0.55h, lerp(_ShallowColor.rgb, sky, 0.6h), window) + shimmer * 0.12h;
+                col = MixFog(col, i.fogFactor);
+                return half4(col, lerp(0.97h, 0.75h, window));
+            }
+
             half4 Frag(Varyings i) : SV_Target
             {
+                if (_WorldSpaceCameraPos.y < i.positionWS.y - 0.02) return FragBelow(i);
                 // Water depth along the view ray from the depth texture (falls back to vertex depth).
                 float2 uv = i.screenPos.xy / i.screenPos.w;
                 float sceneEye = LinearEyeDepth(SampleSceneDepth(uv), _ZBufferParams);

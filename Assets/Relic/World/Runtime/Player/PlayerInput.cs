@@ -13,14 +13,18 @@ namespace Relic.World.Runtime
         public bool JumpHeld;
         public bool SprintPressed;   // Shift went down this frame (dash)
         public bool SprintHeld;      // Shift held (sprint)
-        public bool DescendHeld;     // Ctrl (fly mode down)
+        public bool DescendHeld;     // Ctrl or C (fly down, dive down)
     }
 
     /// <summary>Reads devices directly through the new Input System (the project uses it exclusively).</summary>
     public static class PlayerInput
     {
+        /// <summary>Scripted input (tests, demos). When set, devices are ignored.</summary>
+        public static System.Func<PlayerInputState> Override;
+
         public static PlayerInputState Read()
         {
+            if (Override != null) return Override();
             var s = new PlayerInputState();
             Keyboard k = Keyboard.current;
             Mouse m = Mouse.current;
