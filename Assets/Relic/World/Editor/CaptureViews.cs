@@ -108,14 +108,69 @@ namespace Relic.World.Editor
             return best > double.MinValue;
         }
 
-        public static void AddDiveViews(TerrainGenerator gen, List<CaptureView> views) { }
+        /// <summary>The tallest peaks outside Frost regions (snow caps must show in every climate).</summary>
+        public static void AddSnowViews(TerrainGenerator gen, List<CaptureView> views)
+        {
+            AddTallest(gen, views, "s1_peak_nonfrost", f => f != RegionFamily.Frost, 480.0, 100f);
+            AddTallest(gen, views, "s2_peak_badlands", f => f == RegionFamily.Badlands, 320.0, 70f);
+            AddTallest(gen, views, "s3_peak_forest", f => f == RegionFamily.Forest || f == RegionFamily.Meadow, 320.0, 70f);
+        }
+
+        static void AddTallest(TerrainGenerator gen, List<CaptureView> views, string name, Func<RegionFamily, bool> family, double back, float camHeight)
+        {
+            if (!FindBest(gen, 5000.0, 32.0, (x, z) =>
+                {
+                    RegionSample r = gen.Regions.Sample(x, z);
+                    return r.W0 > 0.6f && family(r.Family) ? gen.HeightAt(x, z) : double.MinValue;
+                }, out double px, out double pz)) return;
+            double ang = Uphill(gen, px - 60.0, pz) + Math.PI * 0.15;
+            views.Add(new CaptureView
+            {
+                Name = name, X = px, Z = pz, LookAt = true, CamX = px - Math.Sin(ang) * back, CamZ = pz - Math.Cos(ang) * back,
+                CamHeight = camHeight, Height = -40f, ViewDistance = 1300f,
+            });
+        }
+
+        /// <summary>Underwater: a deep spot near spawn, looking along the bed and up at the surface.</summary>
+        public static void AddDiveViews(TerrainGenerator gen, List<CaptureView> views)
+        {
+            if (!FindBest(gen, 3000.0, 16.0, (x, z) =>
+                {
+                    gen.HeightAndWater(x, z, out float h, out float w);
+                    float d = w - h;
+                    if (d < 10f || d > 40f) return double.MinValue;
+                    for (int k = 0; k < 6; k++) // open water around, not a pit
+                    {
+                        double a = k * Math.PI / 3.0;
+                        gen.HeightAndWater(x + 35.0 * Math.Cos(a), z + 35.0 * Math.Sin(a), out float h2, out float w2);
+                        if (w2 - h2 < 6f) return double.MinValue;
+                    }
+                    return -Math.Sqrt(x * x + z * z);
+                }, out double cx, out double cz)) return;
+            gen.HeightAndWater(cx, cz, out float g, out float wl);
+            float depth = wl - g;
+            views.Add(new CaptureView { Name = "d1_dive_bed", X = cx + 25.0, Z = cz + 10.0, LookAt = true, CamX = cx, CamZ = cz, CamHeight = depth * 0.5f, Height = 0.5f, Underwater = true, ViewDistance = 400f });
+            views.Add(new CaptureView { Name = "d2_dive_up", X = cx + 6.0, Z = cz + 2.0, LookAt = true, CamX = cx, CamZ = cz, CamHeight = depth * 0.35f, Height = depth + 6f, Underwater = true, ViewDistance = 400f });
+            views.Add(new CaptureView { Name = "d3_surface_above", X = cx + 30.0, Z = cz + 12.0, LookAt = true, CamX = cx, CamZ = cz, CamHeight = 2.5f, Height = depth - 1f, ViewDistance = 600f });
+        }
 
         public static void AddPropViews(TerrainGenerator gen, List<CaptureView> views) { }
 
         internal static void AfterChunksBuilt(SandboxCapture.CaptureEnv env, CaptureView v, ChunkMeshData[] chunks, Transform root, double originX, double originZ) { }
 
-        internal static void BeforeRender(SandboxCapture.CaptureEnv env, CaptureView v, Camera cam) { }
+        internal static void BeforeRender(SandboxCapture.CaptureEnv env, CaptureView v, Camera cam)
+        {
+            if (!v.Underwater) return;
+            float water = env.Gen.WaterLevelAt(v.CamX, v.CamZ);
+            float depth = Mathf.Max(0.5f, water - cam.transform.position.y);
+            env.Sky.ApplyUnderwater(1f, depth);
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = RenderSettings.fogColor;
+        }
 
-        internal static void AfterRender(SandboxCapture.CaptureEnv env, CaptureView v) { }
+        internal static void AfterRender(SandboxCapture.CaptureEnv env, CaptureView v)
+        {
+            if (v.Underwater) env.Sky.ApplyUnderwater(0f, 0f);
+        }
     }
 }

@@ -11,6 +11,9 @@ Shader "Relic/World/ToonTerrain"
         _StrataStrength ("Rock strata strength", Range(0, 1)) = 0.22
         _GroundVariation ("Ground color variation", Range(0, 0.5)) = 0.12
         _RimStrength ("Rim strength", Range(0, 2)) = 0.25
+        _SnowColor ("Snow color", Color) = (0.93, 0.95, 1.0, 1)
+        _SnowSlopeStart ("Snow slides off from (1 - normal.y)", Range(0, 1)) = 0.29
+        _SnowSlopeEnd ("Snow gone at", Range(0, 1)) = 0.36
     }
 
     SubShader
@@ -27,6 +30,9 @@ Shader "Relic/World/ToonTerrain"
             half _StrataStrength;
             half _GroundVariation;
             half _RimStrength;
+            half4 _SnowColor;
+            half _SnowSlopeStart;
+            half _SnowSlopeEnd;
         CBUFFER_END
         ENDHLSL
 
@@ -60,7 +66,7 @@ Shader "Relic/World/ToonTerrain"
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
                 half3 normalWS : TEXCOORD1;
-                half3 ground : TEXCOORD2;
+                half4 ground : TEXCOORD2; // rgb splat, a snow cover
                 half3 rock : TEXCOORD3;
                 half fogFactor : TEXCOORD4;
                 UNITY_VERTEX_OUTPUT_STEREO
@@ -75,7 +81,7 @@ Shader "Relic/World/ToonTerrain"
                 o.positionCS = p.positionCS;
                 o.positionWS = p.positionWS;
                 o.normalWS = TransformObjectToWorldNormal(input.normalOS);
-                o.ground = SRGBToLinear(input.color.rgb);
+                o.ground = half4(SRGBToLinear(input.color.rgb), input.color.a);
                 o.rock = SRGBToLinear(input.rock);
                 o.fogFactor = ComputeFogFactor(p.positionCS.z);
                 return o;
@@ -102,9 +108,22 @@ Shader "Relic/World/ToonTerrain"
                 strataFade *= saturate(1.5h - (half)fwidth(strataCoord) * 4.0h);
                 half3 rock = i.rock * (1.0h - _StrataStrength * strata * strataFade) * (0.92h + 0.16h * nSmall);
 
-                half3 ground = i.ground * (1.0h - _GroundVariation * 0.5h + _GroundVariation * nBig);
+                half3 ground = i.ground.rgb * (1.0h - _GroundVariation * 0.5h + _GroundVariation * nBig);
 
                 half3 albedo = lerp(ground, rock, rockMask);
+
+                // Snow: cover from the generator (soft altitude band), broken into patches by world
+                // noise, and only where the slope can hold it: cliffs stay rock, ledges catch snow.
+                half cover = saturate(i.ground.a * (1.0h / 0.75h));
+                half deep = saturate((i.ground.a - 0.75h) * 4.0h); // well above the line snow clings to steeper faces
+                half holdShift = deep * 0.16h;
+                half snowHold = 1.0h - smoothstep(_SnowSlopeStart + holdShift, _SnowSlopeEnd + holdShift, slope + (nSmall - 0.5h) * 0.05h);
+                // Near the summits of tall peaks, snow also plasters steep faces in broken patches.
+                snowHold = max(snowHold, deep * RelicStep(0.52h, 0.04h, nBig * 0.65h + nSmall * 0.35h + deep * 0.12h));
+                half patchy = cover + (nBig - 0.5h) * 0.5h + (nSmall - 0.5h) * 0.16h;
+                half snowMask = RelicStep(0.5h, 0.05h, patchy) * snowHold * step(0.004h, i.ground.a);
+                half3 snowAlbedo = _SnowColor.rgb * (0.95h + 0.05h * nSmall);
+                albedo = lerp(albedo, snowAlbedo, snowMask);
                 half3 color = RelicToonLight(albedo, i.positionWS, n, v, _RimStrength);
                 color = MixFog(color, i.fogFactor);
                 return half4(color, 1.0h);

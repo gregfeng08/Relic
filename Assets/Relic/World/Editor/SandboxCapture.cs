@@ -102,6 +102,7 @@ namespace Relic.World.Editor
             bool all = set == "all";
             if (all || set == "default") AddDefaultViews(env.Gen, views);
             if (all || set == "ridges") CaptureViews.AddRidgeViews(env.Gen, views);
+            if (all || set == "snow") CaptureViews.AddSnowViews(env.Gen, views);
             if (all || set == "dive") CaptureViews.AddDiveViews(env.Gen, views);
             if (all || set == "props") CaptureViews.AddPropViews(env.Gen, views);
 

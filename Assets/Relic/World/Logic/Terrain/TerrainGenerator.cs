@@ -21,6 +21,10 @@ namespace Relic.World.Terrain
         public RegionId Region;
         /// <summary>0 deep inside a region, toward 1 on a border.</summary>
         public float BorderFactor;
+        /// <summary>Snow cover before slope: 0..0.75 the altitude band (0.75 = full cover), up to 1 for deep snow well above the line (the shader keeps cliffs steeper than ~47 degrees bare, ~57 degrees for deep snow).</summary>
+        public float Snow;
+        /// <summary>Local snow line altitude (m): climate-shifted, always under the tallest peaks.</summary>
+        public float SnowLine;
 
         public bool IsUnderwater => Height < WaterLevel;
     }
@@ -35,7 +39,7 @@ namespace Relic.World.Terrain
     /// → optional mesa terracing. Climate (temperature, humidity, altitude cooling) then picks
     /// the biome per point.
     /// </summary>
-    public sealed class TerrainGenerator
+    public sealed partial class TerrainGenerator
     {
         /// <summary>Bump when the height function changes, so saves can tell old terrain from new.</summary>
         public const int Version = 2;
@@ -81,6 +85,7 @@ namespace Relic.World.Terrain
             _humidity = SimplexNoise2.ForPurpose(seed, "climate.humidity");
             _tint = SimplexNoise2.ForPurpose(seed, "terrain.tint");
             _cliffs = SimplexNoise2.ForPurpose(seed, "terrain.cliffs");
+            _snow = SimplexNoise2.ForPurpose(seed, "terrain.snow");
 
             // Continentalness → base height in meters: deep sea, shelf, coast, lowland, upland.
             _continentSpline = new MonotoneSpline(
@@ -120,14 +125,14 @@ namespace Relic.World.Terrain
             RegionParams p = r.Blended;
             Height(x, z, p, out double h, out double water);
 
-            double temperature = 0.5 * _temperature.Fbm(x / TemperatureWavelength, z / TemperatureWavelength, 2)
-                                 + p.TemperatureBias
-                                 - WorldMath.Max(0.0, h) / 420.0; // altitude cooling
+            double climate = 0.5 * _temperature.Fbm(x / TemperatureWavelength, z / TemperatureWavelength, 2) + p.TemperatureBias;
+            double temperature = climate - WorldMath.Max(0.0, h) / 420.0; // altitude cooling
             double humidity = 0.5 * _humidity.Fbm(x / HumidityWavelength, z / HumidityWavelength, 2) + p.HumidityBias;
             Biome biome = BiomeTable.Classify(temperature, humidity, h - water);
 
             float tint = (float)(0.93 + 0.07 * _tint.Fbm(x / TintWavelength, z / TintWavelength, 2));
             Rgb ground = (SoftBiomeColor(temperature, humidity, h - water) * p.GroundTint * tint).Clamped();
+            Snowfall(x, z, h, climate, temperature, p.HeightScale, ref biome, ref ground, out double snow, out double snowLine);
 
             return new TerrainSample
             {
@@ -141,6 +146,8 @@ namespace Relic.World.Terrain
                 Family = r.Family,
                 Region = r.Id0,
                 BorderFactor = r.BorderFactor,
+                Snow = (float)snow,
+                SnowLine = (float)snowLine,
             };
         }
 

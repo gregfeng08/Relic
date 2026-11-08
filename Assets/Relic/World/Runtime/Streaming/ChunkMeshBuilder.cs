@@ -110,7 +110,7 @@ namespace Relic.World.Runtime
                     d.Heights[(i + 1) + (j + 1) * g] = s.Height;
                     d.Water[k] = s.WaterLevel;
                     d.Positions[k] = new Vector3(i * step, s.Height, j * step);
-                    d.Colors[k] = ToColor32(s.Ground);
+                    d.Colors[k] = ToColor32(s.Ground, s.Snow); // alpha: snow cover
                     d.Rock[k] = new Vector3(s.Rock.R, s.Rock.G, s.Rock.B);
                     if (s.Height < minY) minY = s.Height;
                     if (s.Height > maxY) maxY = s.Height;
@@ -213,8 +213,8 @@ namespace Relic.World.Runtime
             d.Heights[(i + 1) + (j + 1) * g] = gen.HeightAt(x, z);
         }
 
-        static Color32 ToColor32(Rgb c) =>
-            new Color32((byte)(Mathf.Clamp01(c.R) * 255f + 0.5f), (byte)(Mathf.Clamp01(c.G) * 255f + 0.5f), (byte)(Mathf.Clamp01(c.B) * 255f + 0.5f), 255);
+        static Color32 ToColor32(Rgb c, float a) =>
+            new Color32((byte)(Mathf.Clamp01(c.R) * 255f + 0.5f), (byte)(Mathf.Clamp01(c.G) * 255f + 0.5f), (byte)(Mathf.Clamp01(c.B) * 255f + 0.5f), (byte)(Mathf.Clamp01(a) * 255f + 0.5f));
 
         /// <summary>Edge e (0 south, 1 north, 2 west, 3 east), k-th vertex along it.</summary>
         static int EdgeVertex(int e, int k, int n)
