@@ -1,0 +1,14 @@
+{
+    "name": "Relic.Lore.Tests",
+    "rootNamespace": "Relic.Lore.Tests",
+    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.World.Logic", "Relic.Lore.Logic"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll", "Newtonsoft.Json.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

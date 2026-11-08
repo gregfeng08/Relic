@@ -1,0 +1,48 @@
+{
+  "id": "eskeln",
+  "name": "the Eskeln",
+  "adjective": "Eskeln",
+  "identity": "Northern herders, bone-carvers and storytellers who measure a winter by how many tales it took to get through.",
+  "families": ["Frost", "Coast"],
+  "climates": ["Cold", "Maritime"],
+  "phonology": {
+    "starts": ["Hja", "Os", "Bryn", "Tor", "Sve", "Yr", "Ka", "Li", "Ask", "Ing", "Ha", "Rag", "Sol", "Ey", "Vi", "Ulf"],
+    "middles": ["la", "ve", "ri", "ne", "gu", "da", "ki"],
+    "ends": ["a", "e", "ild", "ven", "ja", "rik", "un", "by", "dis", "holm", "ke", "vi", "ra", "vik"],
+    "patterns": [ { "shape": "SE", "weight": 5 }, { "shape": "SME", "weight": 2 } ],
+    "surnameChance": 0.6,
+    "surnamePattern": "SE",
+    "minLength": 3,
+    "maxLength": 10,
+    "places": {
+      "suffixes": ["holm", "vik", "stad", "fell", "hof"],
+      "words": ["Lodge", "Hall", "Firth", "Ridge", "Hearth", "Floe"],
+      "suffixChance": 0.6
+    }
+  },
+  "architecture": "Long turf-roofed halls half sunk into the hillside, steaming bathhouses, doorposts carved with family stories, and snow-lanterns along every path.",
+  "crafts": ["bone and antler carving", "wool-felting", "sledge-building", "ice-fishing", "saga-telling", "fur-lined leatherwork"],
+  "materials": ["whalebone", "reindeer antler", "felted wool", "birch", "rime-iron", "amber"],
+  "foods": ["smoked fish", "cloudberry jam", "rye flatbread", "reindeer stew", "hot spiced milk"],
+  "festivals": [
+    { "name": "the Long Telling", "season": "midwinter", "description": "The whole hall tells one story together, each person adding a line, for as long as the night lasts." },
+    { "name": "Sun-Return", "season": "end of the dark weeks", "description": "Everyone climbs the nearest hill to cheer the first sunrise of the year, loudly, in case it needs encouragement." },
+    { "name": "the Thaw Market", "season": "spring", "description": "Sledges full of winter carving race to the coast to trade before the ice goes soft." }
+  ],
+  "values": ["endurance", "hospitality in hard weather", "a story told well", "sharing the warm spot by the fire"],
+  "pride": "Their stories, which are longer than anyone's, and Hjalla Osvik, who is definitely winning the Great Wager.",
+  "factions": ["wayfarers", "hearthwardens", "festival-keepers", "smiths", "spirit-keepers"],
+  "itemForms": ["bearded axe", "antler-hilted knife", "sledge-spear", "whalebone bow", "fur cloak", "horn", "saga-staff", "round shield"],
+  "motifs": ["frost", "song", "star", "tide"],
+  "itemNaming": {
+    "patterns": ["{maker}'s {form}", "{form} of {place}", "{form} of the {word}", "The {epithet} {form}"],
+    "epithets": ["Long-Telling", "Sun-Return", "Fireside", "Snow-Walker", "Northward"],
+    "adjectives": ["Hardy", "Warm", "Weathered", "Stout", "Faithful"],
+    "makersMarks": ["a knot carved into the haft", "a tally of winters notched along the edge", "a twist of red wool tied through the pommel"]
+  },
+  "relations": [
+    { "culture": "teskari", "kind": "FriendlyRivalry", "note": "The yearly Peak Race, and a long argument over whose horns carry farther." },
+    { "culture": "solanne", "kind": "FriendlyRivalry", "note": "The Great Wager. Every new letter from Hjalla is read aloud in every hall." },
+    { "culture": "ochrel", "kind": "Kinship", "note": "Fellow star-readers; their scholars swap star charts by caravan." }
+  ]
+}

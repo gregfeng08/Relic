@@ -1,0 +1,48 @@
+{
+  "id": "teskari",
+  "name": "the Teskari",
+  "adjective": "Teskari",
+  "identity": "Terrace-builders of the high mountains: tea growers, bellfounders and kite-flyers who carve stairways into cliffs.",
+  "families": ["Highlands", "Frost"],
+  "climates": ["Alpine", "Temperate"],
+  "phonology": {
+    "starts": ["Tes", "Kar", "Yen", "Sho", "Hal", "Mir", "Os", "Ket", "Ra", "Sen", "Tam", "Ive", "Dor", "Ore", "Ka", "Yu"],
+    "middles": ["ka", "ri", "se", "ya", "ro", "te", "ma", "shi"],
+    "ends": ["i", "an", "ek", "ari", "os", "en", "ira", "un", "esh", "ai", "el", "o"],
+    "patterns": [ { "shape": "SE", "weight": 4 }, { "shape": "SME", "weight": 3 } ],
+    "surnameChance": 0.7,
+    "surnamePattern": "S",
+    "minLength": 3,
+    "maxLength": 10,
+    "places": {
+      "suffixes": ["kel", "orin", "shan", "dar", "yen"],
+      "words": ["Steps", "Terrace", "Spire", "Bridge", "Bellrock", "Pass"],
+      "suffixChance": 0.5
+    }
+  },
+  "architecture": "Stone terraces stepping down every slope, tiled roofs that curl up at the corners like a smile, bell towers on the crags, and rope-and-plank bridges strung between peaks.",
+  "crafts": ["bellfounding", "tea growing", "stone carving", "kite making", "porcelain", "paper-making"],
+  "materials": ["granite", "bell-bronze", "porcelain", "kite-silk", "mountain cedar", "slate"],
+  "foods": ["terrace tea", "steamed buns", "goat cheese", "pine-nut noodles", "plum wine"],
+  "festivals": [
+    { "name": "the Kite Ascent", "season": "spring winds", "description": "Every family flies a kite painted with a wish. The highest kite wins nothing at all except a year of bragging." },
+    { "name": "Bellnight", "season": "midwinter", "description": "At midnight every bell in the mountains rings once, peak after peak, until the sound has crossed the whole range." },
+    { "name": "Tea Moon", "season": "autumn", "description": "The first leaves of the year are tasted by moonlight on the highest terrace, and everyone pretends to notice the difference." }
+  ],
+  "values": ["patience", "precision", "keeping one's word", "climbing a little higher each year"],
+  "pride": "Their bells, their tea, and bridges from the Lamplit Age that are still standing.",
+  "factions": ["bellfounders", "smiths", "glyphwrights", "lamplighters", "caravanners"],
+  "itemForms": ["bell", "kite-blade", "cedar staff", "porcelain mask", "climbing pick", "war-fan", "lacquered lamellar", "scroll case"],
+  "motifs": ["bell", "wind", "stone", "ink", "frost"],
+  "itemNaming": {
+    "patterns": ["{form} of the {word}", "{maker}'s {form}", "The {epithet} {form}", "{form} of {place}"],
+    "epithets": ["Peak-Rung", "Ninth-Step", "Cloud-Stair", "Kite-Day", "High-Terrace"],
+    "adjectives": ["Steady", "Clear-Toned", "Precise", "Patient", "Lofty"],
+    "makersMarks": ["a tiny bell engraved where the hand rests", "the number of steps from the maker's door, in old Teskari script", "a kite-shaped seal in red wax"]
+  },
+  "relations": [
+    { "culture": "eskeln", "kind": "FriendlyRivalry", "note": "The yearly Peak Race, and an old argument over whose horns and bells carry farther." },
+    { "culture": "ochrel", "kind": "Trade", "note": "Teskari tea and slate go down to the red country; Ochrel glass and dyes come up." },
+    { "culture": "wendle", "kind": "Trade", "note": "Their best customers for tea, though the Wendle brew it far too strong." }
+  ]
+}

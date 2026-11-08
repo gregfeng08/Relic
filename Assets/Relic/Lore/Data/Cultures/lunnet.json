@@ -1,0 +1,48 @@
+{
+  "id": "lunnet",
+  "name": "the Lunnet",
+  "adjective": "Lunnet",
+  "identity": "Cheerful marsh folk in stilt villages: ferry-keepers, reed-weavers and herbalists, famous for frog choirs and terrible puns.",
+  "families": ["Marsh", "Coast"],
+  "climates": ["Wetland", "Humid"],
+  "phonology": {
+    "starts": ["Pib", "Lul", "Nim", "Tob", "Wob", "Mog", "Pud", "Lil", "Bub", "Rush", "Sib", "Dun", "Fen", "Mim", "Bo", "Wim"],
+    "middles": ["ble", "li", "bo", "wi", "pa", "ne"],
+    "ends": ["et", "ow", "y", "kin", "ling", "le", "o", "ap", "ick", "win", "sy", "mot"],
+    "patterns": [ { "shape": "SE", "weight": 6 }, { "shape": "SME", "weight": 2 } ],
+    "surnameChance": 0.5,
+    "surnamePattern": "SE",
+    "minLength": 3,
+    "maxLength": 10,
+    "places": {
+      "suffixes": ["pond", "reed", "wade", "mire", "fen"],
+      "words": ["Stilts", "Reeds", "Ferry", "Lilypads", "Locks", "Landing"],
+      "suffixChance": 0.6
+    }
+  },
+  "architecture": "Round reed-thatched houses on stilts, joined by plank walkways and little ferries, with a floating garden tied up outside every door.",
+  "crafts": ["reed-weaving", "ferry-building", "herbal medicine", "eel-trapping", "rush-paper making", "gourd lanterns"],
+  "materials": ["reeds", "bog-oak", "cattail down", "gourd", "river clay", "willow"],
+  "foods": ["eel pie", "duck-egg custard", "rice cakes", "watercress soup", "cranberry tarts"],
+  "festivals": [
+    { "name": "the Frog Choir", "season": "spring", "description": "The whole marsh sings back to the frogs. The frogs usually win." },
+    { "name": "the Firefly Ferry", "season": "summer", "description": "Boats drift with gourd-lanterns while everyone takes a turn telling their very worst joke." },
+    { "name": "the Big Dry", "season": "late summer", "description": "When the water drops, the village hunts the mud for everything it lost during the year, and some things it did not." }
+  ],
+  "values": ["good humor", "helping first and asking later", "never laughing at a joke too early", "knowing every channel"],
+  "pride": "Their ferries, which can find any channel in thick fog, and the fact that nobody has ever successfully invaded a marsh.",
+  "factions": ["growers", "brewers", "festival-keepers", "spirit-keepers", "shipwrights"],
+  "itemForms": ["punt-pole staff", "fishing spear", "reed shield", "gourd lantern", "herb satchel", "trident", "eel-skin boots", "rush-paper scroll"],
+  "motifs": ["mist", "tide", "bloom", "song", "lantern"],
+  "itemNaming": {
+    "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "The {epithet} {form}"],
+    "epithets": ["Frog-Choir", "Ferry", "Firefly", "Big-Dry", "Fog-Finder"],
+    "adjectives": ["Cheerful", "Muddy", "Lucky", "Snug", "Trusty"],
+    "makersMarks": ["a little frog carved somewhere hard to find", "three dots of green paint", "a reed knot only the maker can tie"]
+  },
+  "relations": [
+    { "culture": "wendle", "kind": "FriendlyRivalry", "note": "Eel pie against meat-and-onion pie, judged every Haymoot, never settled." },
+    { "culture": "aruvi", "kind": "Kinship", "note": "Neighbors on the marsh-forest edge who share their lantern festivals." },
+    { "culture": "ochrel", "kind": "Trade", "note": "Rush paper and dried herbs for Ochrel glass, by a very long caravan road." }
+  ]
+}

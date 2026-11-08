@@ -1,0 +1,48 @@
+{
+  "id": "aruvi",
+  "name": "the Aruvi",
+  "adjective": "Aruvi",
+  "identity": "Forest woodwrights and grove-tenders who carve lanterns from living wood and share their villages with spirits.",
+  "families": ["Forest", "Marsh"],
+  "climates": ["Humid", "Temperate"],
+  "phonology": {
+    "starts": ["A", "I", "O", "Se", "Li", "Te", "Me", "Ru", "Va", "Ne", "Su", "Lo", "Ha", "Yo", "Ki", "Ela"],
+    "middles": ["ru", "la", "vi", "no", "ri", "sa", "lu", "me", "ya", "ve", "ni"],
+    "ends": ["vi", "ai", "ue", "oru", "an", "il", "esa", "ani", "uvi", "eli", "on", "aru", "ira"],
+    "patterns": [ { "shape": "SME", "weight": 4 }, { "shape": "SE", "weight": 3 }, { "shape": "SMME", "weight": 1 } ],
+    "surnameChance": 0,
+    "surnamePattern": "SE",
+    "minLength": 3,
+    "maxLength": 10,
+    "places": {
+      "suffixes": ["ashe", "lun", "avel", "ori", "esse"],
+      "words": ["Grove", "Canopy", "Glade", "Boughs", "Hollow", "Rootway"],
+      "suffixChance": 0.5
+    }
+  },
+  "architecture": "Houses grown rather than built: living-willow walls, rope bridges between great trees, lacquered shrines among the roots, and moth-lanterns on every branch.",
+  "crafts": ["woodcarving", "lacquerwork", "bow-making", "herbal medicine", "moth-silk weaving", "mushroom farming"],
+  "materials": ["living willow", "red lacquer", "moth-silk", "amberwood", "birch bark", "river pearl"],
+  "foods": ["mushroom dumplings", "nut bread", "flower tea", "smoked river fish", "wild-berry preserves"],
+  "festivals": [
+    { "name": "Moth Lantern Night", "season": "midsummer", "description": "Everyone releases a paper lantern with a wish carved on its frame, and the moths follow them up into the canopy." },
+    { "name": "the Tending", "season": "autumn", "description": "Each village brings gifts to its grove's patron spirit and asks, very politely, how the year went." },
+    { "name": "First Leaf", "season": "spring", "description": "The children choose and name the year's first new leaf, then argue about it until supper." }
+  ],
+  "values": ["patience", "care for living things", "listening", "taking only what you need"],
+  "pride": "Their spirits trust them. A grove the Aruvi tend never goes wild.",
+  "factions": ["spirit-keepers", "glyphwrights", "growers", "archivists"],
+  "itemForms": ["carved longbow", "lacquered staff", "moth-silk cloak", "seed-pouch charm", "bark-bound tome", "antler knife", "spirit mask", "wooden flute"],
+  "motifs": ["thorn", "bloom", "lantern", "mist", "ink", "hive"],
+  "itemNaming": {
+    "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "{form} of the {word}"],
+    "epithets": ["Grove-Tended", "Moonleaf", "Rootborn", "Spirit-Gifted", "Dew-Bright"],
+    "adjectives": ["Patient", "Living", "Gentle", "Rooted", "Evergreen"],
+    "makersMarks": ["a leaf carved so finely it seems to move", "a drop of red lacquer shaped like a seed", "the maker's grove-sign burned into the grain"]
+  },
+  "relations": [
+    { "culture": "wendle", "kind": "Trade", "note": "Honey and lacquer for grain and cheese, with gentle lectures about trees included free." },
+    { "culture": "lunnet", "kind": "Kinship", "note": "They share the marsh-forest edge, and Moth Lantern Night and the Firefly Ferry are held on the same evening." },
+    { "culture": "teskari", "kind": "FriendlyRivalry", "note": "A polite, unending debate over whose tea is better." }
+  ]
+}

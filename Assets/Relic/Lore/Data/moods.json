@@ -1,0 +1,135 @@
+{
+  "brightShare": 0.7,
+  "moods": [
+    {
+      "id": "wonder", "tone": "Bright", "weight": 3,
+      "words": ["Starlit", "Humming", "Far-Seen", "Marvel", "Bright"],
+      "effectLean": ["reveal", "aura", "discovery"],
+      "lines": [
+        "{maker} found this {form} humming on a hillside near {place}. Nobody has explained the {word} pattern inside it yet.",
+        "Carry it anywhere near {place} and it hums like a kettle about to boil. Nobody knows why, but the kettles there are excellent.",
+        "On clear nights it glows like a lamp-tower in miniature. The children of {place} call it a pocket star."
+      ]
+    },
+    {
+      "id": "craft", "tone": "Bright", "weight": 3,
+      "words": ["Masterwork", "Well-Made", "Journeyman's", "Patient", "True-Struck"],
+      "effectLean": ["stat", "precision", "durability"],
+      "lines": [
+        "{maker} of {place} worked this {form} for three winters and signed it where only another maker would look.",
+        "A {culture} {form}, made the slow way. The {word} pattern worked into it was put there on purpose.",
+        "Apprentices in {place} still copy this {form}. None of them has got the {word} quite right."
+      ]
+    },
+    {
+      "id": "kinship", "tone": "Bright", "weight": 2,
+      "words": ["Sister's", "Hearth", "Shared", "Kindred", "Neighbor's"],
+      "effectLean": ["ally", "aura", "regen"],
+      "lines": [
+        "Passed from aunt to niece in {place} for six generations, and never lost for long.",
+        "{maker} made this {form} as half of a pair. The other half is still somewhere near {place}.",
+        "{faction} lend this {form} to whoever keeps the hearth that winter."
+      ]
+    },
+    {
+      "id": "celebration", "tone": "Bright", "weight": 2,
+      "words": ["Festival", "Feast-Day", "Merry", "Ribboned", "Garland"],
+      "effectLean": ["ally", "haste", "celebration"],
+      "lines": [
+        "Carried at the head of every festival parade in {place}, and dropped in the river at least once a year.",
+        "This {form} opened the first harvest feast at {place}. It still smells faintly of {word} and honey cake.",
+        "{faction} award this {form} to the year's best dancer. {maker} won it four times and mentions it often."
+      ]
+    },
+    {
+      "id": "journey", "tone": "Bright", "weight": 3,
+      "words": ["Wayfarer's", "Roadworn", "Far-Walked", "Mile-Marked", "Trailblazer's"],
+      "effectLean": ["haste", "stamina", "discovery"],
+      "lines": [
+        "{maker} carried this {form} from {place} to the edge of the map, and came home with a new dent to prove it.",
+        "Every scratch on this {form} is a road. The newest one points past {place}.",
+        "A wayfarer's {form}. It leans toward {place} whenever its owner is about to get lost."
+      ]
+    },
+    {
+      "id": "discovery", "tone": "Bright", "weight": 3,
+      "words": ["Unearthed", "First-Found", "Ledger", "Surveyor's", "Lamplit"],
+      "effectLean": ["reveal", "discovery", "insight"],
+      "lines": [
+        "Dug out of a fallen lamp-tower near {place}, still warm. Nobody at the Ledger recognizes the hand that made it.",
+        "The {form} that showed {maker} the way into the old vaults beneath {place}.",
+        "Scholars of {faction} have argued about this {form} for forty years. The {word} on its side might be a glyph."
+      ]
+    },
+    {
+      "id": "rivalry", "tone": "Bright", "weight": 2,
+      "words": ["Champion's", "Wager", "Racer's", "Prize", "Second-Best"],
+      "effectLean": ["precision", "haste", "crit"],
+      "lines": [
+        "{maker} made this {form} to beat a rival from {place}. The rival made a better one. They got married.",
+        "Prize of the yearly race at {place}. {faction} have won it nine times and bring it up often.",
+        "Made to settle a bet over who could work the {word} more finely. Both sides say this {form} proves them right."
+      ]
+    },
+    {
+      "id": "legacy", "tone": "Bright", "weight": 2,
+      "words": ["Heirloom", "Elder's", "Handed-Down", "Founder's", "Old-Road"],
+      "effectLean": ["stat", "aura", "durability"],
+      "lines": [
+        "Made in the Lamplit Age by a {culture} smith whose name has worn off, and still in daily use at {place}.",
+        "Said to have belonged to someone who knew {legend}. {faction} keep a careful copy, just in case.",
+        "{maker} left this {form} to {place} with a note: for whoever needs it next."
+      ]
+    },
+    {
+      "id": "homecoming", "tone": "Bright", "weight": 2,
+      "words": ["Homeward", "Doorstep", "Returning", "Welcome", "Hearthbound"],
+      "effectLean": ["regen", "ally", "lowHealth"],
+      "lines": [
+        "This {form} warms in the hand as you walk toward {place}, where it was made.",
+        "{maker} carried this {form} for twenty years abroad. It was the first thing unpacked in {place}.",
+        "It hung by the door in {place}, and every traveler touched it on the way back in."
+      ]
+    },
+    {
+      "id": "loss", "tone": "Somber", "weight": 3,
+      "words": ["Unreturned", "Last", "Waycairn", "Empty-Chair", "Remembered"],
+      "effectLean": ["lowHealth", "drawback", "stat"],
+      "lines": [
+        "{maker} made this {form} for someone who did not come home to {place}. It was kept polished anyway.",
+        "Found in a waycairn on the road past {place}, with a faded ribbon still tied around it.",
+        "The last thing {maker} mended before the Hush emptied {place}. The stitching is still good."
+      ]
+    },
+    {
+      "id": "old-war", "tone": "Somber", "weight": 3,
+      "words": ["Concord", "Field-Worn", "Mended", "Siege", "Veteran's"],
+      "effectLean": ["defense", "drawback", "stagger"],
+      "lines": [
+        "Carried at the Silent Field by a Concord scribe. The {word} along its edge was scratched in by hand.",
+        "Pulled from a broken Imperative construct near {place}. It still tries to give orders.",
+        "A {culture} {form} from the Quarrel, mended many times since. Whoever owned it wanted it to last."
+      ]
+    },
+    {
+      "id": "exile", "tone": "Somber", "weight": 2,
+      "words": ["Exile's", "Far-Flung", "Unwelcome", "Wanderer's", "Outcast"],
+      "effectLean": ["stamina", "drawback", "solo"],
+      "lines": [
+        "{maker} was sent away from {place} with nothing but this {form}, and made it go a long way.",
+        "Its {culture} make is unmistakable, yet it turned up very far from {place}. Somebody walked a long road.",
+        "{faction} closed their doors to {maker}. This {form} is how the craft survived anyway."
+      ]
+    },
+    {
+      "id": "curse", "tone": "Somber", "weight": 2,
+      "words": ["Iron-Sworn", "Stubborn", "Unquiet", "Bound", "Grudging"],
+      "effectLean": ["curse", "drawback", "power"],
+      "lines": [
+        "Nobody in {place} will touch this {form} after dark. It has never actually done anything. Yet.",
+        "A sliver of the Iron Sentence is set into it. It works very well, and it likes being obeyed.",
+        "{maker} wrote one word too many on this {form}. The {word} never quite settles."
+      ]
+    }
+  ]
+}

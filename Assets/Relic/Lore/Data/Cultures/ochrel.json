@@ -1,0 +1,48 @@
+{
+  "id": "ochrel",
+  "name": "the Ochrel",
+  "adjective": "Ochrel",
+  "identity": "Mesa-dwelling potters, glassblowers and star-readers who run the great caravans across the red country.",
+  "families": ["Badlands", "Highlands"],
+  "climates": ["Arid"],
+  "phonology": {
+    "starts": ["Az", "Ka", "Mir", "Ru", "Sa", "Tel", "Ush", "Dar", "Ir", "Zan", "Nesh", "Ba", "Ha", "Ya", "Om", "Qa"],
+    "middles": ["ra", "ma", "shi", "du", "ka", "ze", "la", "ri"],
+    "ends": ["im", "esh", "ara", "un", "ad", "ir", "ul", "ani", "ez", "oum", "a", "ah"],
+    "patterns": [ { "shape": "SE", "weight": 4 }, { "shape": "SME", "weight": 3 } ],
+    "surnameChance": 0.4,
+    "surnamePattern": "SE",
+    "minLength": 3,
+    "maxLength": 10,
+    "places": {
+      "suffixes": ["kar", "ad", "im", "esh"],
+      "words": ["Mesa", "Kiln", "Wells", "Bluffs", "Spire", "Oasis"],
+      "suffixChance": 0.5
+    }
+  },
+  "architecture": "Cool adobe towns carved into mesa walls, wind-towers that pull the breeze indoors, kilns glowing at dusk, and shady courtyards around deep wells.",
+  "crafts": ["pottery", "glassblowing", "star-charting", "caravan-keeping", "dyeing", "sun-clock making"],
+  "materials": ["red clay", "sun-glass", "ochre dye", "copper", "sandstone", "dune-goat wool"],
+  "foods": ["flatbread baked on hot stones", "spiced lentils", "date cakes", "mint tea", "honeyed figs"],
+  "festivals": [
+    { "name": "the Night of Open Kilns", "season": "cool season", "description": "Every kiln in town is opened at once, and families trade their best pots by firelight." },
+    { "name": "the Long Shade", "season": "midsummer", "description": "Everyone naps through the hottest day of the year and then celebrates all night under the stars." },
+    { "name": "the Star Reckoning", "season": "new year", "description": "The star-readers announce the new calendar from the highest roof, and get it very slightly wrong on purpose so there is something to argue about." }
+  ],
+  "values": ["hospitality to travelers", "careful water-keeping", "reading the sky", "bargaining well"],
+  "pride": "Their caravans, which kept the Long Roads alive through the Hush, and glass so clear you forget it is there.",
+  "factions": ["caravanners", "glyphwrights", "smiths", "archivists", "tollkeepers"],
+  "itemForms": ["curved glaive", "sling", "glass orb", "star-chart tome", "sun-mirror shield", "clay flask", "desert veil", "copper bracer"],
+  "motifs": ["sun", "ember", "star", "stone"],
+  "itemNaming": {
+    "patterns": ["{form} of {place}", "{maker}'s {form}", "The {adjective} {form}", "{form} of the {word}"],
+    "epithets": ["Caravan", "Kiln-Fired", "Star-Read", "Long-Shade", "Wellspring"],
+    "adjectives": ["Clear", "Sun-Warmed", "Patient", "Generous", "Bright-Glazed"],
+    "makersMarks": ["a thumbprint pressed into the clay before firing", "a small star etched into the glass", "a knot pattern unique to the maker's caravan"]
+  },
+  "relations": [
+    { "culture": "solanne", "kind": "FriendlyRivalry", "note": "Partners in the glass and spice trade, rivals over who invented the lighthouse lens." },
+    { "culture": "teskari", "kind": "Trade", "note": "Glass and dyes up the mountain; tea and slate down to the mesas." },
+    { "culture": "eskeln", "kind": "Kinship", "note": "Both read the stars to cross empty country, and their star-readers write to each other." }
+  ]
+}
