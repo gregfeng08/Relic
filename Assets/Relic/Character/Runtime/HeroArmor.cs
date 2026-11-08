@@ -20,20 +20,34 @@ namespace Relic.Character
             }
             ChestStrap(b, a);
             if (a.Weight != ArmorWeight.Heavy) return;
+            // Bright, readable steel with trim-colored rims (Genshin-style banding), not grey patches.
+            Rgb plate = Rgb.Lerp(a.Plate, new Rgb(0.80f, 0.82f, 0.88f), 0.4f);
+            Color trim = HeroBuild.C(b.App.Outfit.Coat.TrimColor);
             for (int s = -1; s <= 1; s += 2)
             {
-                Pauldron(b, s, a.Plate, 0.014f, 1.5f);
-                Greave(b, s, a.Plate.Scale(0.85f));
+                Pauldron(b, s, plate, 0.014f, 1.5f);
+                Pauldron(b, s, plate.Scale(0.92f), 0.004f, 1.3f, 0.82f, -0.05f);
+                PauldronRim(b, s, trim);
+                Greave(b, s, plate, trim);
             }
-            ChestPlate(b, a.Plate);
+            ChestPlate(b, plate, trim);
+        }
+
+        static void PauldronRim(HeroBuild b, int s, Color trim)
+        {
+            b.Toon(trim, 1f);
+            b.Kit.Weigh = p => MeshKit.Blend(HeroBuild.ArmWeight(s, new Vector3(p.x, HeroRig.ShoulderY - 0.05f, p.z)), MeshKit.W1(HeroRig.Chest), 0.35f);
+            Vector3 c = new Vector3((HeroRig.ShoulderX + 0.012f) * s, 1.395f - 0.014f * 1.6f - 0.02f, -0.008f);
+            b.Kit.Torus(c, Vector3.up, 0.088f, 0.098f, 0.005f, 16, 5);
+            b.Kit.Ellipsoid(c + new Vector3(0.05f * s, 0.045f, 0.0f), new Vector3(0.007f, 0.007f, 0.007f), 6, 4);
         }
 
         /// <summary>A dome over the shoulder, a little outward and down the arm (on the arm/chest blend).</summary>
-        static void Pauldron(HeroBuild b, int s, Rgb color, float grow, float outline, float scale = 1f)
+        static void Pauldron(HeroBuild b, int s, Rgb color, float grow, float outline, float scale = 1f, float drop = 0f)
         {
             b.Toon(color, outline);
             b.Kit.Weigh = p => MeshKit.Blend(HeroBuild.ArmWeight(s, new Vector3(p.x, HeroRig.ShoulderY - 0.05f, p.z)), MeshKit.W1(HeroRig.Chest), 0.35f);
-            Vector3 c = new Vector3((HeroRig.ShoulderX + 0.012f) * s, 1.395f - grow * 1.6f, -0.008f);
+            Vector3 c = new Vector3((HeroRig.ShoulderX + 0.012f - drop * 0.3f) * s, 1.395f - grow * 1.6f + drop, -0.008f);
             float rx = (0.074f + grow) * scale, ry = (0.05f + grow * 0.5f) * scale, rz = (0.084f + grow) * scale;
             var rings = new List<Ring>();
             for (int i = 0; i <= 3; i++)
@@ -92,44 +106,60 @@ namespace Relic.Character
             b.Kit.Box(pts[4] + Vector3.forward * 0.006f, new Vector3(0.028f, 0.03f, 0.01f));
         }
 
-        static void ChestPlate(HeroBuild b, Rgb color)
+        static void ChestPlate(HeroBuild b, Rgb color, Color trim)
         {
-            b.Toon(color, 1.5f);
+            b.Toon(color, 1.4f);
             b.Torso();
             var r = new List<Ring>
             {
-                new Ring(new Vector3(0f, 1.08f, 0.012f), 0.128f, 0.104f),
-                new Ring(new Vector3(0f, 1.20f, 0.016f), 0.146f, 0.112f),
-                new Ring(new Vector3(0f, 1.31f, 0.012f), 0.152f, 0.112f),
-                new Ring(new Vector3(0f, 1.37f, 0.004f), 0.120f, 0.098f),
+                new Ring(new Vector3(0f, 1.10f, 0.014f), 0.124f, 0.104f),
+                new Ring(new Vector3(0f, 1.20f, 0.018f), 0.142f, 0.114f),
+                new Ring(new Vector3(0f, 1.29f, 0.016f), 0.150f, 0.116f),
+                new Ring(new Vector3(0f, 1.35f, 0.008f), 0.130f, 0.104f),
             };
-            const int cols = 10;
-            const float a0 = -1.0f, a1 = 1.0f;
-            b.Kit.Sheet(r.Count - 1, cols,
-                (i, j) => r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)),
-                (i, j) => { Vector3 d = r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)) - r[i].C; d.y = 0f; return d; },
-                0.008f,
-                (i, j) => HeroBuild.TorsoWeight(r[i].At(Mathf.Lerp(a0, a1, (float)j / cols))));
-        }
-
-        static void Greave(HeroBuild b, int s, Rgb color)
-        {
-            float x = HeroRig.LegX * s;
-            b.Leg(s);
-            b.Toon(color, 1.4f);
-            var r = new List<Ring>
-            {
-                new Ring(new Vector3(x, 0.46f, 0.01f), 0.074f, 0.078f),
-                new Ring(new Vector3(x, 0.36f, 0.006f), 0.078f, 0.082f),
-                new Ring(new Vector3(x, 0.25f, 0.004f), 0.084f, 0.088f),
-            };
-            const int cols = 8;
+            const int cols = 12;
             const float a0 = -0.95f, a1 = 0.95f;
             b.Kit.Sheet(r.Count - 1, cols,
                 (i, j) => r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)),
                 (i, j) => { Vector3 d = r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)) - r[i].C; d.y = 0f; return d; },
-                0.006f,
+                0.01f,
+                (i, j) => HeroBuild.TorsoWeight(r[i].At(Mathf.Lerp(a0, a1, (float)j / cols))));
+            // Trim along the neckline and the bottom edge, and a center ridge.
+            b.Toon(trim, 1f);
+            foreach (int ri in new[] { 0, 3 })
+            {
+                var pts = new List<Vector3>();
+                for (int j = 0; j <= 8; j++) pts.Add(r[ri].At(Mathf.Lerp(a0, a1, j / 8f), -0.004f));
+                b.Kit.Path(pts, HeroGear.Fill(pts.Count, 0.005f), 5, 1f, Vector3.forward);
+            }
+            var ridge = new List<Vector3> { r[0].At(0f, -0.006f), r[1].At(0f, -0.007f), r[2].At(0f, -0.007f), r[3].At(0f, -0.006f) };
+            b.Kit.Path(ridge, HeroGear.Fill(4, 0.004f), 5, 1f, Vector3.forward);
+        }
+
+        static void Greave(HeroBuild b, int s, Rgb color, Color trim)
+        {
+            float x = HeroRig.LegX * s;
+            b.Leg(s);
+            b.Toon(color, 1.3f);
+            var r = new List<Ring>
+            {
+                new Ring(new Vector3(x, 0.44f, 0.012f), 0.070f, 0.075f),
+                new Ring(new Vector3(x, 0.34f, 0.008f), 0.074f, 0.079f),
+                new Ring(new Vector3(x, 0.25f, 0.006f), 0.080f, 0.085f),
+            };
+            const int cols = 8;
+            const float a0 = -0.85f, a1 = 0.85f;
+            b.Kit.Sheet(r.Count - 1, cols,
+                (i, j) => r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)),
+                (i, j) => { Vector3 d = r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)) - r[i].C; d.y = 0f; return d; },
+                0.007f,
                 (i, j) => HeroBuild.LegWeight(s, r[i].At(Mathf.Lerp(a0, a1, (float)j / cols))));
+            // Knee cop with a trim rim.
+            b.Kit.Ellipsoid(new Vector3(x, 0.49f, 0.066f), new Vector3(0.045f, 0.04f, 0.022f), 10, 6);
+            b.Toon(trim, 1f);
+            var top = new List<Vector3>();
+            for (int j = 0; j <= 6; j++) top.Add(r[0].At(Mathf.Lerp(a0, a1, j / 6f), -0.005f));
+            b.Kit.Path(top, HeroGear.Fill(top.Count, 0.0045f), 5, 1f, Vector3.forward);
         }
     }
 }

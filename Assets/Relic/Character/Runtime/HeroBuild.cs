@@ -28,23 +28,67 @@ namespace Relic.Character
     /// </summary>
     public sealed class HeroBuild
     {
+        /// <summary>Genshin-style thin outlines: every part's width is scaled by this.</summary>
+        public const float OutlineScale = 0.72f;
+
         public readonly MeshKit Kit = new MeshKit();
         public readonly HeroRig Rig;
         public readonly HeroMaterials Mats;
         public readonly HeroLook Look;
+        public readonly HeroAppearance App;
+        public readonly HeroShape Shape;
         public readonly bool WeaponDrawn;
         public readonly List<ChainDef> Chains = new List<ChainDef>();
 
-        public HeroBuild(HeroRig rig, HeroMaterials mats, HeroLook look, bool weaponDrawn)
+        public HeroBuild(HeroRig rig, HeroMaterials mats, HeroLook look, HeroAppearance app, HeroShape shape, bool weaponDrawn)
         {
-            Rig = rig; Mats = mats; Look = look; WeaponDrawn = weaponDrawn;
+            Rig = rig; Mats = mats; Look = look; App = app; Shape = shape; WeaponDrawn = weaponDrawn;
+            Kit.DefaultRemap = shape.Remap;
+            Kit.Remap = shape.Remap;
         }
 
-        public void Toon(Rgb c, float outline = 1.6f) => Kit.Use(Mats.Toon(c, outline));
-        public void Toon(Color c, float outline = 1.6f) => Kit.Use(Mats.Toon(c, outline));
-        public void Flat(Color c, float intensity = 1f) => Kit.Use(Mats.Flat(c, intensity));
+        public static Color C(string hex) => HeroMaterials.ToColor(Rgb.Hex(hex));
 
-        public void Rigid(int bone) => Kit.Rigid(bone);
+        /// <summary>Plain toon paint (world cool shade).</summary>
+        public void Toon(Rgb c, float outline = 1.6f) => Toon(HeroMaterials.ToColor(c), outline);
+        public void Toon(Color c, float outline = 1.6f)
+        {
+            Kit.Paint(c, outline * OutlineScale, 0f, 0.45f);
+            Kit.PaintShade = new Color(0f, 0f, 0f, 0f);
+            Kit.NormalBend = 0f;
+        }
+
+        /// <summary>Toon paint with its own shade tint (hair, skin: warm instead of lavender).</summary>
+        public void Toon(Color c, float outline, Color shade, float rim = 0.45f)
+        {
+            Kit.Paint(c, outline * OutlineScale, 0f, rim);
+            Kit.PaintShade = new Color(shade.r, shade.g, shade.b, 1f);
+            Kit.NormalBend = 0f;
+        }
+
+        public Color SkinColor => C(App.Body.SkinTone);
+        public Color SkinShade { get { Color s = SkinColor; return new Color(s.r * 0.96f, s.g * 0.80f, s.b * 0.80f); } }
+        public Color HairColor => C(App.Hair.Color);
+        public Color HairShade => C(App.Hair.ShadeTint);
+
+        public void Skin(float outline = 1.2f) => Toon(SkinColor, outline, SkinShade, 0.3f);
+        public void Hair(float outline = 1.5f) => Toon(HairColor, outline, HairShade, 0.6f);
+
+        /// <summary>Unlit paint (eyes, mouth, blush); no outline.</summary>
+        public void Flat(Color c, float intensity = 1f)
+        {
+            Kit.Paint(c, 0f, intensity);
+            Kit.NormalBend = 0f;
+        }
+
+        /// <summary>Glowing paint for relic, weapon and charm emissives (EmissiveIntensity 0..4).</summary>
+        public void Glow(Rgb c, float intensity) => Flat(HeroMaterials.ToColor(c), 1.2f + intensity * 0.9f);
+
+        public void Rigid(int bone)
+        {
+            Kit.Rigid(bone);
+            Kit.Remap = Shape.RigidMap(bone);
+        }
 
         static float Smooth(float a, float b, float x)
         {

@@ -59,7 +59,7 @@ namespace Relic.Character
                 var c = new Chain { Def = d };
                 for (int i = 0; i < d.Bones.Count - 1; i++)
                 {
-                    Vector3 off = rig.Rest[d.Bones[i + 1]] - rig.Rest[d.Bones[i]];
+                    Vector3 off = rig.Bind[d.Bones[i + 1]] - rig.Bind[d.Bones[i]];
                     c.Joints.Add(new Joint { T = rig.Bones[d.Bones[i]], Axis = off.normalized, Length = Mathf.Max(1e-4f, off.magnitude) });
                 }
                 _chains.Add(c);

@@ -67,10 +67,10 @@ namespace Relic.Character
 
         static void Waterskin(HeroBuild b)
         {
-            // Hangs on the right side of the backpack.
-            b.Rigid(HeroRig.Chest);
+            // Hangs at the right hip, outside the coat, from the belt.
+            b.Rigid(HeroRig.Hips);
             b.Toon(new Color(0.62f, 0.44f, 0.27f), 1.4f);
-            var basePos = new Vector3(0.155f, 1.0f, -0.19f);
+            var basePos = new Vector3(0.198f, 0.80f, 0.012f);
             b.Kit.Lathe(basePos, new List<Vector2>
             {
                 new Vector2(0.02f, 0.0f), new Vector2(0.05f, 0.03f), new Vector2(0.056f, 0.075f),
@@ -172,7 +172,7 @@ namespace Relic.Character
 
         static void Gem(HeroBuild b, AmuletLook a, Color c, Vector3 at, float r)
         {
-            if (a.Glows) b.Kit.Use(b.Mats.Glow(a.GlowColor, a.Glow));
+            if (a.Glows) b.Glow(a.GlowColor, a.Glow);
             else b.Toon(c, 1f);
             b.Kit.Ellipsoid(at, new Vector3(r, r * 0.8f, r * 0.55f), 10, 6);
         }
@@ -205,7 +205,7 @@ namespace Relic.Character
             }
             if (c.Glows)
             {
-                b.Kit.Use(b.Mats.Glow(c.GlowColor, c.Glow));
+                b.Glow(c.GlowColor, c.Glow);
                 b.Kit.Ellipsoid(p + Vector3.forward * 0.004f, new Vector3(0.006f, 0.006f, 0.004f), 8, 4);
             }
         }

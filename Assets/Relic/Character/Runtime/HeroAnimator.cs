@@ -197,7 +197,7 @@ namespace Relic.Character
                 _rig.Bones[i].localRotation = _current[i];
             }
             _hipsOffset = Vector3.Lerp(_hipsOffset, hips, 1f - Mathf.Exp(-14f * dt));
-            _rig.Bones[HeroRig.Hips].localPosition = _rig.Rest[HeroRig.Hips] + _hipsOffset;
+            _rig.Bones[HeroRig.Hips].localPosition = _rig.Bind[HeroRig.Hips] + _hipsOffset;
         }
 
         /// <summary>Jumps straight to the pose for the input (captures, first frame).</summary>
