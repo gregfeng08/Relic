@@ -18,7 +18,8 @@
 | F4 | Debug fly (Space/Ctrl up/down, Shift fast) |
 | F5 | Rebuild the world with the next seed |
 | F6 | Toggle a slow day cycle |
-| F7 | Toggle props (trees, rocks, grass) for perf comparisons |
+| F10 | Toggle props (trees, rocks, grass) for perf comparisons |
+| F7 / F9 | Hero: random kit / armor weight (Character stream) |
 | F8 | Benchmark: auto-sprint 3 km straight along the camera direction, then log a pass/fail perf summary |
 
 Perf lines start with `[Relic.Perf]` (Console / Editor.log): a line every 10 s while moving, a

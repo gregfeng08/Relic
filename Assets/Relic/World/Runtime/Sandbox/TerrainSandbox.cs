@@ -41,7 +41,7 @@ namespace Relic.World.Runtime
         public float Lod2Distance = 768f;
         public float ColliderDistance = 72f;
         public float UploadBudgetMs = 2f;
-        [Tooltip("Trees, bushes, rocks and grass (F7 toggles at runtime).")]
+        [Tooltip("Trees, bushes, rocks and grass (F10 toggles at runtime).")]
         public bool ShowProps = true;
 
         [Header("Debug")]
@@ -231,7 +231,7 @@ namespace Relic.World.Runtime
             if (PlayerInput.KeyDown(Key.F4)) Player.ToggleFly();
             if (PlayerInput.KeyDown(Key.F5)) { BuildWorld(CurrentSeed + 1); return; }
             if (PlayerInput.KeyDown(Key.F6) && Sky != null) Sky.DayCycle = !Sky.DayCycle;
-            if (PlayerInput.KeyDown(Key.F7) && PropView != null) PropView.enabled = !PropView.enabled;
+            if (PlayerInput.KeyDown(Key.F10) && PropView != null) PropView.enabled = !PropView.enabled;
             if (PlayerInput.KeyDown(Key.F8))
             {
                 if (Perf.BenchmarkRunning) { Perf.CancelBenchmark(); Player.AutoRun = false; }
