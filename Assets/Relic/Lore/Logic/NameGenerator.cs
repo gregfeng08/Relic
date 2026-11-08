@@ -117,8 +117,18 @@ namespace Relic.Lore
             }
             if (!hasVowel) return false;
             string lower = name.ToLowerInvariant();
+            if (HasStutter(lower)) return false;
             foreach (var bad in _banned) if (lower.Contains(bad)) return false;
             return true;
+        }
+
+        /// <summary>A chunk of 2-3 letters repeated back to back ("Hjaja", "Neshesh") reads as a stutter.</summary>
+        static bool HasStutter(string s)
+        {
+            for (int len = 2; len <= 3; len++)
+                for (int i = 0; i + 2 * len <= s.Length; i++)
+                    if (string.CompareOrdinal(s, i, s, i + len, len) == 0) return true;
+            return false;
         }
 
         string PickShape(ref Pcg32 rng)

@@ -25,6 +25,20 @@ namespace Relic.Lore.Tests
             TestContext.WriteLine("wrote " + path);
         }
 
+        /// <summary>Prints example names per culture (seeds 1-6 people, 1-4 places), as listed in docs/lore/cultures.md.</summary>
+        [Test, Explicit("prints example names; run on demand")]
+        public void PrintExampleNames()
+        {
+            foreach (var c in LoreTestData.Bible.Cultures)
+            {
+                var g = new NameGenerator(c, LoreTestData.Bible.Style);
+                var names = new System.Collections.Generic.List<string>();
+                for (ulong s = 1; s <= 6; s++) names.Add(g.Person(s));
+                for (ulong s = 1; s <= 4; s++) names.Add(g.Place(s));
+                TestContext.Progress.WriteLine(c.Id + ": " + string.Join(", ", names));
+            }
+        }
+
         [Test]
         public void SamplesAreCleanAndDeterministic()
         {
