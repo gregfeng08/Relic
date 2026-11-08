@@ -68,7 +68,7 @@
       "lines": [
         "{maker} made this {form} to beat a rival from {place}. The rival made a better one. They got married.",
         "Prize of the yearly race at {place}. {faction} have won it nine times and bring it up often.",
-        "Made to settle a bet over who could work the {word} more finely. Both sides say this {form} proves them right."
+        "Made to settle a bet between two {culture} makers. Both sides say this {form} proves them right."
       ]
     },
     {
@@ -106,7 +106,7 @@
       "words": ["Concord", "Field-Worn", "Mended", "Siege", "Veteran's"],
       "effectLean": ["defense", "drawback", "stagger"],
       "lines": [
-        "Carried at the Silent Field by a Concord scribe. The {word} along its edge was scratched in by hand.",
+        "Carried at the Silent Field by a Concord scribe, who scratched a {word} pattern along its edge for luck.",
         "Pulled from a broken Imperative construct near {place}. It still tries to give orders.",
         "A {culture} {form} from the Quarrel, mended many times since. Whoever owned it wanted it to last."
       ]
