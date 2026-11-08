@@ -144,9 +144,9 @@ namespace Relic.Character
             var spiral = new List<Vector3>();
             var rad = new List<float>();
             Vector3 center = new Vector3(0f, 0.76f, 0f);
-            for (int i = 0; i <= 16; i++)
+            for (int i = 0; i <= 10; i++)
             {
-                float t = i / 16f;
+                float t = i / 10f;
                 float a = Mathf.Lerp(-Mathf.PI * 0.5f, Mathf.PI * 1.6f, t);
                 float r = Mathf.Lerp(0.11f, 0.055f, t);
                 spiral.Add(center + new Vector3(Mathf.Cos(a) * r * 0.9f, Mathf.Sin(a) * r, 0f));
@@ -154,12 +154,12 @@ namespace Relic.Character
             }
             spiral.Insert(0, new Vector3(0f, 0.62f, 0f));
             rad.Insert(0, 0.019f);
-            b.Kit.Path(MeshKit.Spline(spiral, 2), Resample(rad, 2), 6, 1f, Vector3.forward);
+            b.Kit.Path(MeshKit.Spline(spiral, 2), Resample(rad, 2), 5, 1f, Vector3.forward);
             // The orb (every staff has one; the sheet draws it held by the spiral).
             {
                 if (w.Glows) b.Glow(w.GlowColor, w.Glow);
                 else b.Toon(new Color(0.72f, 0.86f, 0.92f), 1.2f);
-                b.Kit.Ellipsoid(center + new Vector3(0.008f, 0.0f, 0f), new Vector3(0.036f, 0.036f, 0.036f), 12, 8);
+                b.Kit.Ellipsoid(center + new Vector3(0.008f, 0.0f, 0f), new Vector3(0.036f, 0.036f, 0.036f), 10, 6);
             }
         }
 

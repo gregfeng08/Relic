@@ -15,7 +15,7 @@ namespace Relic.Character
             if (a.Weight == ArmorWeight.Light) return;
             for (int s = -1; s <= 1; s += 2)
             {
-                Pauldron(b, s, a.Leather, 0f, 1.6f);
+                if (a.Weight != ArmorWeight.Heavy) Pauldron(b, s, a.Leather, 0f, 1.6f);
                 Bracer(b, s, a.Leather);
             }
             ChestStrap(b, a);
@@ -26,7 +26,6 @@ namespace Relic.Character
             for (int s = -1; s <= 1; s += 2)
             {
                 Pauldron(b, s, plate, 0.014f, 1.5f);
-                Pauldron(b, s, plate.Scale(0.92f), 0.004f, 1.3f, 0.82f, -0.05f);
                 PauldronRim(b, s, trim);
                 Greave(b, s, plate, trim);
             }
@@ -38,7 +37,7 @@ namespace Relic.Character
             b.Toon(trim, 1f);
             b.Kit.Weigh = p => MeshKit.Blend(HeroBuild.ArmWeight(s, new Vector3(p.x, HeroRig.ShoulderY - 0.05f, p.z)), MeshKit.W1(HeroRig.Chest), 0.35f);
             Vector3 c = new Vector3((HeroRig.ShoulderX + 0.012f) * s, 1.395f - 0.014f * 1.6f - 0.02f, -0.008f);
-            b.Kit.Torus(c, Vector3.up, 0.088f, 0.098f, 0.005f, 16, 5);
+            b.Kit.Torus(c, Vector3.up, 0.088f, 0.098f, 0.005f, 12, 4);
             b.Kit.Ellipsoid(c + new Vector3(0.05f * s, 0.045f, 0.0f), new Vector3(0.007f, 0.007f, 0.007f), 6, 4);
         }
 
@@ -117,7 +116,7 @@ namespace Relic.Character
                 new Ring(new Vector3(0f, 1.29f, 0.016f), 0.150f, 0.116f),
                 new Ring(new Vector3(0f, 1.35f, 0.008f), 0.130f, 0.104f),
             };
-            const int cols = 12;
+            const int cols = 10;
             const float a0 = -0.95f, a1 = 0.95f;
             b.Kit.Sheet(r.Count - 1, cols,
                 (i, j) => r[i].At(Mathf.Lerp(a0, a1, (float)j / cols)),
@@ -155,7 +154,7 @@ namespace Relic.Character
                 0.007f,
                 (i, j) => HeroBuild.LegWeight(s, r[i].At(Mathf.Lerp(a0, a1, (float)j / cols))));
             // Knee cop with a trim rim.
-            b.Kit.Ellipsoid(new Vector3(x, 0.49f, 0.066f), new Vector3(0.045f, 0.04f, 0.022f), 10, 6);
+            b.Kit.Ellipsoid(new Vector3(x, 0.49f, 0.066f), new Vector3(0.045f, 0.04f, 0.022f), 8, 5);
             b.Toon(trim, 1f);
             var top = new List<Vector3>();
             for (int j = 0; j <= 6; j++) top.Add(r[0].At(Mathf.Lerp(a0, a1, j / 6f), -0.005f));

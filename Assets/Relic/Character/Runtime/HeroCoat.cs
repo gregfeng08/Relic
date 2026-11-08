@@ -61,7 +61,7 @@ namespace Relic.Character
                 new Ring(new Vector3(0f, 1.432f, -0.006f), 0.080f, 0.068f),
             };
             const float gap = 0.24f;
-            Shell(b, r, 26, gap, Mathf.PI * 2f - gap, ShoulderAware);
+            Shell(b, r, 18, gap, Mathf.PI * 2f - gap, ShoulderAware);
             // Collar: a short stand-up band, open at the throat, trimmed.
             b.Toon(dark);
             var collar = new List<Ring>
@@ -70,7 +70,7 @@ namespace Relic.Character
                 new Ring(new Vector3(0f, 1.46f, -0.012f), 0.082f, 0.073f),
                 new Ring(new Vector3(0f, 1.485f, -0.016f), 0.086f, 0.076f),
             };
-            Shell(b, collar, 18, 0.55f, Mathf.PI * 2f - 0.55f, HeroBuild.TorsoWeight);
+            Shell(b, collar, 14, 0.55f, Mathf.PI * 2f - 0.55f, HeroBuild.TorsoWeight);
             // Trims down each edge of the opening.
             b.Toon(trim, 1.1f);
             b.Kit.Weigh = ShoulderAware;
@@ -124,7 +124,7 @@ namespace Relic.Character
                 new Ring(new Vector3(x, 1.03f, -0.01f), 0.055f, 0.057f),
                 new Ring(new Vector3(x, 0.955f, -0.01f), 0.059f, 0.061f),
             };
-            b.Kit.Loft(r, 14, true, false);
+            b.Kit.Loft(r, 12, true, false);
             // Turned-back cuff with a thin trim line.
             b.Toon(dark);
             var cuff = new List<Ring>
@@ -134,10 +134,10 @@ namespace Relic.Character
                 new Ring(new Vector3(x, 0.915f, -0.01f), 0.069f, 0.071f),
                 new Ring(new Vector3(x, 0.905f, -0.01f), 0.062f, 0.064f),
             };
-            b.Kit.Loft(cuff, 14, false, false);
-            b.Kit.Loft(cuff, 14, false, false, 0f, Mathf.PI * 2f, true, true, 0.006f);
+            b.Kit.Loft(cuff, 12, false, false);
+            b.Kit.Loft(cuff, 12, false, false, 0f, Mathf.PI * 2f, true, true, 0.006f);
             b.Toon(trim, 1f);
-            b.Kit.Torus(new Vector3(x, 0.968f, -0.01f), Vector3.up, 0.0695f, 0.0715f, 0.0035f, 14, 4);
+            b.Kit.Torus(new Vector3(x, 0.968f, -0.01f), Vector3.up, 0.0695f, 0.0715f, 0.0035f, 12, 3);
         }
 
         static void Skirt(HeroBuild b, CoatSpec spec, Color coat, Color dark, Color trim)

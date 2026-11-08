@@ -22,22 +22,22 @@ namespace Relic.Character
                 new Ring(new Vector3(0f, 1.488f, 0.007f), 0.094f, 0.091f),
                 new Ring(new Vector3(0f, 1.50f, 0.005f), 0.079f, 0.077f),
             };
-            b.Kit.Loft(cowl, 20, false, false);
-            b.Kit.Loft(cowl, 20, false, false, 0f, Mathf.PI * 2f, true, true, 0.014f);
+            b.Kit.Loft(cowl, 16, false, false);
+            b.Kit.Loft(cowl, 12, false, false, 0f, Mathf.PI * 2f, true, true, 0.014f);
             b.Toon(red * 0.88f + Color.black, 1.4f);
-            b.Kit.Torus(new Vector3(0f, 1.44f, 0.012f), new Vector3(0.12f, 1f, 0.18f), 0.117f, 0.113f, 0.012f, 18, 6, 1.1f);
+            b.Kit.Torus(new Vector3(0f, 1.44f, 0.012f), new Vector3(0.12f, 1f, 0.18f), 0.117f, 0.113f, 0.012f, 16, 5, 1.1f);
             b.Toon(red, 1.6f);
             // A soft knot at the front right; the tails hang down the chest and stream back when running.
             b.Kit.Ellipsoid(new Vector3(0.066f, 1.425f, 0.088f), new Vector3(0.034f, 0.03f, 0.028f), 12, 6);
             Tail(b, red, new[]
             {
                 new Vector3(0.07f, 1.425f, 0.10f), new Vector3(0.085f, 1.35f, 0.122f), new Vector3(0.092f, 1.26f, 0.13f),
-                new Vector3(0.095f, 1.17f, 0.128f), new Vector3(0.098f, 1.09f, 0.122f),
+                new Vector3(0.095f, 1.19f, 0.128f),
             }, 0.036f);
             Tail(b, red, new[]
             {
                 new Vector3(0.052f, 1.42f, 0.10f), new Vector3(0.056f, 1.35f, 0.125f), new Vector3(0.058f, 1.27f, 0.132f),
-                new Vector3(0.06f, 1.20f, 0.13f),
+                new Vector3(0.06f, 1.235f, 0.13f),
             }, 0.032f);
         }
 

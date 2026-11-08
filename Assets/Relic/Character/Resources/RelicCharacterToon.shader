@@ -3,7 +3,8 @@
 //   COLOR.rgb     albedo
 //   TEXCOORD0.x   outline width (px at 1080p); 0 = none
 //   TEXCOORD0.y   emission: 0 = lit toon, > 0 = unlit albedo * emission (face paint, glow)
-//   TEXCOORD0.z   rim strength (TEXCOORD0.w unused)
+//   TEXCOORD0.z   rim strength
+//   TEXCOORD0.w   1 = ignore cast shadows (face and hair, Genshin-style: clean shapes, no streaks)
 //   TEXCOORD1     shade tint rgb, a = how much it replaces the world's cool shade (hair, skin)
 //   TANGENT.xyz   the smooth surface normal, for the outline (NORMAL may be bent, e.g. the face)
 // The outline color is a darker, more saturated version of the albedo (softer than black).
@@ -76,7 +77,7 @@ Shader "Relic/Character/Toon"
                 float4 shadowCoord = TransformWorldToShadowCoord(i.positionWS);
                 Light mainLight = GetMainLight(shadowCoord, i.positionWS, half4(1, 1, 1, 1));
                 half ndl = dot(n, mainLight.direction);
-                half shadow = smoothstep(0.35h, 0.65h, mainLight.shadowAttenuation);
+                half shadow = lerp(smoothstep(0.35h, 0.65h, mainLight.shadowAttenuation), 1.0h, i.data.z);
                 // Two tones with a soft edge (Genshin-like), a hint of light kept in cast shadow.
                 half ramp = smoothstep(-0.04h, 0.16h, ndl);
                 half lit = ramp * shadow;

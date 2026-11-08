@@ -12,7 +12,7 @@ namespace Relic.Character
         public float GapTop, GapHem;            // front opening half-angle (radians) at waist and hem
         public float VentFromY = -10f;          // back vent opens below this height...
         public float VentHem;                   // ...to this half-angle at the hem
-        public int Cols = 10, ChainsPerPanel = 4, Sub = 2;
+        public int Cols = 10, ChainsPerPanel = 4, Sub = 1;
         public float Stiffness = 0.75f, Gravity = 0.45f, Drag = 0.5f;
         public float Thick = 0.009f;
     }

@@ -21,7 +21,7 @@ namespace Relic.Character
         public float Height = 1f;
         /// <summary>0 = very slender .. 1 = sturdier. Stays in the cute range.</summary>
         public float Build = 0.35f;
-        public string SkinTone = "#FAD4B3";
+        public string SkinTone = "#FCE0CC";
     }
 
     public sealed class FaceSpec
@@ -43,7 +43,7 @@ namespace Relic.Character
         public bool Cowlick = true;
         public string Color = "#F7F2E8";
         /// <summary>Tint of the shaded side (warm for light hair).</summary>
-        public string ShadeTint = "#F0C9B8";
+        public string ShadeTint = "#EADFD8";
     }
 
     public sealed class CoatSpec

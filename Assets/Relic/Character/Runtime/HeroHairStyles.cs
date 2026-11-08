@@ -46,7 +46,7 @@ namespace Relic.Character
                         Gathered(b, tie, 1f, 1.42f);
                         Tie(b, tie, new Vector3(0f, 0.35f, -1f), HeroRig.Chest);
                         Tail(b, "LowTail", tie, new[] { new Vector3(0f, 1.24f, -0.27f), new Vector3(0f, 1.10f, -0.29f) },
-                            Mathf.Lerp(1.02f, 0.82f, len), 0.068f, HeroRig.Chest);
+                            Mathf.Lerp(1.02f, 0.82f, len), 0.08f, HeroRig.Chest);
                         break;
                     }
             }
@@ -82,7 +82,7 @@ namespace Relic.Character
                     new Vector3(tie.x + dir.x * 0.04f, tie.y + 0.02f * pull, tie.z + 0.01f),
                 };
                 if (pull < 0.8f) j.RemoveAt(2);
-                HeroHair.Lock(b, j, 0.062f, 0.03f, dir, 0.42f, 6, 3, 0.9f);
+                HeroHair.Lock(b, j, 0.062f, 0.03f, dir, 0.42f, 6, 2, 0.9f);
             }
         }
 
@@ -101,7 +101,7 @@ namespace Relic.Character
                     new Vector3(dir.x * 0.122f, 1.62f, dir.z * 0.124f - 0.012f),
                     new Vector3(tie.x * 0.85f, tie.y + 0.01f, tie.z - 0.01f),
                 };
-                HeroHair.Lock(b, j, 0.058f, 0.03f, dir, 0.42f, 6, 3, 0.9f);
+                HeroHair.Lock(b, j, 0.058f, 0.03f, dir, 0.42f, 6, 2, 0.9f);
             }
         }
 
@@ -114,8 +114,10 @@ namespace Relic.Character
             Vector3 last = j[j.Count - 1];
             j.Add(new Vector3(last.x * 1.05f, endY, last.z + 0.01f));
             HeroHair.Chain(b, name, parent, j, 0.35f, width * 0.5f);
-            HeroHair.Lock(b, j, width, width * 0.25f, new Vector3(tie.x, 0f, -1f), 0.6f, 8, 3, 0.7f);
-            for (int s = -1; s <= 1; s += 2)
+            bool thick = width >= 0.06f;
+            HeroHair.Lock(b, j, width, width * 0.25f, new Vector3(tie.x, 0f, -1f), 0.6f, thick ? 8 : 6, 2, 0.7f);
+            // Thick tails get two companion locks; slim twin tails one (outward).
+            for (int s = thick ? -1 : (tie.x < 0f ? -1 : 1); s <= 1; s += thick ? 2 : 3)
             {
                 var k = new List<Vector3>();
                 for (int i = 0; i < j.Count; i++)
@@ -124,7 +126,7 @@ namespace Relic.Character
                     k.Add(j[i] + off + (i == j.Count - 1 ? Vector3.up * 0.06f : Vector3.zero));
                 }
                 HeroHair.Chain(b, name + (s < 0 ? "L" : "R"), parent, k, 0.3f, width * 0.35f);
-                HeroHair.Lock(b, k, width * 0.62f, width * 0.12f, new Vector3(s, 0f, -1f), 0.55f, 6, 3, 0.7f);
+                HeroHair.Lock(b, k, width * 0.62f, width * 0.12f, new Vector3(s, 0f, -1f), 0.55f, 5, 2, 0.7f);
             }
         }
 
@@ -171,7 +173,7 @@ namespace Relic.Character
                     new Vector3(dir.x * 0.135f, 1.54f, dir.z * 0.135f - 0.015f),
                     new Vector3(dir.x * 0.112f, endY, dir.z * 0.112f - 0.012f), // ends curl in
                 };
-                HeroHair.Lock(b, j, 0.06f, 0.012f, dir, 0.42f, 6, 3, 0.9f);
+                HeroHair.Lock(b, j, 0.06f, 0.012f, dir, 0.42f, 6, 2, 0.9f);
             }
         }
 

@@ -72,7 +72,11 @@ namespace Relic.Character
         public Color HairShade => C(App.Hair.ShadeTint);
 
         public void Skin(float outline = 1.2f) => Toon(SkinColor, outline, SkinShade, 0.3f);
-        public void Hair(float outline = 1.5f) => Toon(HairColor, outline, HairShade, 0.6f);
+        public void Hair(float outline = 1.5f)
+        {
+            Toon(HairColor, outline, HairShade, 0.6f);
+            Kit.PaintData.w = 1f; // clean clumps: no noisy self-shadowing between locks
+        }
 
         /// <summary>Unlit paint (eyes, mouth, blush); no outline.</summary>
         public void Flat(Color c, float intensity = 1f)

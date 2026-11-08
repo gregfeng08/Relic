@@ -37,7 +37,7 @@ namespace Relic.Character
         {
             b.Hair();
             b.Rigid(HeroRig.Head);
-            const int stacks = 14, sides = 20;
+            const int stacks = 12, sides = 18;
             int first = b.Kit.VertexCount;
             for (int i = 1; i < stacks; i++)
             {
@@ -77,7 +77,7 @@ namespace Relic.Character
             b.Rigid(HeroRig.Head);
             Color c = Color.Lerp(b.HairColor, Color.white, 0.6f);
             b.Flat(c, 1.06f);
-            const int n = 14;
+            const int n = 9;
             for (int k = 0; k < n; k++)
             {
                 // Short dashes around the back and sides, following the crown's curve, sitting on the locks.
@@ -154,7 +154,7 @@ namespace Relic.Character
                     new Vector3(mx, my, HeroFace.FrontZ(my, mx) + 0.016f),
                     new Vector3(tx, ty, HeroFace.FrontZ(ty, tx) + 0.009f),
                 };
-                Lock(b, j, 0.034f, 0.004f, Vector3.forward, 0.38f);
+                Lock(b, j, 0.034f, 0.004f, Vector3.forward, 0.38f, 5, 2);
             }
             // Cheek locks framing the face.
             for (int s = -1; s <= 1; s += 2)
@@ -164,7 +164,7 @@ namespace Relic.Character
                     new Vector3(0.075f * s, 1.69f, 0.045f), new Vector3(0.106f * s, 1.61f, 0.055f),
                     new Vector3(0.108f * s, 1.53f, 0.045f), new Vector3(0.094f * s, 1.47f, 0.04f),
                 };
-                Lock(b, cheek, 0.024f, 0.004f, new Vector3(s, 0f, 0.4f), 0.45f);
+                Lock(b, cheek, 0.024f, 0.004f, new Vector3(s, 0f, 0.4f), 0.45f, 5, 2);
             }
         }
 
@@ -187,7 +187,7 @@ namespace Relic.Character
             }
             var joints = new List<Vector3> { path[0], path[1], path[2], path[3], path[4], path[6], path[8], path[10] };
             ChainDef chain = Chain(b, "SideLock", HeroRig.Head, joints, 0.55f, 0.022f);
-            List<Vector3> pts = MeshKit.Spline(path, 3);
+            List<Vector3> pts = MeshKit.Spline(path, 2);
             var rad = new List<float>();
             for (int i = 0; i < pts.Count; i++)
             {

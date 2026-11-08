@@ -61,7 +61,7 @@ namespace Relic.Character
             // Belt with a gold buckle.
             b.Toon(HeroBuild.C(o.BeltColor), 1.2f);
             b.Kit.Weigh = p => MeshKit.W1(HeroRig.Hips);
-            b.Kit.Torus(new Vector3(0f, 0.985f, 0.002f), Vector3.up, 0.124f, 0.092f, 0.008f, 18, 5, 2.6f);
+            b.Kit.Torus(new Vector3(0f, 0.985f, 0.002f), Vector3.up, 0.124f, 0.092f, 0.008f, 14, 5, 2.6f);
             b.Toon(MaterialPalette.Gold, 1.2f);
             b.Kit.Box(new Vector3(0f, 0.985f, 0.097f), new Vector3(0.036f, 0.03f, 0.012f));
         }
@@ -87,8 +87,8 @@ namespace Relic.Character
                     new Ring(new Vector3(x, 0.165f, 0.004f), 0.078f, 0.082f),
                     new Ring(new Vector3(x, 0.13f, 0.008f), 0.073f, 0.078f),
                 };
-                b.Kit.Loft(r, 14, false, true);
-                b.Kit.Torus(new Vector3(x, 0.205f, 0.002f), Vector3.up, 0.072f, 0.074f, 0.007f, 14, 5);
+                b.Kit.Loft(r, 12, false, true);
+                b.Kit.Torus(new Vector3(x, 0.205f, 0.002f), Vector3.up, 0.072f, 0.074f, 0.007f, 12, 4);
             }
         }
 
@@ -161,12 +161,12 @@ namespace Relic.Character
             float[] cy = { 0.073f, 0.078f, 0.070f, 0.058f, 0.053f, 0.048f };
             for (int i = 0; i < zs.Length; i++)
                 foot.Add(new Ring(new Vector3(x, cy[i], zs[i]), Vector3.right, Vector3.up, ws[i], hs[i], 3f));
-            b.Kit.Loft(foot, 14, true, true);
+            b.Kit.Loft(foot, 12, true, true);
             b.Toon(MaterialPalette.Sole, 1.2f);
             var sole = new List<Ring>();
             for (int i = 0; i < zs.Length; i++)
                 sole.Add(new Ring(new Vector3(x, 0.014f, zs[i] + (i == 0 ? -0.004f : i == zs.Length - 1 ? 0.006f : 0f)), Vector3.right, Vector3.up, ws[i] + 0.005f, 0.0145f, 6f));
-            b.Kit.Loft(sole, 12, true, true);
+            b.Kit.Loft(sole, 10, true, true);
             // Laces.
             b.Leg(s);
             b.Toon(boot * 0.6f + Color.black, 0.8f);
@@ -223,7 +223,7 @@ namespace Relic.Character
                     pts.Add(p); rad.Add((0.0075f - k * 0.0007f) * thick);
                 }
                 Paint(main, 1f);
-                b.Kit.Path(pts, rad, 5, 0.85f, Vector3.right);
+                b.Kit.Path(pts, rad, 4, 0.85f, Vector3.right);
                 if (!claws) continue;
                 Paint(tip, 1f);
                 Vector3 c0 = p, c1 = p + Quaternion.AngleAxis(-22f * s, Vector3.forward) * dir * 0.02f;

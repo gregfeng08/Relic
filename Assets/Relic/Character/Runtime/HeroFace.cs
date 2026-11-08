@@ -56,10 +56,11 @@ namespace Relic.Character
         {
             b.Skin(0.9f);
             b.Kit.NormalBend = 0.7f;
+            b.Kit.PaintData.w = 1f; // the face ignores cast shadows (no hair-shadow streaks)
             b.Rigid(HeroRig.Head);
             var rings = new List<Ring>();
             HeadRings(rings, 0f);
-            b.Kit.Loft(rings, 20, true, true);
+            b.Kit.Loft(rings, 18, true, true);
             b.Skin(1f);
             b.Kit.Weigh = HeroBuild.TorsoWeight;
             b.Kit.Tube(new Vector3(0f, 1.40f, -0.005f), new Vector3(0f, 1.52f, -0.002f), 0.034f, 0.031f, 10);
@@ -83,19 +84,19 @@ namespace Relic.Character
                 float z = FrontZ(y, x) - 0.0045f;
                 b.Kit.Xf = Matrix4x4.TRS(new Vector3(x, y, z), Quaternion.Euler(0f, 20f * s, tilt * s), new Vector3(size * wScale, size * hScale, 1f));
                 b.Flat(new Color(1f, 0.98f, 0.96f));
-                b.Kit.Ellipsoid(Vector3.zero, new Vector3(0.019f, 0.023f, 0.005f), 16, 4);
+                b.Kit.Ellipsoid(Vector3.zero, new Vector3(0.019f, 0.023f, 0.0068f), 18, 3);
                 // Gradient iris: base, a dark upper cap, a light lower crescent, the pupil.
                 b.Flat(iris);
-                b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.002f, 0.0024f), new Vector3(0.0155f, 0.0195f, 0.0045f), 16, 4);
+                b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.002f, 0.0034f), new Vector3(0.0155f, 0.0195f, 0.0045f), 18, 3);
                 b.Flat(irisDark);
-                b.Kit.Ellipsoid(new Vector3(0.001f * -s, 0.0065f, 0.0037f), new Vector3(0.0138f, 0.0105f, 0.0042f), 14, 4);
+                b.Kit.Ellipsoid(new Vector3(0.001f * -s, 0.0065f, 0.0047f), new Vector3(0.0138f, 0.0105f, 0.0042f), 12, 3);
                 b.Flat(irisLight);
-                b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.0115f, 0.0037f), new Vector3(0.0095f, 0.0055f, 0.0042f), 12, 4);
+                b.Kit.Ellipsoid(new Vector3(0.001f * -s, -0.0115f, 0.0047f), new Vector3(0.0095f, 0.0055f, 0.0042f), 10, 3);
                 b.Flat(irisDark * 0.6f + new Color(0f, 0f, 0f, 1f));
-                b.Kit.Ellipsoid(new Vector3(0.001f * -s, 0.001f, 0.0049f), new Vector3(0.0065f, 0.009f, 0.0036f), 10, 4);
+                b.Kit.Ellipsoid(new Vector3(0.001f * -s, 0.001f, 0.0059f), new Vector3(0.0065f, 0.009f, 0.0036f), 10, 3);
                 b.Flat(Color.white, 1.15f);
-                b.Kit.Ellipsoid(new Vector3(0.0055f * s, 0.008f, 0.0068f), new Vector3(0.0046f, 0.0054f, 0.002f), 8, 4);
-                b.Kit.Ellipsoid(new Vector3(-0.0045f * s, -0.009f, 0.0066f), new Vector3(0.0021f, 0.0021f, 0.0018f), 6, 4);
+                b.Kit.Ellipsoid(new Vector3(0.0055f * s, 0.008f, 0.0078f), new Vector3(0.0046f, 0.0054f, 0.002f), 8, 3);
+                b.Kit.Ellipsoid(new Vector3(-0.0045f * s, -0.009f, 0.0076f), new Vector3(0.0021f, 0.0021f, 0.0018f), 6, 3);
                 // Upper lash line: dark, thick in the middle, a small flick at the outer corner.
                 b.Flat(lash);
                 var pts = new List<Vector3>();
@@ -103,8 +104,8 @@ namespace Relic.Character
                 for (int i = 0; i <= 7; i++)
                 {
                     float a = Mathf.Lerp(-1.15f, 1.3f, i / 7f);
-                    pts.Add(new Vector3(Mathf.Sin(a) * 0.021f * s, Mathf.Cos(a) * 0.0225f + 0.001f + (i == 7 ? 0.0035f : 0f), 0.0046f));
-                    rad.Add(Mathf.Lerp(0.0013f, 0.0028f, Mathf.Sin(Mathf.PI * i / 7f)));
+                    pts.Add(new Vector3(Mathf.Sin(a) * 0.0195f * s, Mathf.Cos(a) * 0.0185f + 0.0005f + (i == 7 ? 0.003f : 0f), 0.0078f));
+                    rad.Add(Mathf.Lerp(0.0015f, 0.0034f, Mathf.Sin(Mathf.PI * i / 7f)));
                 }
                 b.Kit.Path(pts, rad, 4, 0.6f, Vector3.forward);
             }
@@ -116,12 +117,12 @@ namespace Relic.Character
             b.Rigid(HeroRig.Head);
             Color skin = b.SkinColor;
             // Blush.
-            b.Flat(Color.Lerp(skin, new Color(1f, 0.55f, 0.55f), 0.45f));
+            b.Flat(Color.Lerp(skin, new Color(1f, 0.52f, 0.55f), 0.6f));
             for (int s = -1; s <= 1; s += 2)
             {
-                float bx = 0.062f * s, by = 1.543f;
-                b.Kit.Xf = Matrix4x4.TRS(new Vector3(bx, by, FrontZ(by, bx) - 0.0025f), Quaternion.Euler(0f, 32f * s, 0f), Vector3.one);
-                b.Kit.Ellipsoid(Vector3.zero, new Vector3(0.013f, 0.006f, 0.003f), 10, 4);
+                float bx = 0.058f * s, by = 1.547f;
+                b.Kit.Xf = Matrix4x4.TRS(new Vector3(bx, by, FrontZ(by, bx) - 0.001f), Quaternion.Euler(0f, 32f * s, 0f), Vector3.one);
+                b.Kit.Ellipsoid(Vector3.zero, new Vector3(0.016f, 0.0075f, 0.0035f), 12, 3);
             }
             b.Kit.Xf = Matrix4x4.identity;
             // A hint of a nose: a tiny soft shadow.
