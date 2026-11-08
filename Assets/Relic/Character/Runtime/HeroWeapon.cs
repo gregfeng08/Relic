@@ -52,13 +52,13 @@ namespace Relic.Character
                     return;
                 default:
                     bone = HeroRig.Chest;
-                    Vector3 c = new Vector3(0f, 1.16f, -0.285f);
+                    // Strapped upright along the sides of the backpack, clear of the hair down the back.
                     if (w.Kind == WeaponKind.Greatsword)
-                        xf = Matrix4x4.TRS(c + new Vector3(0.13f, 0.24f, 0f), Quaternion.Euler(0f, 0f, 150f), Vector3.one);
+                        xf = Matrix4x4.TRS(new Vector3(-0.155f, 1.33f, -0.19f), Quaternion.Euler(-4f, 0f, 172f), Vector3.one);
                     else if (w.Kind == WeaponKind.Bow)
-                        xf = Matrix4x4.TRS(c, Quaternion.Euler(0f, 0f, -38f), Vector3.one);
-                    else // staff: center it on the pack, head over the right shoulder
-                        xf = Matrix4x4.TRS(c + Quaternion.Euler(0f, 0f, -32f) * new Vector3(0f, -0.06f, 0f), Quaternion.Euler(0f, 0f, -32f), Vector3.one);
+                        xf = Matrix4x4.TRS(new Vector3(-0.16f, 1.12f, -0.19f), Quaternion.Euler(-4f, 90f, 6f), Vector3.one);
+                    else // staff: right side of the pack, the spiral head above the shoulder
+                        xf = Matrix4x4.TRS(new Vector3(0.155f, 1.0f, -0.19f), Quaternion.Euler(-5f, 0f, -7f), Vector3.one);
                     return;
             }
         }
@@ -97,7 +97,7 @@ namespace Relic.Character
             b.Kit.Path(pts, rad, 4, 0.22f, Vector3.forward, true, 2f);
             if (w.Glows)
             {
-                b.Kit.Use(b.Mats.Glow(w.GlowColor, w.Glow));
+                b.Glow(w.GlowColor, w.Glow);
                 for (int s = -1; s <= 1; s += 2)
                     b.Kit.Tube(new Vector3(0f, y0 + 0.03f, 0.0035f * s), new Vector3(0f, y0 + bladeLen * 0.75f, 0.0035f * s), 0.0035f * scale, 0.002f, 4);
             }
@@ -126,7 +126,7 @@ namespace Relic.Character
             b.Kit.Tube(top[8], bottom[8], 0.0022f, 0.0022f, 4, false);
             if (w.Glows)
             {
-                b.Kit.Use(b.Mats.Glow(w.GlowColor, w.Glow));
+                b.Glow(w.GlowColor, w.Glow);
                 b.Kit.Ellipsoid(new Vector3(0f, 0.075f, 0.012f), new Vector3(0.01f, 0.012f, 0.008f), 8, 4);
             }
         }
@@ -144,9 +144,9 @@ namespace Relic.Character
             var spiral = new List<Vector3>();
             var rad = new List<float>();
             Vector3 center = new Vector3(0f, 0.76f, 0f);
-            for (int i = 0; i <= 16; i++)
+            for (int i = 0; i <= 10; i++)
             {
-                float t = i / 16f;
+                float t = i / 10f;
                 float a = Mathf.Lerp(-Mathf.PI * 0.5f, Mathf.PI * 1.6f, t);
                 float r = Mathf.Lerp(0.11f, 0.055f, t);
                 spiral.Add(center + new Vector3(Mathf.Cos(a) * r * 0.9f, Mathf.Sin(a) * r, 0f));
@@ -154,12 +154,12 @@ namespace Relic.Character
             }
             spiral.Insert(0, new Vector3(0f, 0.62f, 0f));
             rad.Insert(0, 0.019f);
-            b.Kit.Path(MeshKit.Spline(spiral, 2), Resample(rad, 2), 6, 1f, Vector3.forward);
+            b.Kit.Path(MeshKit.Spline(spiral, 2), Resample(rad, 2), 5, 1f, Vector3.forward);
             // The orb (every staff has one; the sheet draws it held by the spiral).
             {
-                if (w.Glows) b.Kit.Use(b.Mats.Glow(w.GlowColor, w.Glow));
+                if (w.Glows) b.Glow(w.GlowColor, w.Glow);
                 else b.Toon(new Color(0.72f, 0.86f, 0.92f), 1.2f);
-                b.Kit.Ellipsoid(center + new Vector3(0.008f, 0.0f, 0f), new Vector3(0.036f, 0.036f, 0.036f), 12, 8);
+                b.Kit.Ellipsoid(center + new Vector3(0.008f, 0.0f, 0f), new Vector3(0.036f, 0.036f, 0.036f), 10, 6);
             }
         }
 
@@ -185,7 +185,7 @@ namespace Relic.Character
             if (w.Has("chain")) b.Kit.Torus(new Vector3(0f, 0.11f, -0.07f), Vector3.forward, 0.012f, 0.012f, 0.0025f, 8, 4);
             if (w.Glows)
             {
-                b.Kit.Use(b.Mats.Glow(w.GlowColor, w.Glow));
+                b.Glow(w.GlowColor, w.Glow);
                 b.Kit.Torus(new Vector3(0.026f, 0f, 0f), Vector3.right, 0.03f, 0.03f, 0.003f, 14, 4);
             }
             // The strap that holds it to the belt.

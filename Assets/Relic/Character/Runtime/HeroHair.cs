@@ -4,215 +4,209 @@ using UnityEngine;
 namespace Relic.Character
 {
     /// <summary>
-    /// Very long straight white hair: a tilted cap, swept bangs, side strands, a back curtain to
-    /// below the waist, the forward side lock over the left shoulder that curls at the end, a
-    /// cowlick, and the small gold crown pinned on the upper left. Long strands ride spring chains.
+    /// Anime hair as chunky, layered clumps with pointed tips: a seamless cap whose hairline dips
+    /// under the skin (no rim), bangs (swept, straight or parted), the optional forward side lock
+    /// with a curl, a cowlick, and a soft highlight band ("angel ring") on the crown. The back is
+    /// built per style by HeroHairStyles. Hair shades with its own (warm) tint.
     /// </summary>
     public static class HeroHair
     {
-        const float Flat = 0.32f;
-
         public static void Build(HeroBuild b)
         {
+            HairSpec h = b.App.Hair;
             Cap(b);
-            Bangs(b);
-            BackCurtain(b);
-            SideStrands(b);
-            Cowlick(b);
-            Crown(b);
+            AngelRing(b);
+            Bangs(b, h.Bangs);
+            HeroHairStyles.Back(b, h);
+            if (h.SideLock) SideLock(b);
+            if (h.Cowlick) Cowlick(b);
+        }
+
+        // Cap ellipsoid (authoring space, before HeroShape).
+        static readonly Vector3 CapC = new Vector3(0f, HeroRig.HeadCenterY + 0.012f, -0.008f);
+        static readonly Vector3 CapR = new Vector3(HeroRig.HeadHalfW + 0.018f, HeroRig.HeadHalfH + 0.02f, HeroRig.HeadHalfD + 0.018f);
+
+        /// <summary>A point on the cap surface at latitude/longitude (longitude 0 = front).</summary>
+        public static Vector3 OnCap(float lat, float lon, float lift = 0f)
+        {
+            var d = new Vector3(Mathf.Cos(lat) * Mathf.Sin(lon), Mathf.Sin(lat), Mathf.Cos(lat) * Mathf.Cos(lon));
+            return CapC + Vector3.Scale(d, CapR + Vector3.one * lift);
         }
 
         static void Cap(HeroBuild b)
         {
-            b.Toon(MaterialPalette.Hair, 1.5f);
+            b.Hair();
             b.Rigid(HeroRig.Head);
-            // An ellipsoid shell around the skull, tilted so its rim runs from the hairline
-            // (front, high) down to the nape (back, low).
-            var c = new Vector3(0f, HeroRig.HeadCenterY + 0.012f, -0.006f);
-            b.Kit.Xf = Matrix4x4.TRS(c, Quaternion.Euler(-46f, 0f, 0f), Vector3.one);
-            var rings = new List<Ring>();
-            const int stacks = 10;
-            for (int i = 4; i < stacks; i++)
+            const int stacks = 12, sides = 18;
+            int first = b.Kit.VertexCount;
+            for (int i = 1; i < stacks; i++)
             {
-                float t = Mathf.PI * i / stacks;
-                float y = -Mathf.Cos(t), k = Mathf.Sin(t);
-                rings.Add(new Ring(new Vector3(0f, y * (HeroRig.HeadHalfH + 0.012f), 0f), (HeroRig.HeadHalfW + 0.017f) * k, (HeroRig.HeadHalfD + 0.016f) * k));
+                float lat = -Mathf.PI * 0.5f + Mathf.PI * i / stacks;
+                for (int j = 0; j < sides; j++)
+                {
+                    float lon = Mathf.PI * 2f * j / sides;
+                    var d = new Vector3(Mathf.Cos(lat) * Mathf.Sin(lon), Mathf.Sin(lat), Mathf.Cos(lat) * Mathf.Cos(lon));
+                    // In front and below the hairline the cap sinks under the skin: a soft hairline, no rim.
+                    float face = Smooth(0.05f, 0.45f, d.z) * (1f - Smooth(0.18f, 0.5f, d.y));
+                    float chin = Smooth(-0.3f, -0.65f, d.y) * Smooth(-0.5f, 0.1f, d.z);
+                    float s = Mathf.Lerp(1f, 0.82f, Mathf.Max(face, chin));
+                    b.Kit.Vert(CapC + Vector3.Scale(d, CapR) * s);
+                }
             }
-            b.Kit.Loft(rings, 18, false, true);
-            b.Kit.Xf = Matrix4x4.identity;
-            // Nape and sides: an open sheet around the back half of the lower head.
-            var nape = new List<Ring>();
-            for (int i = 0; i < 4; i++)
+            int top = b.Kit.Vert(CapC + Vector3.up * CapR.y), bottom = b.Kit.Vert(CapC + Vector3.down * CapR.y * 0.82f);
+            for (int i = 0; i < stacks - 2; i++)
+                for (int j = 0; j < sides; j++)
+                {
+                    int j1 = (j + 1) % sides;
+                    int a = first + i * sides + j, bb = first + i * sides + j1, cc = first + (i + 1) * sides + j1, dd = first + (i + 1) * sides + j;
+                    float lat = -Mathf.PI * 0.5f + Mathf.PI * (i + 1.5f) / stacks, lon = Mathf.PI * 2f * (j + 0.5f) / sides;
+                    b.Kit.Quad(a, bb, cc, dd, new Vector3(Mathf.Cos(lat) * Mathf.Sin(lon), Mathf.Sin(lat), Mathf.Cos(lat) * Mathf.Cos(lon)));
+                }
+            int last = first + (stacks - 2) * sides;
+            for (int j = 0; j < sides; j++)
             {
-                float y = Mathf.Lerp(1.50f, 1.62f, i / 3f);
-                float k = Mathf.Lerp(0.78f, 1f, Mathf.Sin(Mathf.PI * 0.5f * i / 3f));
-                nape.Add(new Ring(new Vector3(0f, y, -0.012f), (HeroRig.HeadHalfW + 0.016f) * k, (HeroRig.HeadHalfD + 0.012f) * k));
+                int j1 = (j + 1) % sides;
+                b.Kit.Tri(last + j, last + j1, top, Vector3.up);
+                b.Kit.Tri(first + j, first + j1, bottom, Vector3.down);
             }
-            b.Kit.Loft(nape, 14, false, false, Mathf.PI * 0.42f, Mathf.PI * 1.58f, false);
         }
 
-        /// <summary>A tapered ribbon along a smoothed path; optional chain (simulated) or rigid to the head.</summary>
-        static void Strand(HeroBuild b, List<Vector3> joints, float width, float tipWidth, Vector3 outward, bool simulate, float stiffness = 0.35f, int perSeg = 3, float flat = Flat)
+        /// <summary>The glossy highlight band across the crown (unlit, no outline).</summary>
+        static void AngelRing(HeroBuild b)
         {
-            ChainDef chain = null;
-            if (simulate)
+            b.Rigid(HeroRig.Head);
+            Color c = Color.Lerp(b.HairColor, Color.white, 0.6f);
+            b.Flat(c, 1.06f);
+            const int n = 9;
+            for (int k = 0; k < n; k++)
             {
-                chain = b.Chain("Hair", HeroRig.Head, joints, "hair");
-                chain.Stiffness = stiffness;
-                chain.Drag = 0.35f;
-                chain.Radius = width * 0.6f;
-                b.Kit.Weigh = p => b.ChainWeight(chain, HeroRig.Head, p);
+                // Short dashes around the back and sides, following the crown's curve, sitting on the locks.
+                float lon0 = Mathf.Lerp(0.42f, 1.58f, (float)k / n) * Mathf.PI, lon1 = lon0 + 0.06f * Mathf.PI;
+                float lat = 0.42f + 0.06f * Mathf.Sin(k * 1.7f);
+                var pts = new List<Vector3> { OnCap(lat, lon0, 0.016f), OnCap(lat + 0.02f, Mathf.Lerp(lon0, lon1, 0.5f), 0.018f), OnCap(lat, lon1, 0.016f) };
+                b.Kit.Path(pts, new List<float> { 0.002f, 0.0045f, 0.002f }, 4, 0.3f, OnCap(lat, lon0) - CapC, false);
             }
-            else b.Rigid(HeroRig.Head);
+        }
+
+        internal static float Smooth(float a, float b, float x)
+        {
+            float t = Mathf.Clamp01((x - a) / (b - a));
+            return t * t * (3f - 2f * t);
+        }
+
+        /// <summary>A chunky lock: swells after the root, tapers to a point (anime clump).</summary>
+        public static void Lock(HeroBuild b, IList<Vector3> joints, float width, float tip, Vector3 outward, float flat, int sides = 6, int perSeg = 3, float rootScale = 0.75f)
+        {
             List<Vector3> pts = MeshKit.Spline(joints, perSeg);
             var rad = new List<float>();
             for (int i = 0; i < pts.Count; i++)
             {
                 float t = (float)i / (pts.Count - 1);
-                // Full width near the root, a long taper to a point.
-                float w = Mathf.Lerp(width, tipWidth, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - 0.15f) / 0.85f)));
-                if (i == 0) w *= 0.8f;
+                float w = Mathf.Lerp(width, tip, Mathf.Pow(Mathf.Clamp01((t - 0.25f) / 0.75f), 1.3f));
+                if (t < 0.2f) w *= Mathf.Lerp(rootScale, 1f, t / 0.2f);
                 rad.Add(w);
             }
-            b.Kit.Path(pts, rad, simulate ? 5 : 6, flat, outward);
+            b.Kit.Path(pts, rad, sides, flat, outward);
         }
 
-        static void Bangs(HeroBuild b)
+        public static ChainDef Chain(HeroBuild b, string name, int parent, IList<Vector3> joints, float stiffness, float radius)
         {
-            b.Toon(MaterialPalette.Hair, 1.5f);
-            // Swept bangs: roots along the front hairline, tips over the brow, parting on the right
-            // so they sweep toward the character's left (the side lock side).
-            float[] rootX = { 0.075f, 0.05f, 0.025f, 0.0f, -0.025f, -0.05f, -0.075f };
-            float[] tipX = { 0.098f, 0.062f, 0.02f, -0.018f, -0.05f, -0.082f, -0.106f };
-            float[] tipY = { 1.565f, 1.60f, 1.612f, 1.595f, 1.605f, 1.585f, 1.545f };
+            ChainDef c = b.Chain(name, parent, joints, "hair");
+            c.Stiffness = stiffness;
+            c.Drag = 0.4f;
+            c.Radius = radius;
+            c.CollideFrom = 1;
+            b.Kit.Weigh = p => b.ChainWeight(c, parent, p);
+            return c;
+        }
+
+        static void Bangs(HeroBuild b, BangsStyle style)
+        {
+            b.Hair(1.3f);
+            b.Rigid(HeroRig.Head);
+            float[] rootX, tipX, tipY;
+            switch (style)
+            {
+                case BangsStyle.Straight:
+                    rootX = new[] { 0.066f, 0.034f, 0.002f, -0.03f, -0.062f };
+                    tipX = new[] { 0.08f, 0.04f, 0.002f, -0.036f, -0.076f };
+                    tipY = new[] { 1.592f, 1.6f, 1.602f, 1.6f, 1.592f };
+                    break;
+                case BangsStyle.Parted:
+                    rootX = new[] { 0.05f, 0.022f, -0.022f, -0.05f };
+                    tipX = new[] { 0.095f, 0.06f, -0.06f, -0.095f };
+                    tipY = new[] { 1.57f, 1.605f, 1.605f, 1.57f };
+                    break;
+                default:
+                    rootX = new[] { 0.06f, 0.03f, 0.0f, -0.03f, -0.06f };
+                    tipX = new[] { 0.082f, 0.04f, -0.004f, -0.05f, -0.09f };
+                    tipY = new[] { 1.585f, 1.604f, 1.598f, 1.60f, 1.575f };
+                    break;
+            }
             for (int i = 0; i < rootX.Length; i++)
             {
                 float rx = rootX[i], tx = tipX[i], ty = tipY[i];
+                float mx = Mathf.Lerp(rx, tx, 0.5f), my = Mathf.Lerp(1.70f, ty, 0.55f);
                 var j = new List<Vector3>
                 {
-                    new Vector3(rx * 0.7f, 1.745f, 0.01f),
-                    new Vector3(Mathf.Lerp(rx, tx, 0.4f), 1.69f, HeroBody.FrontZ(1.69f, Mathf.Lerp(rx, tx, 0.4f)) + 0.016f),
-                    new Vector3(Mathf.Lerp(rx, tx, 0.8f), Mathf.Lerp(1.69f, ty, 0.7f), HeroBody.FrontZ(Mathf.Lerp(1.69f, ty, 0.7f), tx) + 0.012f),
-                    new Vector3(tx, ty, HeroBody.FrontZ(ty, tx) + 0.009f),
+                    new Vector3(rx * 0.6f, 1.745f, 0.0f),
+                    new Vector3(Mathf.Lerp(rx, tx, 0.2f), 1.705f, HeroFace.FrontZ(1.705f, rx) + 0.02f),
+                    new Vector3(mx, my, HeroFace.FrontZ(my, mx) + 0.016f),
+                    new Vector3(tx, ty, HeroFace.FrontZ(ty, tx) + 0.009f),
                 };
-                Strand(b, j, i == 0 || i == 6 ? 0.026f : 0.032f, 0.0015f, Vector3.forward, false, 0f, 2, 0.3f);
+                Lock(b, j, 0.034f, 0.004f, Vector3.forward, 0.38f, 5, 2);
+            }
+            // Cheek locks framing the face.
+            for (int s = -1; s <= 1; s += 2)
+            {
+                var cheek = new List<Vector3>
+                {
+                    new Vector3(0.075f * s, 1.69f, 0.045f), new Vector3(0.106f * s, 1.61f, 0.055f),
+                    new Vector3(0.108f * s, 1.53f, 0.045f), new Vector3(0.094f * s, 1.47f, 0.04f),
+                };
+                Lock(b, cheek, 0.024f, 0.004f, new Vector3(s, 0f, 0.4f), 0.45f, 5, 2);
             }
         }
 
-        static void BackCurtain(HeroBuild b)
+        static void SideLock(HeroBuild b)
         {
-            b.Toon(MaterialPalette.Hair, 1.5f);
-            // Underlayer: one wide, thin sheet down the back so the curtain reads as a mass of
-            // hair (no gaps between strands), riding its own chain.
-            var under = new List<Vector3>
-            {
-                new Vector3(0f, 1.62f, -0.085f), new Vector3(0f, 1.47f, -0.13f), new Vector3(0f, 1.32f, -0.215f),
-                new Vector3(0f, 1.15f, -0.27f), new Vector3(0f, 1.0f, -0.265f),
-            };
-            Strand(b, under, 0.12f, 0.035f, Vector3.back, true, 0.35f, 2, 0.1f);
-            const int n = 13;
-            for (int i = 0; i < n; i++)
-            {
-                float u = (i + 0.5f) / n;                     // 0..1 across the back
-                float a = Mathf.Lerp(0.56f, 1.44f, u) * Mathf.PI; // angle from the front
-                var dir = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
-                float side = Mathf.Abs(Mathf.Cos(a));          // 1 at the very back... 0 at the sides
-                float spread = Mathf.Sin(a);                   // -1..1, left/right
-                float tipY = Mathf.Lerp(0.80f, 0.94f, Mathf.Abs(spread)) + (i % 2) * 0.035f;
-                float layer = (i % 2) * 0.018f;
-                // Over the shoulders/backpack, then straight down, widening into a curtain.
-                var j = new List<Vector3>
-                {
-                    new Vector3(dir.x * 0.085f, 1.69f, dir.z * 0.10f - 0.01f),
-                    new Vector3(dir.x * 0.125f, 1.53f, dir.z * 0.13f - 0.02f),
-                    new Vector3(spread * 0.18f, 1.36f, -0.10f - 0.12f * side - layer),
-                    new Vector3(spread * 0.235f, 1.16f, -0.13f - 0.15f * side - layer),
-                    new Vector3(spread * 0.27f, 0.98f, -0.13f - 0.15f * side - layer),
-                    new Vector3(spread * 0.29f, tipY, -0.12f - 0.14f * side - layer),
-                };
-                Strand(b, j, 0.05f, 0.016f, dir, true, 0.3f, 2, 0.26f);
-            }
-        }
-
-        static void SideStrands(HeroBuild b)
-        {
-            b.Toon(MaterialPalette.Hair, 1.5f);
-            // Right temple: straight to the collarbone.
-            var r = new List<Vector3>
-            {
-                new Vector3(0.088f, 1.67f, 0.02f), new Vector3(0.112f, 1.58f, 0.03f),
-                new Vector3(0.118f, 1.48f, 0.03f), new Vector3(0.12f, 1.38f, 0.035f),
-            };
-            Strand(b, r, 0.022f, 0.004f, Vector3.right, true, 0.45f);
-            // Left: the forward side lock, over the shoulder onto the chest, curling at the end.
+            b.Hair();
+            // The forward lock over the left shoulder, ending in a soft curl.
             var l = new List<Vector3>
             {
-                new Vector3(-0.088f, 1.68f, 0.025f), new Vector3(-0.118f, 1.57f, 0.045f),
-                new Vector3(-0.13f, 1.44f, 0.08f), new Vector3(-0.125f, 1.32f, 0.11f),
-                new Vector3(-0.11f, 1.22f, 0.125f), new Vector3(-0.085f, 1.15f, 0.13f),
+                new Vector3(-0.09f, 1.67f, 0.02f), new Vector3(-0.124f, 1.56f, 0.04f),
+                new Vector3(-0.135f, 1.44f, 0.075f), new Vector3(-0.128f, 1.32f, 0.105f),
+                new Vector3(-0.112f, 1.22f, 0.118f), new Vector3(-0.09f, 1.16f, 0.122f),
             };
-            // The curl: a loop in the frontal plane at the end of the lock.
             Vector3 end = l[l.Count - 1];
-            var lock_ = new List<Vector3>(l);
+            var path = new List<Vector3>(l);
             for (int k = 1; k <= 5; k++)
             {
-                float a = k / 5f * Mathf.PI * 1.5f;
-                lock_.Add(end + new Vector3(Mathf.Sin(a) * -0.035f + 0.0f, -Mathf.Cos(a) * 0.03f + 0.03f - 0.02f * (k / 5f), 0.004f));
+                float a = k / 5f * Mathf.PI * 1.4f;
+                path.Add(end + new Vector3(-Mathf.Sin(a) * 0.034f, Mathf.Cos(a) * 0.03f - 0.03f + 0.015f * (k / 5f), 0.004f));
             }
-            var joints = new List<Vector3> { lock_[0], lock_[1], lock_[2], lock_[3], lock_[4], lock_[6], lock_[8], lock_[10] };
-            ChainDef chain = b.Chain("SideLock", HeroRig.Head, joints, "hair");
-            chain.Stiffness = 0.5f;
-            chain.Radius = 0.02f;
-            b.Kit.Weigh = p => b.ChainWeight(chain, HeroRig.Head, p);
-            List<Vector3> pts = MeshKit.Spline(lock_, 3);
+            var joints = new List<Vector3> { path[0], path[1], path[2], path[3], path[4], path[6], path[8], path[10] };
+            ChainDef chain = Chain(b, "SideLock", HeroRig.Head, joints, 0.55f, 0.022f);
+            List<Vector3> pts = MeshKit.Spline(path, 2);
             var rad = new List<float>();
             for (int i = 0; i < pts.Count; i++)
             {
                 float t = (float)i / (pts.Count - 1);
-                rad.Add(Mathf.Lerp(0.03f, 0.004f, t * t));
+                rad.Add(Mathf.Lerp(0.034f, 0.006f, t * t) * (t < 0.06f ? 0.8f : 1f));
             }
-            b.Kit.Path(pts, rad, 6, 0.4f, Vector3.forward);
-            // A couple of loose strands framing the face.
-            var loose = new List<Vector3> { new Vector3(-0.07f, 1.70f, 0.07f), new Vector3(-0.098f, 1.61f, 0.075f), new Vector3(-0.104f, 1.52f, 0.06f) };
-            Strand(b, loose, 0.012f, 0.002f, Vector3.forward, false);
-            var loose2 = new List<Vector3> { new Vector3(0.07f, 1.70f, 0.07f), new Vector3(0.096f, 1.62f, 0.07f), new Vector3(0.1f, 1.54f, 0.055f) };
-            Strand(b, loose2, 0.012f, 0.002f, Vector3.forward, false);
+            b.Kit.Path(pts, rad, 6, 0.5f, Vector3.forward);
         }
 
         static void Cowlick(HeroBuild b)
         {
-            b.Toon(MaterialPalette.Hair, 1.3f);
+            b.Hair(1.2f);
+            b.Rigid(HeroRig.Head);
             var j = new List<Vector3>
             {
-                new Vector3(0.025f, 1.735f, 0.01f), new Vector3(0.04f, 1.775f, 0.02f),
-                new Vector3(0.062f, 1.79f, 0.04f), new Vector3(0.078f, 1.772f, 0.05f),
+                new Vector3(0.01f, 1.745f, 0.0f), new Vector3(0.022f, 1.79f, 0.012f),
+                new Vector3(0.045f, 1.805f, 0.03f), new Vector3(0.062f, 1.785f, 0.042f),
             };
-            Strand(b, j, 0.008f, 0.002f, Vector3.right, false, 0f, 3, 0.6f);
-        }
-
-        static void Crown(HeroBuild b)
-        {
-            b.Toon(MaterialPalette.Gold, 1.4f);
-            b.Rigid(HeroRig.Head);
-            // Pinned on the upper left, tilted outward.
-            b.Kit.Xf = Matrix4x4.TRS(new Vector3(-0.072f, 1.735f, 0.0f), Quaternion.Euler(0f, 20f, 32f), Vector3.one);
-            const float r = 0.028f;
-            var band = new List<Ring>
-            {
-                new Ring(new Vector3(0f, -0.006f, 0f), r, r * 0.85f),
-                new Ring(new Vector3(0f, 0.008f, 0f), r * 1.02f, r * 0.87f),
-            };
-            b.Kit.Loft(band, 14, true, true);
-            // Five points; the middle front one tallest.
-            for (int i = 0; i < 5; i++)
-            {
-                float a = (i - 2) * 0.55f;
-                float h = i == 2 ? 0.034f : i == 1 || i == 3 ? 0.026f : 0.018f;
-                var basePos = new Vector3(Mathf.Sin(a) * r, 0.006f, Mathf.Cos(a) * r * 0.85f);
-                var tip = basePos + new Vector3(Mathf.Sin(a) * 0.004f, h, Mathf.Cos(a) * 0.003f);
-                b.Kit.Path(new List<Vector3> { basePos, Vector3.Lerp(basePos, tip, 0.5f), tip }, new List<float> { 0.008f, 0.005f, 0.0008f }, 4, 0.45f, new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)), false);
-            }
-            b.Kit.Xf = Matrix4x4.identity;
+            Lock(b, j, 0.01f, 0.002f, Vector3.right, 0.6f, 5);
         }
     }
 }

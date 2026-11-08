@@ -47,7 +47,6 @@ namespace Relic.Character.Editor
             return null;
         }
 
-        struct Kit { public string Name; public BaseType Weapon; public BaseType Armor; public int Roll; public bool Drawn; }
 
         public static void Capture(string dir)
         {
@@ -81,41 +80,65 @@ namespace Relic.Character.Editor
 
             var cam = MakeCamera();
             var roller = new KitRoller(1337);
-            var kits = new List<Kit>
+            // v2: one turnaround per appearance preset (each with a different kit), head close-ups,
+            // the motion sheet, the armor weights and a drawn weapon.
+            var looks = new[]
             {
-                new Kit { Name = "kit1_light_staff", Weapon = BaseType.Staff, Armor = BaseType.LightArmor, Roll = 1 },
-                new Kit { Name = "kit2_medium_sword", Weapon = BaseType.Sword, Armor = BaseType.MediumArmor, Roll = 2 },
-                new Kit { Name = "kit3_heavy_greatsword", Weapon = BaseType.Greatsword, Armor = BaseType.HeavyArmor, Roll = 3 },
+                (AppearancePresets.Default(), BaseType.Staff, BaseType.LightArmor),
+                (AppearancePresets.Mira(), BaseType.Sword, BaseType.LightArmor),
+                (AppearancePresets.Rowan(), BaseType.Bow, BaseType.MediumArmor),
+                (AppearancePresets.Ash(), BaseType.Tome, BaseType.LightArmor),
             };
-            foreach (Kit k in kits)
+            var heads = new Texture2D(W * looks.Length, H, TextureFormat.RGB24, false);
+            for (int li = 0; li < looks.Length; li++)
             {
-                hero.Kit = roller.Roll(3, k.Roll, k.Weapon, k.Armor);
-                hero.WeaponDrawn = k.Drawn;
+                var (look, weapon, armor) = looks[li];
+                hero.Appearance = look;
+                hero.Kit = roller.Roll(3, li + 1, weapon, armor);
+                hero.WeaponDrawn = false;
+                hero.ArmorOverride = null;
                 hero.Input = new HeroAnimInput { Motion = HeroMotion.Idle };
                 hero.Rebuild();
                 Settle(hero, Vector3.zero, 90);
-                Debug.Log("[Relic.Character] " + k.Name + ": " + hero.TriangleCount + " triangles, " + hero.MaterialCount + " materials [" + hero.Breakdown + "], items: " + string.Join(" | ", hero.Look.ItemNames));
-                var sheet = new Texture2D(W * 3, H, TextureFormat.RGB24, false);
-                float[] yaws = { 180f, 215f, 0f };
-                for (int v = 0; v < 3; v++)
+                string name = "v2_" + (li + 1) + "_" + look.Name.ToLowerInvariant();
+                Debug.Log("[Relic.Character] " + name + ": " + hero.TriangleCount + " triangles, " + hero.Shape.HeadsTall.ToString("0.00") + " heads [" + hero.Breakdown + "], items: " + string.Join(" | ", hero.Look.ItemNames));
+                float[] yaws = { 180f, 220f, 270f, 0f };
+                var sheet = new Texture2D(W * yaws.Length, H, TextureFormat.RGB24, false);
+                for (int v = 0; v < yaws.Length; v++)
                 {
-                    Orbit(cam, yaws[v], 0.95f, 4.3f, 4f, 30f);
+                    Orbit(cam, yaws[v], 0.92f, 4.3f, 4f, 30f);
                     Blit(cam, sheet, v * W);
                 }
-                Save(sheet, Path.Combine(dir, k.Name + "_sheet.png"));
-                if (k.Roll == 1)
+                Save(sheet, Path.Combine(dir, name + "_turnaround.png"));
+                Orbit(cam, 175f, 1.5f, 1.0f, 2f, 24f);
+                Blit(cam, heads, li * W);
+                if (li == 0)
                 {
-                    Orbit(cam, 180f, 1.58f, 0.85f, 2f, 22f);
+                    Orbit(cam, 180f, 1.5f, 0.75f, 2f, 22f);
                     var head = new Texture2D(W, H, TextureFormat.RGB24, false);
                     Blit(cam, head, 0);
-                    Save(head, Path.Combine(dir, "head_closeup.png"));
-                    Orbit(cam, 160f, 1.55f, 1.0f, 2f, 22f);
-                    Blit(cam, head, 0);
-                    Save(head, Path.Combine(dir, "head_threequarter.png"));
-                    MotionSheet(hero, cam, Path.Combine(dir, "motion_sheet.png"));
+                    Save(head, Path.Combine(dir, "v2_head_closeup.png"));
+                    MotionSheet(hero, cam, Path.Combine(dir, "v2_motion_sheet.png"));
                 }
             }
-            // A drawn weapon for good measure.
+            Save(heads, Path.Combine(dir, "v2_heads.png"));
+            // Armor weights on the default look (front and back).
+            hero.Appearance = AppearancePresets.Default();
+            var armorSheet = new Texture2D(W * 4, H, TextureFormat.RGB24, false);
+            ArmorWeight[] weights = { ArmorWeight.Medium, ArmorWeight.Heavy };
+            for (int i = 0; i < 2; i++)
+            {
+                hero.Kit = roller.Roll(3, 10 + i, i == 0 ? BaseType.Sword : BaseType.Greatsword, BaseType.HeavyArmor);
+                hero.ArmorOverride = weights[i];
+                hero.Rebuild();
+                Settle(hero, Vector3.zero, 90);
+                Debug.Log("[Relic.Character] armor " + weights[i] + ": " + hero.TriangleCount + " triangles [" + hero.Breakdown + "]");
+                Orbit(cam, 200f, 0.92f, 4.3f, 4f, 30f); Blit(cam, armorSheet, i * 2 * W);
+                Orbit(cam, 20f, 0.92f, 4.3f, 4f, 30f); Blit(cam, armorSheet, (i * 2 + 1) * W);
+            }
+            Save(armorSheet, Path.Combine(dir, "v2_armor_medium_heavy.png"));
+            hero.ArmorOverride = null;
+            // A drawn weapon.
             hero.Kit = roller.Roll(3, 4, BaseType.Bow, BaseType.MediumArmor);
             hero.WeaponDrawn = true;
             hero.Input = new HeroAnimInput { Motion = HeroMotion.Idle, WeaponDrawn = true };
@@ -124,7 +147,7 @@ namespace Relic.Character.Editor
             var drawn = new Texture2D(W * 2, H, TextureFormat.RGB24, false);
             Orbit(cam, 200f, 0.95f, 3.6f, 5f, 30f); Blit(cam, drawn, 0);
             Orbit(cam, 120f, 0.95f, 3.6f, 5f, 30f); Blit(cam, drawn, W);
-            Save(drawn, Path.Combine(dir, "kit4_bow_drawn.png"));
+            Save(drawn, Path.Combine(dir, "v2_bow_drawn.png"));
 
             Object.DestroyImmediate(heroGo);
             Debug.Log("[Relic.Character] Captures written to " + dir);
@@ -140,6 +163,8 @@ namespace Relic.Character.Editor
                 ("dash", new HeroAnimInput { Motion = HeroMotion.Run, Speed = 14f, Dash = true }, new Vector3(0f, 0f, 14f)),
                 ("jump", new HeroAnimInput { Motion = HeroMotion.Air, VerticalSpeed = 5f, Speed = 5f }, new Vector3(0f, 5f, 5f)),
                 ("climb", new HeroAnimInput { Motion = HeroMotion.Climb, ClimbSpeed = 2f }, new Vector3(0f, 1.5f, 0f)),
+                ("land", new HeroAnimInput { Motion = HeroMotion.Idle, LandingSquash = 0.8f }, Vector3.zero),
+                ("dive", new HeroAnimInput { Motion = HeroMotion.Dive, Speed = 2.5f, DivePitch = 10f, Underwater = true }, new Vector3(0f, -0.5f, 2.5f)),
             };
             var sheet = new Texture2D(W * poses.Length, H, TextureFormat.RGB24, false);
             for (int i = 0; i < poses.Length; i++)

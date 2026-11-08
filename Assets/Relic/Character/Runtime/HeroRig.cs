@@ -18,19 +18,24 @@ namespace Relic.Character
         public const float HipY = 0.94f, SpineY = 1.06f, ChestY = 1.24f, NeckY = 1.44f, HeadY = 1.50f;
         public const float ShoulderX = 0.165f, ShoulderY = 1.385f, ElbowY = 1.115f, WristY = 0.875f;
         public const float LegX = 0.085f, HipJointY = 0.90f, KneeY = 0.49f, AnkleY = 0.085f;
-        public const float HeadCenterY = 1.605f, HeadHalfH = 0.13f, HeadHalfW = 0.098f, HeadHalfD = 0.108f;
+        public const float HeadCenterY = 1.605f, HeadHalfH = 0.128f, HeadHalfW = 0.104f, HeadHalfD = 0.11f;
 
         public readonly List<Transform> Bones = new List<Transform>();
+        /// <summary>Authoring rest positions (sheet proportions): weights are computed against these.</summary>
         public readonly List<Vector3> Rest = new List<Vector3>();
+        /// <summary>Actual rest positions after HeroShape (what the transforms and bind poses use).</summary>
+        public readonly List<Vector3> Bind = new List<Vector3>();
+        readonly System.Func<Vector3, Vector3> _remap;
         public readonly List<int> Parent = new List<int>();
         public Transform RootTransform => Bones[0];
 
-        public HeroRig(Transform parent)
+        public HeroRig(Transform parent, System.Func<Vector3, Vector3> remap = null)
         {
+            _remap = remap ?? (p => p);
             var root = new GameObject("HeroRoot").transform;
             root.SetParent(parent, false);
             root.gameObject.layer = parent.gameObject.layer;
-            Bones.Add(root); Rest.Add(Vector3.zero); Parent.Add(-1);
+            Bones.Add(root); Rest.Add(Vector3.zero); Bind.Add(Vector3.zero); Parent.Add(-1);
 
             Add("Hips", Root, new Vector3(0f, HipY, 0f));
             Add("Spine", Hips, new Vector3(0f, SpineY, 0f));
@@ -61,9 +66,10 @@ namespace Relic.Character
             var t = new GameObject(name).transform;
             t.SetParent(Bones[parent], false);
             t.gameObject.layer = Bones[0].gameObject.layer;
-            t.localPosition = restRootPos - Rest[parent];
+            Vector3 bind = _remap(restRootPos);
+            t.localPosition = bind - Bind[parent];
             t.localRotation = Quaternion.identity;
-            Bones.Add(t); Rest.Add(restRootPos); Parent.Add(parent);
+            Bones.Add(t); Rest.Add(restRootPos); Bind.Add(bind); Parent.Add(parent);
             return Bones.Count - 1;
         }
 
@@ -72,7 +78,7 @@ namespace Relic.Character
         {
             for (int i = 1; i < Bones.Count; i++)
             {
-                Bones[i].localPosition = Rest[i] - Rest[Parent[i]];
+                Bones[i].localPosition = Bind[i] - Bind[Parent[i]];
                 Bones[i].localRotation = Quaternion.identity;
                 Bones[i].localScale = Vector3.one;
             }
@@ -81,7 +87,7 @@ namespace Relic.Character
         public Matrix4x4[] BindPoses()
         {
             var b = new Matrix4x4[Bones.Count];
-            for (int i = 0; i < b.Length; i++) b[i] = Matrix4x4.Translate(-Rest[i]);
+            for (int i = 0; i < b.Length; i++) b[i] = Matrix4x4.Translate(-Bind[i]);
             return b;
         }
 

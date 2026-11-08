@@ -71,6 +71,35 @@ namespace Relic.Character.EditTests
         }
 
         [Test]
+        public void EveryPresetAndHairStyleBuildsWithinBudget()
+        {
+            var roller = new KitRoller(99);
+            int roll = 0;
+            foreach (HeroAppearance preset in AppearancePresets.All())
+                foreach (HairStyle style in System.Enum.GetValues(typeof(HairStyle)))
+                    foreach (BangsStyle bangs in System.Enum.GetValues(typeof(BangsStyle)))
+                    {
+                        HeroAppearance a = AppearanceJson.Clone(preset);
+                        a.Hair.Style = style;
+                        a.Hair.Bangs = bangs;
+                        a.Hair.Length = (roll % 3) * 0.5f;
+                        _hero.Appearance = a;
+                        _hero.Kit = roller.Roll(4, roll++, BaseType.Greatsword, BaseType.HeavyArmor);
+                        _hero.Rebuild();
+                        Assert.AreEqual(1, _hero.Renderer.sharedMaterials.Length, "one material");
+                        Assert.LessOrEqual(_hero.TriangleCount, TriangleBudget, preset.Name + " " + style + "/" + bangs + ": " + _hero.Breakdown);
+                    }
+        }
+
+        [Test]
+        public void ProportionsAreGenshinMedium()
+        {
+            _hero.Appearance = AppearancePresets.Default();
+            _hero.Rebuild();
+            Assert.That(_hero.Shape.HeadsTall, Is.InRange(5.9f, 6.6f));
+        }
+
+        [Test]
         public void AllPosesAnimateWithoutNaNs()
         {
             _hero.Kit = new KitRoller(3).Roll(2, 1);

@@ -46,19 +46,34 @@ namespace Relic.Character
     /// </summary>
     public sealed class MeshKit
     {
-        readonly List<Vector3> _v = new List<Vector3>();
+        readonly List<Vector3> _v = new List<Vector3>();       // authoring space (orientation, weights)
+        readonly List<Vector3> _final = new List<Vector3>();   // after Remap (what the mesh gets)
         readonly List<BoneWeight> _w = new List<BoneWeight>();
-        readonly List<List<int>> _subs = new List<List<int>>();
-        readonly List<Material> _mats = new List<Material>();
-        List<int> _tris;
+        readonly List<Color> _c = new List<Color>();
+        readonly List<Vector4> _d = new List<Vector4>();
+        readonly List<Color> _shade = new List<Color>();
+        readonly List<float> _bend = new List<float>();
+        readonly List<int> _tris = new List<int>();
 
         /// <summary>Applied to every vertex added (part-local → root space).</summary>
         public Matrix4x4 Xf = Matrix4x4.identity;
         /// <summary>Bone weights for a root-space position.</summary>
-        public Func<Vector3, BoneWeight> Weigh = p => W1(0);
+        public Func<Vector3, BoneWeight> Weigh { get => _weigh; set { _weigh = value; Remap = DefaultRemap; } }
+        Func<Vector3, BoneWeight> _weigh = p => W1(0);
+        /// <summary>The Remap every new Weigh starts with (rigid parts then override it).</summary>
+        public Func<Vector3, Vector3> DefaultRemap = p => p;
+        /// <summary>Final shaping of a root-space position (proportions); weights and winding use the unmapped one.</summary>
+        public Func<Vector3, Vector3> Remap = p => p;
+        /// <summary>Current paint: albedo (sRGB) and shader data (outline px, emission, rim, unused).</summary>
+        public Color PaintColor = Color.white;
+        public Vector4 PaintData = new Vector4(1.6f, 0f, 0.45f, 0f);
+        /// <summary>Shade tint (sRGB rgb) and how much it replaces the world shade (a).</summary>
+        public Color PaintShade = new Color(0f, 0f, 0f, 0f);
+        /// <summary>0..1: bend lighting normals toward +Z (the face), keeping the outline on the true normal.</summary>
+        public float NormalBend;
 
         public int VertexCount => _v.Count;
-        public int TriangleCount { get { int n = 0; foreach (var s in _subs) n += s.Count; return n / 3; } }
+        public int TriangleCount => _tris.Count / 3;
 
         public static BoneWeight W1(int bone) => new BoneWeight { boneIndex0 = bone, weight0 = 1f };
 
@@ -107,27 +122,28 @@ namespace Relic.Character
             return r;
         }
 
-        public void Use(Material m)
+        public void Paint(Color c, float outline, float emission = 0f, float rim = 0.45f)
         {
-            int i = _mats.IndexOf(m);
-            if (i < 0) { _mats.Add(m); _subs.Add(new List<int>()); i = _mats.Count - 1; }
-            _tris = _subs[i];
+            PaintColor = c;
+            PaintData = new Vector4(outline, emission, rim, 0f);
         }
 
         public void Rigid(int bone) { Weigh = p => W1(bone); }
 
-        public int Vert(Vector3 local)
+        public int Vert(Vector3 local) => Vert(local, null);
+
+        public int Vert(Vector3 local, BoneWeight w) => Vert(local, (BoneWeight?)w);
+
+        int Vert(Vector3 local, BoneWeight? w)
         {
             Vector3 p = Xf.MultiplyPoint3x4(local);
             _v.Add(p);
-            _w.Add(Weigh(p));
-            return _v.Count - 1;
-        }
-
-        public int Vert(Vector3 local, BoneWeight w)
-        {
-            _v.Add(Xf.MultiplyPoint3x4(local));
-            _w.Add(w);
+            _final.Add(Remap(p));
+            _w.Add(w ?? Weigh(p));
+            _c.Add(PaintColor);
+            _d.Add(PaintData);
+            _shade.Add(PaintShade);
+            _bend.Add(NormalBend);
             return _v.Count - 1;
         }
 
@@ -356,17 +372,40 @@ namespace Relic.Character
             z = Vector3.Cross(t, x).normalized;
         }
 
-        public Mesh Build(string name, out Material[] materials)
+        /// <summary>One mesh, one submesh: colors and shader data live in the vertices.</summary>
+        public Mesh Build(string name)
         {
             var mesh = new Mesh { name = name };
             if (_v.Count > 65000) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            mesh.SetVertices(_v);
+            mesh.SetVertices(_final);
+            bool linear = QualitySettings.activeColorSpace == ColorSpace.Linear;
+            var colors = new List<Color>(_c.Count);
+            foreach (Color c in _c) colors.Add(linear ? c.linear : c);
+            mesh.SetColors(colors);
+            mesh.SetUVs(0, _d);
+            var shade = new List<Vector4>(_shade.Count);
+            foreach (Color s in _shade)
+            {
+                Color l = linear ? s.linear : s;
+                shade.Add(new Vector4(l.r, l.g, l.b, s.a));
+            }
+            mesh.SetUVs(1, shade);
             mesh.boneWeights = NormalizedWeights();
-            mesh.subMeshCount = _subs.Count;
-            for (int i = 0; i < _subs.Count; i++) mesh.SetTriangles(_subs[i], i, false);
+            mesh.SetTriangles(_tris, 0, false);
             mesh.RecalculateNormals();
+            // The outline follows the true smooth normal (stored as the tangent); lighting normals
+            // on the face are bent forward so the cel shadow doesn't streak across it.
+            Vector3[] normals = mesh.normals;
+            var tangents = new Vector4[normals.Length];
+            for (int i = 0; i < normals.Length; i++)
+            {
+                tangents[i] = new Vector4(normals[i].x, normals[i].y, normals[i].z, 1f);
+                float k = _bend[i];
+                if (k > 0f) normals[i] = Vector3.Slerp(normals[i], (Vector3.forward + Vector3.up * 0.15f).normalized, k);
+            }
+            mesh.tangents = tangents;
+            mesh.normals = normals;
             mesh.RecalculateBounds();
-            materials = _mats.ToArray();
             return mesh;
         }
 

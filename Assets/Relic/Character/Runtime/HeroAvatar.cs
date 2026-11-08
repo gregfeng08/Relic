@@ -12,6 +12,8 @@ namespace Relic.Character
     {
         public Material ToonMaterial;
         public HeroKit Kit = new HeroKit();
+        /// <summary>The look (data-driven; sanitized on rebuild). Defaults to Greg's hero.</summary>
+        public HeroAppearance Appearance = AppearancePresets.Default();
         /// <summary>Overrides the armor weight shown (F9 debug), or null for the kit's own.</summary>
         public ArmorWeight? ArmorOverride;
         public bool WeaponDrawn;
@@ -19,6 +21,7 @@ namespace Relic.Character
         public HeroAnimInput Input;
 
         public HeroRig Rig { get; private set; }
+        public HeroShape Shape { get; private set; }
         public HeroLook Look { get; private set; }
         public SkinnedMeshRenderer Renderer { get; private set; }
         public SpringChains Chains { get; private set; }
@@ -37,9 +40,12 @@ namespace Relic.Character
             Look = EquipmentMapper.Map(Kit);
             if (ArmorOverride.HasValue) Look.Armor.Weight = ArmorOverride.Value;
 
-            Rig = new HeroRig(transform);
+            if (Appearance == null) Appearance = AppearancePresets.Default();
+            AppearanceRules.Sanitize(Appearance);
+            Shape = new HeroShape(Appearance.Body);
+            Rig = new HeroRig(transform, Shape.Remap);
             _mats = new HeroMaterials(ToonMaterial);
-            var b = new HeroBuild(Rig, _mats, Look, WeaponDrawn);
+            var b = new HeroBuild(Rig, _mats, Look, Appearance, Shape, WeaponDrawn);
             var sb = new System.Text.StringBuilder();
             int last = 0;
             void Mark(string part) { int t = b.Kit.TriangleCount; sb.Append(part).Append(' ').Append(t - last).Append(' '); last = t; }
@@ -48,21 +54,22 @@ namespace Relic.Character
             HeroArmor.Build(b); Mark("armor");
             HeroScarf.Build(b); Mark("scarf");
             HeroHair.Build(b); Mark("hair");
+            HeroAccessories.Build(b); Mark("accessories");
             HeroGear.Build(b); Mark("gear");
             HeroWeapon.Build(b); Mark("weapon");
             Breakdown = sb.ToString();
 
-            _mesh = b.Kit.Build("Hero", out Material[] materials);
+            _mesh = b.Kit.Build("Hero");
             _mesh.bindposes = Rig.BindPoses();
             TriangleCount = b.Kit.TriangleCount;
-            MaterialCount = materials.Length;
+            MaterialCount = 1;
 
             var go = new GameObject("HeroMesh");
             go.layer = gameObject.layer;
             go.transform.SetParent(Rig.RootTransform, false);
             Renderer = go.AddComponent<SkinnedMeshRenderer>();
             Renderer.sharedMesh = _mesh;
-            Renderer.sharedMaterials = materials;
+            Renderer.sharedMaterial = _mats.Material;
             Renderer.bones = Rig.Bones.ToArray();
             Renderer.rootBone = Rig.Bones[HeroRig.Hips];
             Renderer.localBounds = new Bounds(new Vector3(0f, 0f, 0f), new Vector3(2.4f, 2.6f, 2.4f));
@@ -80,18 +87,19 @@ namespace Relic.Character
         void AddColliders()
         {
             Transform B(int i) => Rig.Bones[i];
-            Chains.AddCollider(B(HeroRig.Head), new Vector3(0f, 0.08f, -0.005f), new Vector3(0f, 0.13f, -0.005f), 0.11f);
-            Chains.AddCollider(B(HeroRig.Neck), new Vector3(0f, -0.02f, 0f), new Vector3(0f, 0.06f, 0f), 0.06f);
-            Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.07f, 0.06f, -0.01f), new Vector3(0.07f, 0.06f, -0.01f), 0.12f);
-            Chains.AddCollider(B(HeroRig.Spine), new Vector3(0f, -0.06f, 0f), new Vector3(0f, 0.1f, 0f), 0.13f);
-            Chains.AddCollider(B(HeroRig.Hips), new Vector3(-0.05f, -0.04f, 0f), new Vector3(0.05f, -0.04f, 0f), 0.13f);
+            // Offsets are in actual (HeroShape-mapped) bone space.
+            Chains.AddCollider(B(HeroRig.Head), new Vector3(0f, 0.09f, -0.01f), new Vector3(0f, 0.15f, -0.01f), 0.125f);
+            Chains.AddCollider(B(HeroRig.Neck), new Vector3(0f, -0.02f, 0f), new Vector3(0f, 0.05f, 0f), 0.055f);
+            Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.06f, 0.05f, -0.01f), new Vector3(0.06f, 0.05f, -0.01f), 0.105f);
+            Chains.AddCollider(B(HeroRig.Spine), new Vector3(0f, -0.05f, 0f), new Vector3(0f, 0.09f, 0f), 0.11f);
+            Chains.AddCollider(B(HeroRig.Hips), new Vector3(-0.04f, -0.04f, 0f), new Vector3(0.04f, -0.04f, 0f), 0.11f);
             // The backpack keeps the hair and scarf off the back.
-            Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.06f, -0.06f, -0.185f), new Vector3(0.06f, -0.06f, -0.185f), 0.08f);
+            Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.05f, -0.08f, -0.17f), new Vector3(0.05f, -0.08f, -0.17f), 0.065f);
             for (int s = -1; s <= 1; s += 2)
             {
-                Chains.AddCollider(B(HeroRig.Thigh(s)), new Vector3(0f, -0.06f, 0.0f), new Vector3(0f, -0.40f, 0.01f), 0.075f, SpringChains.Legs);
-                Chains.AddCollider(B(HeroRig.Shin(s)), new Vector3(0f, 0f, 0.01f), new Vector3(0f, -0.3f, 0f), 0.075f, SpringChains.Legs);
-                Chains.AddCollider(B(HeroRig.UpperArm(s)), new Vector3(0f, 0f, 0f), new Vector3(0f, -0.26f, 0f), 0.065f);
+                Chains.AddCollider(B(HeroRig.Thigh(s)), new Vector3(0f, -0.06f, 0.0f), new Vector3(0f, -0.37f, 0.01f), 0.066f, SpringChains.Legs);
+                Chains.AddCollider(B(HeroRig.Shin(s)), new Vector3(0f, 0f, 0.01f), new Vector3(0f, -0.28f, 0f), 0.066f, SpringChains.Legs);
+                Chains.AddCollider(B(HeroRig.UpperArm(s)), new Vector3(0f, 0f, 0f), new Vector3(0f, -0.24f, 0f), 0.056f);
             }
         }
 
@@ -103,7 +111,7 @@ namespace Relic.Character
             // Air drag on cloth and hair: things trail behind when moving, more so when dashing.
             Chains.Wind = -worldVelocity * (Input.Dash ? 2.2f : 1.1f);
             // Underwater, hair and scarf drift slowly upward; at the surface they float.
-            Chains.GravityScale = Input.Motion == HeroMotion.Dive ? -0.12f : Input.Motion == HeroMotion.Swim ? 0.3f : 1f;
+            Chains.GravityScale = Input.Underwater || Input.Motion == HeroMotion.Dive ? -0.12f : Input.Motion == HeroMotion.Swim ? 0.3f : 1f;
             if (Input.Motion == HeroMotion.Dive || Input.Motion == HeroMotion.Swim) Chains.Wind *= 0.4f;
             Chains.Step(dt);
         }

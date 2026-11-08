@@ -22,6 +22,7 @@ namespace Relic.Character
         ulong _rollerSeed;
         int _roll;
         int _tier;
+        int _preset;
         GUIStyle _style;
 
         /// <summary>World avatar factory: builds the hero on the player object (registered by the Game layer).</summary>
@@ -66,6 +67,7 @@ namespace Relic.Character
             if (Hero == null) return;
             if (PlayerInput.KeyDown(Key.F7)) RollRandomKit();
             if (PlayerInput.KeyDown(Key.F9)) CycleArmor();
+            if (PlayerInput.KeyDown(Key.F11)) CyclePreset(); // F10 is the sandbox props toggle
         }
 
         /// <summary>F7: a random kit for the tier at the player's world position.</summary>
@@ -76,6 +78,15 @@ namespace Relic.Character
             Hero.ArmorOverride = null;
             Hero.Rebuild();
             Debug.Log("[Relic.Character] Kit " + _roll + " (tier " + _tier + "): " + string.Join(" | ", Hero.Look.ItemNames) + " (" + Hero.TriangleCount + " tris)");
+        }
+
+        /// <summary>F11: the next built-in appearance preset (Wanderer, Mira, Rowan, Ash).</summary>
+        public void CyclePreset()
+        {
+            var all = AppearancePresets.All();
+            _preset = (_preset + 1) % all.Count;
+            Hero.Appearance = all[_preset];
+            Hero.Rebuild();
         }
 
         /// <summary>F9: Light → Medium → Heavy → Light (overrides the equipped armor's weight).</summary>
@@ -96,6 +107,10 @@ namespace Relic.Character
                 Dash = Player.IsDashing,
                 VerticalSpeed = Player.Velocity.y,
                 WeaponDrawn = Hero.WeaponDrawn,
+                VisualYOffset = Player.VisualYOffset,
+                LandingSquash = Player.LandingSquash,
+                DivePitch = Player.DivePitch,
+                Underwater = Player.HeadUnderwater,
             };
             switch (Player.State)
             {
@@ -104,6 +119,7 @@ namespace Relic.Character
                 case MoveState.Climbing: a.Motion = HeroMotion.Climb; a.ClimbSpeed = Player.Velocity.magnitude; break;
                 case MoveState.Swimming: a.Motion = HeroMotion.Swim; break;
                 case MoveState.Flying: a.Motion = HeroMotion.Fly; break;
+                case MoveState.Diving: a.Motion = HeroMotion.Dive; break;
                 default:
                     // States added later (diving, underwater...): never throw, swim or dive.
                     string name = Player.State.ToString();
@@ -124,7 +140,7 @@ namespace Relic.Character
                 _style.normal.textColor = Color.white;
             }
             string items = Hero.Look.ItemNames.Count > 0 ? string.Join("  ·  ", Hero.Look.ItemNames) : "(no items)";
-            string line = "<b>Kit</b> " + items + "   <color=#bbbbbb>[" + Hero.Look.Armor.Weight + " · F7 new kit · F9 armor]</color>";
+            string line = "<b>Kit</b> " + items + "   <color=#bbbbbb>[" + Hero.Look.Armor.Weight + " · F7 new kit · F9 armor · F11 look]</color>";
             var r = new Rect(12, Screen.height - 30, Screen.width - 24, 24);
             GUI.color = new Color(0f, 0f, 0f, 0.6f);
             GUI.Label(new Rect(r.x + 1, r.y + 1, r.width, r.height), StripColor(line), _style);
