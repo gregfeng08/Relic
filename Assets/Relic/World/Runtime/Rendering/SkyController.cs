@@ -8,7 +8,8 @@ namespace Relic.World.Runtime
     /// sky's horizon color, so far terrain melts into the sky instead of popping at the view edge.
     /// Optional slow day cycle (off by default for M1).
     /// </summary>
-    public sealed class SkyController : MonoBehaviour
+    [DefaultExecutionOrder(150)] // after the camera, which decides whether it is underwater
+    public sealed partial class SkyController : MonoBehaviour
     {
         public Material SkyMaterial;
         public Light Sun;
@@ -37,6 +38,12 @@ namespace Relic.World.Runtime
         public float FogStart = 380f;
         public float FogEnd = 1500f;
 
+        [Header("Underwater (when View is below the surface)")]
+        public OrbitCamera View;
+        public Color UnderwaterFog = new Color(0.10f, 0.36f, 0.44f);
+        public Color UnderwaterDeepFog = new Color(0.03f, 0.13f, 0.22f);
+        public float UnderwaterFogEnd = 38f;
+
         public void Apply()
         {
             if (Sun != null)
@@ -45,7 +52,9 @@ namespace Relic.World.Runtime
                 float day = Mathf.Clamp01(SunElevation / 15f);
                 Sun.color = Color.Lerp(new Color(1f, 0.6f, 0.4f), SunColor, day);
                 Sun.intensity = SunIntensity * Mathf.Lerp(0.15f, 1f, day);
-                Sun.shadows = LightShadows.Hard; // crisp shadows: players dodge by them
+                // Soft = filtered; the toon shader re-sharpens it into a crisp, anti-aliased edge
+                // (players dodge by shadows, so they stay crisp, just without texel stairs).
+                Sun.shadows = LightShadows.Soft;
                 Sun.shadowStrength = 1f;
                 RenderSettings.sun = Sun;
             }
@@ -66,6 +75,7 @@ namespace Relic.World.Runtime
             RenderSettings.fogStartDistance = FogStart;
             RenderSettings.fogEndDistance = FogEnd;
             RenderSettings.fogColor = Horizon;
+            _appliedUnderwater = -1f;
 
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = AmbientSky;

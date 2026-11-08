@@ -23,6 +23,7 @@ namespace Relic.World.Runtime
         GUIStyle _label;
         GUIStyle _big;
         float _staminaAlpha;
+        float _breathAlpha;
 
         void OnGUI()
         {
@@ -66,6 +67,19 @@ namespace Relic.World.Runtime
                 Color c = Player.Exhausted ? new Color(0.95f, 0.35f, 0.25f) : new Color(0.98f, 0.85f, 0.3f);
                 float sw = 180f * scale, sh = 9f * scale;
                 Bar(new Rect((Screen.width - sw) * 0.5f, Screen.height * 0.62f, sw, sh), frac, c, _staminaAlpha);
+            }
+
+            // Breath: shown while submerged and until it refills; flashes when it has run out.
+            float breath = Player.BreathFraction;
+            bool showBreath = Player.HeadUnderwater || breath < 0.999f;
+            _breathAlpha = Mathf.MoveTowards(_breathAlpha, showBreath ? 1f : 0f, Time.unscaledDeltaTime * 3f);
+            if (_breathAlpha > 0.01f)
+            {
+                float flash = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 12f);
+                Color c = Player.OutOfBreath ? Color.Lerp(new Color(0.95f, 0.3f, 0.25f), Color.white, flash * 0.5f)
+                    : breath < 0.25f ? new Color(0.95f, 0.6f, 0.35f) : new Color(0.55f, 0.85f, 1f);
+                float bw = 180f * scale, bh = 7f * scale;
+                Bar(new Rect((Screen.width - bw) * 0.5f, Screen.height * 0.62f - 14f * scale, bw, bh), breath, c, _breathAlpha);
             }
         }
 
@@ -114,7 +128,7 @@ namespace Relic.World.Runtime
             float ms = Perf != null ? Perf.SmoothedMs : 0f;
 
             string text =
-                "<b>Relic terrain sandbox</b>   F3 overlay · F4 fly · F5 new seed · F6 day cycle · F8 benchmark (3 km) · Esc cursor\n" +
+                "<b>Relic terrain sandbox</b>   F3 overlay · F4 fly · F5 new seed · F6 day cycle · F7 props · F8 benchmark (3 km) · Ctrl/C dive · Esc cursor\n" +
                 "Seed <b>" + Seed + "</b>    " + fps.ToString("0") + " fps (" + ms.ToString("0.0") + " ms)\n" +
                 "World x " + wx.ToString("0.0") + "  z " + wz.ToString("0.0") + "  y " + p.y.ToString("0.0") +
                 "   (distance " + System.Math.Sqrt(wx * wx + wz * wz).ToString("0") + " m)\n" +

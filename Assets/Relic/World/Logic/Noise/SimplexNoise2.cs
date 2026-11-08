@@ -75,15 +75,22 @@ namespace Relic.World.Noise
         }
 
         /// <summary>
-        /// Ridged multifractal noise in [0, 1]: sharp crests where the base noise crosses zero.
+        /// Ridged multifractal noise in [0, 1]: crests where the base noise crosses zero.
         /// Each octave is weighted by the previous one so detail gathers on the ridges.
+        /// softness &gt; 0 replaces |n| with a smooth abs (sqrt(n² + s²) - s, renormalized), which
+        /// rounds the crest over about s noise units instead of a razor V: a razor crest can't be
+        /// represented by a 1 m (or coarser) grid and shows as hard triangle ridges.
         /// </summary>
-        public double Ridged(double x, double y, int octaves, double lacunarity = 2.0, double gain = 0.5)
+        public double Ridged(double x, double y, int octaves, double lacunarity = 2.0, double gain = 0.5, double softness = 0.0)
         {
             double sum = 0.0, amp = 1.0, norm = 0.0, weight = 1.0;
+            double s2 = softness * softness;
+            double softNorm = softness > 0.0 ? 1.0 / (Math.Sqrt(1.0 + s2) - softness) : 1.0;
             for (int o = 0; o < octaves; o++)
             {
-                double r = 1.0 - Math.Abs(Sample(x + o * 57.13, y + o * 113.9));
+                double n = Sample(x + o * 57.13, y + o * 113.9);
+                double a = softness > 0.0 ? (Math.Sqrt(n * n + s2) - softness) * softNorm : Math.Abs(n);
+                double r = 1.0 - a;
                 if (r < 0.0) r = 0.0;
                 r *= r;
                 r *= weight;
