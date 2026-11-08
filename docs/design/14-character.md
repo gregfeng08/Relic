@@ -41,3 +41,18 @@ Later and out of scope: a **baby dragon companion** (backlog, a later milestone)
 - **Hook:** World must not reference Character. World exposes an avatar factory hook, the Game layer registers the procedural hero at startup, and World falls back to the old placeholder if nothing is registered.
 - **Meshes:** generated in code (lofted tubes and capsules, a flared coat skirt, ribbon hair strands) with the World toon material and outline. Target ≤ 15k triangles.
 - **Debug:** **F7** rolls and equips a random kit for the current tier, **F9** cycles armor weight, and a small HUD line shows the equipped item names.
+
+## v2 direction (Greg, 2026-10-28)
+- **Style: cute Genshin-style.** This beats exact likeness to the sheet. The target is the Genshin "medium" body type (about 6–6.5 heads, slender and youthful).
+  - **Face:** large gradient-iris anime eyes with highlights, a tiny nose and mouth, and clean face shading.
+  - **Hair:** chunky layered hair with a glossy highlight band.
+  - **Rendering and clothes:** 2-tone cel shading with a soft edge, a rim light, thin outlines, a bright palette, and clean shapes with gold trims.
+- **No crown.**
+- **Data-driven appearance:** the hero is built from a serializable `HeroAppearance` spec (body, face, hair style, length and color, outfit pieces and colors, accessories), validated and clamped like the effect grammar. Greg's character is the default preset.
+
+## Later: character from a photo (backlog)
+A player uploads a picture, and a vision-capable model maps it onto `HeroAppearance` parameters (hair style and color, eye color, outfit pieces and palette). It goes **image → parameters**, never image → mesh. The same pattern as relics: the model fills a schema, a validator clamps it, and the result is saved.
+- **Runs on:** a local vision model (Qwen3.5 and Gemma 4 small models accept images; llama.cpp needs the model's `mmproj` file) or the cloud.
+- **Grounded rules still apply:** only parameters the game supports.
+- **Safety:** clamped parameters can't produce offensive geometry. Uploaded images are processed and then discarded, never stored or shared.
+- **Multiplayer:** other players only ever see the parameters.

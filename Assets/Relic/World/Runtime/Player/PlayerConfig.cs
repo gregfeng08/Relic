@@ -12,10 +12,23 @@ namespace Relic.World.Runtime
         [Header("Ground")]
         public float RunSpeed = 6.0f;
         public float SprintSpeed = 9.5f;
+        [Tooltip("Legacy linear acceleration (m/s²); now only caps the smoothed acceleration.")]
         public float GroundAcceleration = 60f;
         public float GroundDeceleration = 45f;
-        [Tooltip("Degrees per second the body turns toward the move direction.")]
+        [Tooltip("Critically damped speed response when starting to move (s; ~90% of top speed after 2x this).")]
+        public float AccelTime = 0.1f;
+        [Tooltip("Speed response when letting go of the stick (s).")]
+        public float StopTime = 0.07f;
+        [Tooltip("Speed response when the input points against the current velocity (s).")]
+        public float ReverseTime = 0.09f;
+        [Tooltip("Maximum degrees per second the body turns toward the move direction.")]
         public float TurnSpeed = 900f;
+        [Tooltip("Smoothing time (s) of the body's facing: lower = snappier turns.")]
+        public float TurnSmoothTime = 0.07f;
+        [Tooltip("Snap down onto ground up to this far below the feet (m) instead of going airborne on slopes and steps.")]
+        public float GroundSnapDistance = 0.5f;
+        [Tooltip("Falls faster than this (m/s) slow you briefly on landing.")]
+        public float HardLandingSpeed = 13f;
         [Tooltip("Walkable slope limit in degrees; steeper ground slides and can be climbed.")]
         public float SlopeLimit = 48f;
         public float SlideSpeed = 9f;
@@ -61,8 +74,30 @@ namespace Relic.World.Runtime
         [Tooltip("Depth of the body's center below the water surface while swimming.")]
         public float SwimDepth = 1.15f;
 
+        [Header("Dive (Ctrl/C down, Space up)")]
+        public float DiveSpeed = 3.2f;
+        public float DiveVerticalSpeed = 2.4f;
+        [Tooltip("Smoothing time (s) of underwater velocity: high = floaty.")]
+        public float DiveSmoothTime = 0.38f;
+        [Tooltip("Slow upward drift (m/s) while diving without vertical input.")]
+        public float DiveBuoyancy = 0.35f;
+        [Tooltip("Seconds of breath underwater.")]
+        public float BreathMax = 25f;
+        [Tooltip("Breath regained per second at the surface.")]
+        public float BreathRegen = 10f;
+        [Tooltip("Stamina drained per second while out of breath (forced to surface).")]
+        public float DrownStaminaDrain = 30f;
+
         [Header("Camera")]
         public float MouseSensitivity = 0.12f;
+        [Tooltip("Smoothing (s) of mouse yaw/pitch. 0 = raw.")]
+        public float CameraLookSmooth = 0.03f;
+        [Tooltip("Smoothing (s) of the camera's horizontal follow.")]
+        public float CameraFollowTime = 0.05f;
+        [Tooltip("Smoothing (s) of the camera's vertical follow on the ground (steps, landings).")]
+        public float CameraVerticalTime = 0.11f;
+        [Tooltip("Smoothing (s) of the camera's vertical follow in the air (keeps jumps calm).")]
+        public float CameraAirVerticalTime = 0.24f;
         public float CameraDistance = 5.5f;
         public float CameraMinDistance = 1.5f;
         public float CameraMaxDistance = 12f;

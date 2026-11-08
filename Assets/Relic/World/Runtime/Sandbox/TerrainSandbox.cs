@@ -41,6 +41,8 @@ namespace Relic.World.Runtime
         public float Lod2Distance = 768f;
         public float ColliderDistance = 72f;
         public float UploadBudgetMs = 2f;
+        [Tooltip("Trees, bushes, rocks and grass (F10 toggles at runtime).")]
+        public bool ShowProps = true;
 
         [Header("Debug")]
         public bool ShowOverlay = true;
@@ -55,6 +57,8 @@ namespace Relic.World.Runtime
         public OrbitCamera OrbitCam { get; private set; }
         public PerfMonitor Perf { get; private set; }
         public SkyController Sky { get; private set; }
+        public PropStreamer Props { get; private set; }
+        public PropRenderer PropView { get; private set; }
         public bool Spawned { get; private set; }
         public ulong CurrentSeed { get; private set; }
 
@@ -138,6 +142,7 @@ namespace Relic.World.Runtime
             OrbitCam.Target = playerGo.transform;
             OrbitCam.Probe = Probe;
             Player.OrbitCam = OrbitCam;
+            Sky.View = OrbitCam; // underwater fog when the camera dips below the surface
 
             Origin.Target = playerGo.transform;
             Origin.Register(playerGo.transform);
@@ -157,6 +162,18 @@ namespace Relic.World.Runtime
                 ColliderDistance = ColliderDistance,
             };
             Streamer.Initialize(Generator, Origin, playerGo.transform, terrainMat, waterMat);
+
+            // Props: trees, bushes, rocks and ground cover (instanced), colliders near the player.
+            if (ShowProps)
+            {
+                Props = streamGo.AddComponent<PropStreamer>();
+                Props.Initialize(Generator, Origin, playerGo.transform, Streamer.Lod);
+                PropView = streamGo.AddComponent<PropRenderer>();
+                PropView.Initialize(Props, cam);
+                var propColliders = streamGo.AddComponent<PropColliders>();
+                propColliders.Streamer = Props;
+                propColliders.Target = playerGo.transform;
+            }
 
             // HUD and perf.
             Perf = streamGo.AddComponent<PerfMonitor>();
@@ -214,6 +231,7 @@ namespace Relic.World.Runtime
             if (PlayerInput.KeyDown(Key.F4)) Player.ToggleFly();
             if (PlayerInput.KeyDown(Key.F5)) { BuildWorld(CurrentSeed + 1); return; }
             if (PlayerInput.KeyDown(Key.F6) && Sky != null) Sky.DayCycle = !Sky.DayCycle;
+            if (PlayerInput.KeyDown(Key.F10) && PropView != null) PropView.enabled = !PropView.enabled;
             if (PlayerInput.KeyDown(Key.F8))
             {
                 if (Perf.BenchmarkRunning) { Perf.CancelBenchmark(); Player.AutoRun = false; }

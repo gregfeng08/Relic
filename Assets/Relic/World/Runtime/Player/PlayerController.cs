@@ -2,19 +2,25 @@ using UnityEngine;
 
 namespace Relic.World.Runtime
 {
-    public enum MoveState { Grounded, Airborne, Climbing, Swimming, Flying }
+    public enum MoveState { Grounded, Airborne, Climbing, Swimming, Flying, Diving }
 
     /// <summary>Asks the world for the terrain and water height at a scene position (pure height function, no colliders needed).</summary>
     public delegate void TerrainProbe(Vector3 scenePosition, out float groundHeight, out float waterLevel);
 
     /// <summary>
     /// M1 third-person movement on a CharacterController: run, sprint (stamina), dash (~4 m in
-    /// ~0.18 s, stamina, NO invulnerability: it only moves the body), jump, climb steep surfaces,
-    /// glide from heights, swim. Movement is relative to the camera's yaw, Genshin style.
+    /// ~0.24 s, stamina, NO invulnerability: it only moves the body), jump, climb real walls,
+    /// swim and dive. Movement is relative to the camera's yaw, Genshin style.
     /// Shift: press = dash, keep holding = sprint (Genshin). Space: jump, climb-jump. No glider.
+    ///
+    /// Feel: speed follows a critically damped response (eases in and out, no velocity steps),
+    /// the body turns with a smooth-damped yaw and the run direction follows the body, so turns
+    /// arc instead of cutting corners. Ground is snapped onto across slopes and small drops, so
+    /// the state doesn't flicker. Split into partial files: Ground (snap, landing, facing),
+    /// Climb, Water (swim, dive, breath).
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
-    public sealed class PlayerController : MonoBehaviour
+    public sealed partial class PlayerController : MonoBehaviour
     {
         public PlayerConfig Config;
         public OrbitCamera OrbitCam;
@@ -41,6 +47,7 @@ namespace Relic.World.Runtime
 
         CharacterController _cc;
         Vector3 _velocity;
+        Vector3 _accelRef;        // SmoothDamp state of the horizontal velocity
         float _lastGroundedTime = -10f;
         float _jumpPressedTime = -10f;
         float _staminaUsedTime = -10f;
@@ -58,12 +65,14 @@ namespace Relic.World.Runtime
         void Awake()
         {
             _cc = GetComponent<CharacterController>();
+            _yaw = transform.eulerAngles.y;
         }
 
         void Start()
         {
             if (Config == null) Config = ScriptableObject.CreateInstance<PlayerConfig>();
             Stamina = Config.MaxStamina;
+            Breath = Config.BreathMax;
             _cc.slopeLimit = Config.SlopeLimit + 2f;
             _cc.stepOffset = 0.35f;
             _cc.skinWidth = 0.04f;
@@ -78,6 +87,10 @@ namespace Relic.World.Runtime
             transform.position = scenePosition;
             _cc.enabled = was;
             _velocity = Vector3.zero;
+            _accelRef = Vector3.zero;
+            _yaw = transform.eulerAngles.y;
+            _yawVel = 0f;
+            VisualYOffset = 0f;
             SetState(MoveState.Airborne);
         }
 
@@ -85,12 +98,14 @@ namespace Relic.World.Runtime
         {
             SetState(State == MoveState.Flying ? MoveState.Airborne : MoveState.Flying);
             _velocity = Vector3.zero;
+            _accelRef = Vector3.zero;
         }
 
         void Update()
         {
             if (Frozen || Config == null) return;
             float dt = Mathf.Min(Time.deltaTime, 0.05f);
+            if (dt <= 0f) return;
             PlayerInputState input = PlayerInput.Read();
             if (input.JumpPressed) _jumpPressedTime = Time.time;
             _stateTime += dt;
@@ -104,11 +119,14 @@ namespace Relic.World.Runtime
                 case MoveState.Grounded:
                 case MoveState.Airborne: UpdateLocomotion(dt, input, moveWorld); break;
                 case MoveState.Climbing: UpdateClimb(dt, input); break;
-                case MoveState.Swimming: UpdateSwim(dt, input, moveWorld); break;
+                case MoveState.Swimming:
+                case MoveState.Diving: UpdateWater(dt, input, moveWorld); break;
                 case MoveState.Flying: UpdateFly(dt, input, moveWorld); break;
             }
 
             UpdateStamina(dt);
+            UpdateBreath(dt);
+            UpdateFeel(dt);
             SafetyNet();
         }
 
@@ -124,7 +142,7 @@ namespace Relic.World.Runtime
             // Dash: a burst of movement. It never grants invulnerability.
             if (input.SprintPressed && grounded && !steep && !Exhausted && Time.time >= _dashReadyTime && Stamina > 0f)
             {
-                _dashDir = moveWorld.sqrMagnitude > 0.01f ? moveWorld.normalized : transform.forward;
+                _dashDir = moveWorld.sqrMagnitude > 0.01f ? moveWorld.normalized : Forward;
                 _dashTimeLeft = Config.DashDuration;
                 _dashReadyTime = Time.time + Config.DashDuration + Config.DashCooldown;
                 UseStamina(Config.DashStamina);
@@ -143,18 +161,35 @@ namespace Relic.World.Runtime
                 float t01 = 1f - Mathf.Clamp01(_dashTimeLeft / Config.DashDuration);
                 _dashTimeLeft -= dt;
                 horizontal = _dashDir * Mathf.Lerp(v0, vExit, t01);
-                FaceDirection(_dashDir, dt * 3f);
+                FaceTowards(_dashDir, Config.TurnSmoothTime * 0.5f, dt);
+                _accelRef = Vector3.zero; // hand over to the run smoothly when the dash ends
             }
             else
             {
                 bool moving = moveWorld.sqrMagnitude > 0.01f;
                 IsSprinting = input.SprintHeld && moving && grounded && !Exhausted && Stamina > 0f;
-                float speed = IsSprinting ? Config.SprintSpeed : Config.RunSpeed;
-                Vector3 target = moveWorld * speed;
-                float accel = grounded ? (moving ? Config.GroundAcceleration : Config.GroundDeceleration) : Config.AirAcceleration;
-                // Keep momentum after a dash/sprint in the air; only steer.
-                horizontal = Vector3.MoveTowards(horizontal, target, accel * dt);
-                if (moving) FaceDirection(moveWorld, dt);
+                float speed = (IsSprinting ? Config.SprintSpeed : Config.RunSpeed) * LandingSpeedFactor;
+                Vector3 target = Vector3.zero;
+                if (moving)
+                {
+                    FaceTowards(moveWorld, Config.TurnSmoothTime, dt);
+                    target = RunDirection(moveWorld, horizontal.magnitude) * (speed * Mathf.Clamp01(moveWorld.magnitude));
+                }
+                if (grounded)
+                {
+                    float response = !moving ? Config.StopTime
+                        : Vector3.Dot(horizontal, target) < 0f ? Config.ReverseTime : Config.AccelTime;
+                    float maxAccel = Mathf.Max(Config.GroundAcceleration, Config.GroundDeceleration) * 1.5f;
+                    horizontal = Vector3.SmoothDamp(horizontal, target, ref _accelRef, response, maxAccel, dt);
+                }
+                else
+                {
+                    // Keep momentum after a dash or sprint in the air; only steer.
+                    Vector3 airTarget = moving ? target : horizontal;
+                    if (moving && horizontal.magnitude > target.magnitude) airTarget = target.normalized * horizontal.magnitude;
+                    horizontal = Vector3.MoveTowards(horizontal, airTarget, Config.AirAcceleration * dt);
+                    _accelRef = Vector3.zero;
+                }
                 if (IsSprinting) UseStamina(Config.SprintDrain * dt);
             }
 
@@ -163,8 +198,9 @@ namespace Relic.World.Runtime
             {
                 Vector3 downSlope = Vector3.ProjectOnPlane(Vector3.down, _groundNormal).normalized;
                 horizontal += new Vector3(downSlope.x, 0f, downSlope.z) * Config.SlideSpeed * dt * 4f;
-                float into = Vector3.Dot(horizontal, new Vector3(-_groundNormal.x, 0f, -_groundNormal.z).normalized);
-                if (into > 0f) horizontal -= new Vector3(-_groundNormal.x, 0f, -_groundNormal.z).normalized * into;
+                Vector3 into = new Vector3(-_groundNormal.x, 0f, -_groundNormal.z).normalized;
+                float push = Vector3.Dot(horizontal, into);
+                if (push > 0f) horizontal -= into * push;
             }
 
             float vy = _velocity.y;
@@ -177,9 +213,9 @@ namespace Relic.World.Runtime
                 _lastGroundedTime = -10f;
                 jumped = true;
             }
-            else if (grounded && vy <= 0f)
+            else if (grounded && !steep)
             {
-                vy = -3f; // stick to slopes and steps
+                vy = SlopeFollowY(horizontal); // run along the slope instead of stepping off it
             }
             else
             {
@@ -187,161 +223,40 @@ namespace Relic.World.Runtime
             }
 
             _velocity = new Vector3(horizontal.x, vy, horizontal.z);
-            CollisionFlags flags = _cc.Move(_velocity * dt);
+            float fallSpeed = -vy;
+            float yBefore = transform.position.y;
+            Vector3 move = _velocity * dt;
+            if (grounded && !jumped && !steep) move.y -= 0.02f; // keep contact so isGrounded stays true
+            CollisionFlags flags = _cc.Move(move);
             bool nowGrounded = (flags & CollisionFlags.Below) != 0 || (_cc.isGrounded && vy <= 0f);
             if ((flags & CollisionFlags.Above) != 0 && _velocity.y > 0f) _velocity.y = 0f;
 
-            if (nowGrounded && !jumped) SetState(MoveState.Grounded);
+            // Lost contact on a slope or a small drop: snap back down instead of a micro-fall.
+            if (!nowGrounded && grounded && !jumped && TrySnapToGround()) nowGrounded = true;
+            if (grounded && nowGrounded && !jumped) AbsorbStep(transform.position.y - yBefore - move.y);
+
+            if (nowGrounded && !jumped)
+            {
+                if (State == MoveState.Airborne) OnLanded(fallSpeed);
+                SetState(MoveState.Grounded);
+            }
             else if (State == MoveState.Grounded && !nowGrounded) SetState(MoveState.Airborne);
 
             if (TryEnterSwim()) return;
             if (moveWorld.sqrMagnitude > 0.01f && _dashTimeLeft <= 0f && TryStartClimb(moveWorld, dt)) return;
         }
 
-        // --- Climb -----------------------------------------------------------------------
-
         /// <summary>
-        /// Grab a wall only when it's really a wall: steep (ClimbMinAngle), at least as tall as
-        /// the hero (the head ray hits it too), and either we're airborne/swimming or we've
-        /// been pushing into it on foot for ClimbGrabDelay. Small cliff bands and steep bumps
-        /// are run over or slid down instead of grabbed.
+        /// The direction to run in: the input direction from a standstill, the body's (smoothed)
+        /// facing once moving, so turns and reversals arc around at speed instead of cutting
+        /// through a stop. Blended by speed, so there's no switch.
         /// </summary>
-        bool TryStartClimb(Vector3 moveWorld, float dt = 0f, bool immediate = false)
+        Vector3 RunDirection(Vector3 moveWorld, float speed)
         {
-            if (Stamina <= 0f || Exhausted) { _climbPushTime = 0f; return false; }
-            Vector3 dir = moveWorld.normalized;
-            Vector3 chest = transform.position + Vector3.up * 1.1f;
-            float reach = _cc.radius + 0.35f;
-            float wallCos = Mathf.Cos(Config.ClimbMinAngle * Mathf.Deg2Rad);
-            if (!Physics.SphereCast(chest, 0.2f, dir, out RaycastHit hit, reach, TerrainMask, QueryTriggerInteraction.Ignore)
-                || hit.normal.y > wallCos                                             // not steep enough to be a wall
-                || Vector3.Dot(dir, -FlatNormal(hit.normal)) < 0.5f                    // not pushing into it
-                || !Physics.Raycast(transform.position + Vector3.up * 1.75f, dir, reach + 0.3f, TerrainMask, QueryTriggerInteraction.Ignore)) // shorter than us: step/slide, don't grab
-            {
-                _climbPushTime = 0f;
-                return false;
-            }
-            bool airborne = State == MoveState.Airborne || State == MoveState.Swimming;
-            if (!immediate && !airborne)
-            {
-                _climbPushTime += dt;
-                if (_climbPushTime < Config.ClimbGrabDelay) return false;
-            }
-            _climbPushTime = 0f;
-            _wallNormal = hit.normal;
-            _velocity = Vector3.zero;
-            _climbJumpLeft = 0f;
-            SetState(MoveState.Climbing);
-            FaceDirection(-FlatNormal(hit.normal), 1f);
-            return true;
-        }
-
-        void UpdateClimb(float dt, PlayerInputState input)
-        {
-            Vector3 pos = transform.position;
-            Vector3 n = _wallNormal;
-            bool chestHit = Physics.Raycast(pos + Vector3.up * 1.2f, -n, out RaycastHit chest, _cc.radius + 0.9f, TerrainMask, QueryTriggerInteraction.Ignore);
-            bool feetHit = Physics.Raycast(pos + Vector3.up * 0.25f, -n, out RaycastHit feet, _cc.radius + 0.9f, TerrainMask, QueryTriggerInteraction.Ignore);
-
-            if (!chestHit)
-            {
-                if (feetHit)
-                {
-                    // Topped out: vault up and over the edge.
-                    _velocity = Vector3.up * Config.VaultUpSpeed - FlatNormal(n) * 3f;
-                    SetState(MoveState.Airborne);
-                }
-                else
-                {
-                    _velocity = FlatNormal(n) * 1.5f;
-                    SetState(MoveState.Airborne);
-                }
-                return;
-            }
-
-            n = chest.normal;
-            if (n.y >= SlopeCos + 0.05f)
-            {
-                SetState(MoveState.Airborne); // the wall flattened out: walk again
-                return;
-            }
-            _wallNormal = n;
-            FaceDirection(-FlatNormal(n), dt * 2f);
-
-            if (input.JumpPressed)
-            {
-                _jumpPressedTime = -10f;
-                if (input.Move.y < -0.5f)
-                {
-                    // Leap away from the wall.
-                    _velocity = FlatNormal(n) * 4.5f + Vector3.up * 3.5f;
-                    SetState(MoveState.Airborne);
-                    return;
-                }
-                if (Stamina >= Config.ClimbJumpStamina * 0.5f)
-                {
-                    UseStamina(Config.ClimbJumpStamina);
-                    _climbJumpLeft = 0.3f;
-                }
-            }
-
-            Vector3 up = Vector3.ProjectOnPlane(Vector3.up, n).normalized;
-            Vector3 right = Vector3.Cross(Vector3.up, -FlatNormal(n)).normalized;
-            right = Vector3.ProjectOnPlane(right, n).normalized;
-            Vector3 v;
-            if (_climbJumpLeft > 0f)
-            {
-                _climbJumpLeft -= dt;
-                v = up * (Config.ClimbJumpHeight / 0.3f);
-            }
-            else
-            {
-                v = (up * input.Move.y + right * input.Move.x) * Config.ClimbSpeed;
-            }
-            bool moving = v.sqrMagnitude > 0.01f;
-            UseStamina((moving ? Config.ClimbDrain : 1f) * dt);
-            _velocity = v;
-
-            CollisionFlags flags = _cc.Move((v - n * 0.6f) * dt);
-            if (Stamina <= 0f)
-            {
-                _velocity = FlatNormal(n) * 1f;
-                SetState(MoveState.Airborne);
-                return;
-            }
-            if ((flags & CollisionFlags.Below) != 0 && input.Move.y < -0.1f) SetState(MoveState.Grounded);
-        }
-
-        // --- Swim ------------------------------------------------------------------------
-
-        bool TryEnterSwim()
-        {
-            if (Probe == null) return false;
-            Probe(transform.position, out float ground, out float water);
-            if (water - ground < Config.SwimDepth + 0.1f) return false;
-            if (transform.position.y > water - Config.SwimDepth) return false;
-            SetState(MoveState.Swimming);
-            _velocity.y = Mathf.Max(_velocity.y, -2f);
-            return true;
-        }
-
-        void UpdateSwim(float dt, PlayerInputState input, Vector3 moveWorld)
-        {
-            float ground = transform.position.y - 10f, water = transform.position.y;
-            if (Probe != null) Probe(transform.position, out ground, out water);
-            float targetY = water - Config.SwimDepth;
-            Vector3 horizontal = Vector3.MoveTowards(new Vector3(_velocity.x, 0f, _velocity.z), moveWorld * Config.SwimSpeed, 10f * dt);
-            float vy = Mathf.Clamp((targetY - transform.position.y) * 4f, -6f, 3f);
-            _velocity = new Vector3(horizontal.x, vy, horizontal.z);
-            if (moveWorld.sqrMagnitude > 0.01f) FaceDirection(moveWorld, dt);
-            _cc.Move(_velocity * dt);
-
-            if (water - ground < Config.SwimDepth)
-            {
-                SetState(MoveState.Grounded);
-                return;
-            }
-            if (moveWorld.sqrMagnitude > 0.01f) TryStartClimb(moveWorld, dt, immediate: true);
+            float inputYaw = Mathf.Atan2(moveWorld.x, moveWorld.z) * Mathf.Rad2Deg;
+            float follow = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.6f, 3.5f, speed));
+            float yaw = inputYaw + Mathf.DeltaAngle(inputYaw, _yaw) * follow;
+            return Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
         }
 
         // --- Debug fly and benchmark -----------------------------------------------------
@@ -351,7 +266,7 @@ namespace Relic.World.Runtime
             float speed = input.SprintHeld ? 120f : 35f;
             float vertical = (input.JumpHeld ? 1f : 0f) - (input.DescendHeld ? 1f : 0f);
             _velocity = (moveWorld + Vector3.up * vertical) * speed;
-            if (moveWorld.sqrMagnitude > 0.01f) FaceDirection(moveWorld, dt);
+            if (moveWorld.sqrMagnitude > 0.01f) FaceTowards(moveWorld, Config.TurnSmoothTime, dt);
             bool was = _cc.enabled;
             _cc.enabled = false;
             transform.position += _velocity * dt;
@@ -368,7 +283,7 @@ namespace Relic.World.Runtime
             Vector3 dir = AutoRunDirection.normalized;
             _velocity = dir * AutoRunSpeed;
             IsSprinting = true;
-            FaceDirection(dir, dt);
+            FaceTowards(dir, Config.TurnSmoothTime, dt);
             Vector3 p = transform.position + _velocity * dt;
             if (Probe != null)
             {
@@ -386,7 +301,7 @@ namespace Relic.World.Runtime
 
         void UpdateStamina(float dt)
         {
-            bool draining = State == MoveState.Climbing || IsSprinting || IsDashing;
+            bool draining = State == MoveState.Climbing || IsSprinting || IsDashing || OutOfBreath;
             if (!draining && Time.time - _staminaUsedTime >= Config.StaminaRegenDelay)
                 Stamina = Mathf.Min(Config.MaxStamina, Stamina + Config.StaminaRegen * dt);
             if (Stamina <= 0f) Exhausted = true;
@@ -397,28 +312,6 @@ namespace Relic.World.Runtime
         {
             Stamina = Mathf.Max(0f, Stamina - amount);
             _staminaUsedTime = Time.time;
-        }
-
-        void ProbeGround()
-        {
-            Vector3 origin = transform.position + Vector3.up * (_cc.radius + 0.1f);
-            if (Physics.SphereCast(origin, _cc.radius * 0.9f, Vector3.down, out RaycastHit hit, 0.6f, TerrainMask, QueryTriggerInteraction.Ignore))
-                _groundNormal = hit.normal;
-            else
-                _groundNormal = Vector3.up;
-        }
-
-        float HeightAboveGround()
-        {
-            Vector3 p = transform.position;
-            if (Physics.Raycast(p + Vector3.up * 0.1f, Vector3.down, out RaycastHit hit, 60f, TerrainMask, QueryTriggerInteraction.Ignore))
-                return hit.distance - 0.1f;
-            if (Probe != null)
-            {
-                Probe(p, out float ground, out float water);
-                return p.y - Mathf.Max(ground, water);
-            }
-            return 0f;
         }
 
         /// <summary>If the player ever ends up under the terrain (collider not ready yet), put them back on top.</summary>
@@ -438,14 +331,6 @@ namespace Relic.World.Runtime
             Quaternion q = Quaternion.Euler(0f, yaw, 0f);
             Vector3 v = q * new Vector3(move.x, 0f, move.y);
             return Vector3.ClampMagnitude(v, 1f);
-        }
-
-        void FaceDirection(Vector3 dir, float dt)
-        {
-            dir.y = 0f;
-            if (dir.sqrMagnitude < 1e-4f) return;
-            Quaternion target = Quaternion.LookRotation(dir.normalized, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, target, Config.TurnSpeed * dt);
         }
 
         static Vector3 FlatNormal(Vector3 n)
