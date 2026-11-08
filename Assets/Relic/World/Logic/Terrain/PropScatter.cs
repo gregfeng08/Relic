@@ -1,36 +1,30 @@
 using Relic.Core.Random;
 using Relic.World.Chunks;
+using Relic.World.Regions;
 
 namespace Relic.World.Terrain
 {
-    /// <summary>Placeholder props scattered on the terrain (art comes later; placement is final-ish).</summary>
-    public enum PropKind : byte
-    {
-        Broadleaf = 0,
-        Pine = 1,
-        Boulder = 2,
-    }
-
-    /// <summary>One prop, positioned relative to its chunk's origin (meters).</summary>
-    public struct PropInstance
-    {
-        public PropKind Kind;
-        public float X, Y, Z;
-        public float Scale;
-        public float Yaw; // degrees
-    }
-
     /// <summary>
-    /// Deterministic per-chunk prop placement: a jittered 8 m grid, kept or dropped by the biome's
-    /// density, never under water or on cliffs. Pure function of (seed, chunk); thread-safe.
+    /// Deterministic per-chunk prop placement, a pure function of (seed, chunk); thread-safe.
+    /// Two passes with their own random streams:
+    /// - <see cref="Place"/>: a jittered 8 m grid of trees, bushes and boulders, by biome density
+    ///   times a region-family factor (dense forests, lone meadow trees, sparse highlands, dead
+    ///   badlands), never under water, on cliffs or above the snow line.
+    /// - <see cref="PlaceSmall"/>: a jittered 4 m grid of grass, flowers, rocks, dead shrubs and
+    ///   succulents, only needed near the player.
     /// </summary>
-    public static class PropScatter
+    public static partial class PropScatter
     {
         public const int CellSize = 8;
         public const int CellsPerSide = ChunkMath.ChunkSize / CellSize; // 8
         public const int MaxPerChunk = CellsPerSide * CellsPerSide + 16;
 
+        public const int SmallCellSize = 4;
+        public const int SmallCellsPerSide = ChunkMath.ChunkSize / SmallCellSize; // 16
+        public const int MaxSmallPerChunk = SmallCellsPerSide * SmallCellsPerSide;
+
         static readonly ulong Salt = Hash.Of("props");
+        static readonly ulong SmallSalt = Hash.Of("props.small");
 
         /// <summary>Tree density (probability per 8 m cell) by biome.</summary>
         public static float TreeDensity(Biome b)
@@ -45,8 +39,40 @@ namespace Relic.World.Terrain
                 case Biome.Steppe: return 0.012f;
                 case Biome.Tundra: return 0.07f;
                 case Biome.Snow: return 0.025f;
+                case Biome.Beach: return 0.02f; // palms on warm coasts
                 default: return 0f;
             }
+        }
+
+        /// <summary>Region character on top of the biome: forests are dense, highlands sparse.</summary>
+        public static float FamilyTreeFactor(RegionFamily f)
+        {
+            switch (f)
+            {
+                case RegionFamily.Forest: return 1.6f;
+                case RegionFamily.Meadow: return 0.7f;
+                case RegionFamily.Highlands: return 0.4f;
+                case RegionFamily.Badlands: return 0.25f;
+                case RegionFamily.Marsh: return 0.9f;
+                default: return 1f;
+            }
+        }
+
+        static float BushDensity(Biome b, RegionFamily f)
+        {
+            float d;
+            switch (b)
+            {
+                case Biome.Forest: d = 0.12f; break;
+                case Biome.Jungle: d = 0.2f; break;
+                case Biome.Swamp: d = 0.12f; break;
+                case Biome.Grassland: d = 0.04f; break;
+                case Biome.Savanna: d = 0.03f; break;
+                case Biome.Tundra: d = 0.03f; break;
+                default: d = 0f; break;
+            }
+            if (f == RegionFamily.Badlands || f == RegionFamily.Highlands) d *= 0.3f;
+            return d;
         }
 
         public static float BoulderDensity(Biome b, RegionFamilyHint family)
@@ -67,7 +93,9 @@ namespace Relic.World.Terrain
         /// <summary>Coarse hint so rocky regions get more boulders.</summary>
         public enum RegionFamilyHint : byte { Normal, Rocky }
 
-        /// <summary>Fills output with the chunk's props and returns how many were placed.</summary>
+        static bool Rocky(RegionFamily f) => f == RegionFamily.Highlands || f == RegionFamily.Badlands || f == RegionFamily.Frost;
+
+        /// <summary>Fills output with the chunk's trees, bushes and boulders and returns how many were placed.</summary>
         public static int Place(TerrainGenerator gen, ChunkCoord chunk, PropInstance[] output)
         {
             var rng = new Pcg32(Hash.Combine(gen.Seed, Hash.Coord(chunk.X, chunk.Z), Salt));
@@ -91,28 +119,33 @@ namespace Relic.World.Terrain
                     TerrainSample s = gen.Sample(wx, wz);
                     if ((double)s.Height < (double)s.WaterLevel + 0.6) continue;
 
-                    double tree = TreeDensity(s.Biome);
-                    var hint = s.Family == Regions.RegionFamily.Highlands || s.Family == Regions.RegionFamily.Badlands || s.Family == Regions.RegionFamily.Frost
-                        ? RegionFamilyHint.Rocky : RegionFamilyHint.Normal;
-                    double boulder = BoulderDensity(s.Biome, hint);
-                    if (roll >= tree + boulder) continue;
+                    double tree = s.Height > s.SnowLine ? 0.0 : TreeDensity(s.Biome) * FamilyTreeFactor(s.Family); // nothing grows above the snow line
+                    if (s.Biome == Biome.Beach && s.Temperature < 0.25f) tree = 0.0; // palms only on warm coasts
+                    double bush = s.Height > s.SnowLine ? 0.0 : BushDensity(s.Biome, s.Family);
+                    double boulder = BoulderDensity(s.Biome, Rocky(s.Family) ? RegionFamilyHint.Rocky : RegionFamilyHint.Normal);
+                    if (roll >= tree + bush + boulder) continue;
 
                     // Reject steep ground (cheap two-sample slope).
                     float hx = gen.HeightAt(wx + 1.5, wz), hz = gen.HeightAt(wx, wz + 1.5);
                     double slope = System.Math.Max(System.Math.Abs((double)hx - s.Height), System.Math.Abs((double)hz - s.Height)) / 1.5;
                     bool isTree = roll < tree;
-                    if (isTree && slope > 0.6f) continue;
-                    if (!isTree && slope > 1.2f) continue;
+                    bool isBush = !isTree && roll < tree + bush;
+                    if ((isTree || isBush) && slope > 0.6f) continue;
+                    if (!isTree && !isBush && slope > 1.2f) continue;
 
                     PropKind kind;
                     double scale;
                     if (isTree)
                     {
-                        bool cold = s.Temperature < -0.2f || s.Biome == Biome.Tundra || s.Biome == Biome.Snow;
-                        bool mixed = s.Biome == Biome.Forest && s.Temperature < 0.15f && kindRoll < 0.35f;
-                        kind = cold || mixed ? PropKind.Pine : PropKind.Broadleaf;
+                        kind = TreeKind(s, kindRoll);
                         scale = 0.75 + scaleRoll * 0.6;
                         if (s.Biome == Biome.Jungle) scale *= 1.25;
+                        if (s.Family == RegionFamily.Forest) scale *= 1.1;
+                    }
+                    else if (isBush)
+                    {
+                        kind = PropKind.Bush;
+                        scale = 0.7 + scaleRoll * 0.7;
                     }
                     else
                     {
@@ -132,6 +165,23 @@ namespace Relic.World.Terrain
                 }
             }
             return count;
+        }
+
+        static PropKind TreeKind(in TerrainSample s, float kindRoll)
+        {
+            bool cold = s.Temperature < -0.2f || s.Biome == Biome.Tundra || s.Biome == Biome.Snow || s.Family == RegionFamily.Frost;
+            if (cold) return s.Snow > 0.02f || s.Biome == Biome.Snow || s.Temperature < -0.45f ? PropKind.SnowPine : PropKind.Pine;
+            if (s.Family == RegionFamily.Badlands || s.Biome == Biome.Desert || s.Biome == Biome.Steppe) return PropKind.DeadTree;
+            bool warm = s.Temperature > 0.3f;
+            if (warm && (s.Biome == Biome.Beach || ((s.Family == RegionFamily.Coast || s.Biome == Biome.Savanna) && s.Height - s.WaterLevel < 10f))) return PropKind.Palm;
+            if (s.Family == RegionFamily.Marsh || s.Biome == Biome.Swamp) return kindRoll < 0.3f ? PropKind.DeadTree : PropKind.Broadleaf;
+            if (s.Biome == Biome.Forest)
+            {
+                if (s.Temperature < 0.15f && kindRoll < 0.35f) return PropKind.Pine;
+                if (kindRoll < 0.55f) return PropKind.Birch;
+                return PropKind.Broadleaf;
+            }
+            return kindRoll < 0.3f ? PropKind.Birch : PropKind.Broadleaf;
         }
     }
 }
