@@ -35,6 +35,8 @@ namespace Relic.World.Editor
         public float SunAzimuth = float.NaN;
         /// <summary>Camera below the water surface (diving check).</summary>
         public bool Underwater;
+        /// <summary>Place trees, rocks and grass (as plain renderers) around the focus.</summary>
+        public bool Props;
     }
 
     /// <summary>
@@ -121,8 +123,8 @@ namespace Relic.World.Editor
         static void AddDefaultViews(TerrainGenerator gen, List<CaptureView> views)
         {
             gen.FindSpawn(out double sx, out double sz);
-            views.Add(new CaptureView { Name = "01_spawn_hero", X = sx, Z = sz, Yaw = 40f, Pitch = 12f, Distance = 5.5f, Height = 1.55f, Hero = true });
-            views.Add(new CaptureView { Name = "02_spawn_vista", X = sx, Z = sz, Yaw = 200f, Pitch = 8f, Distance = 30f, Height = 25f });
+            views.Add(new CaptureView { Name = "01_spawn_hero", X = sx, Z = sz, Yaw = 40f, Pitch = 12f, Distance = 5.5f, Height = 1.55f, Hero = true, Props = true });
+            views.Add(new CaptureView { Name = "02_spawn_vista", X = sx, Z = sz, Yaw = 200f, Pitch = 8f, Distance = 30f, Height = 25f, Props = true });
 
             // Find the nearest region of a few families and look at it from its edge.
             var wanted = new[] { RegionFamily.Highlands, RegionFamily.Badlands, RegionFamily.Coast, RegionFamily.Frost, RegionFamily.Forest, RegionFamily.Marsh };
@@ -147,7 +149,7 @@ namespace Relic.World.Editor
                 double len = Math.Sqrt(x * x + z * z);
                 double bx = x - x / len * 250.0, bz = z - z / len * 250.0;
                 float yaw = (float)(Math.Atan2(x - bx, z - bz) * 180.0 / Math.PI);
-                views.Add(new CaptureView { Name = "03_" + kv.Key.ToString().ToLowerInvariant(), X = bx, Z = bz, Yaw = yaw, Pitch = 6f, Distance = 1f, Height = 22f });
+                views.Add(new CaptureView { Name = "03_" + kv.Key.ToString().ToLowerInvariant(), X = bx, Z = bz, Yaw = yaw, Pitch = 6f, Distance = 1f, Height = 22f, Props = true });
             }
         }
 

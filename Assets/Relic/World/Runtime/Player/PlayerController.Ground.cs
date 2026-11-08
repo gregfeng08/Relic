@@ -24,6 +24,9 @@ namespace Relic.World.Runtime
         /// <summary>The body's smoothed facing yaw in degrees.</summary>
         public float FacingYaw => _yaw;
 
+        /// <summary>What the feet stand on: terrain plus prop colliders (boulders). The camera and climbing use TerrainMask only.</summary>
+        public const int GroundMask = TerrainMask | (1 << PropColliders.PropLayer);
+
         float _yaw, _yawVel;
         float _visualYVel;
         float _squashVel;
@@ -49,7 +52,7 @@ namespace Relic.World.Runtime
         void ProbeGround()
         {
             Vector3 origin = transform.position + Vector3.up * (_cc.radius + 0.1f);
-            if (Physics.SphereCast(origin, _cc.radius * 0.9f, Vector3.down, out RaycastHit hit, 0.6f, TerrainMask, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(origin, _cc.radius * 0.9f, Vector3.down, out RaycastHit hit, 0.6f, GroundMask, QueryTriggerInteraction.Ignore))
                 _groundNormal = hit.normal;
             else
                 _groundNormal = Vector3.up;
@@ -72,7 +75,7 @@ namespace Relic.World.Runtime
             float r = _cc.radius * 0.95f;
             Vector3 origin = transform.position + Vector3.up * (_cc.radius + 0.05f);
             float maxDist = Config.GroundSnapDistance + 0.05f;
-            if (!Physics.SphereCast(origin, r, Vector3.down, out RaycastHit hit, maxDist, TerrainMask, QueryTriggerInteraction.Ignore))
+            if (!Physics.SphereCast(origin, r, Vector3.down, out RaycastHit hit, maxDist, GroundMask, QueryTriggerInteraction.Ignore))
                 return false;
             if (hit.normal.y < SlopeCos) return false;
             // The capsule stops on contact, so overshooting a little is safe.

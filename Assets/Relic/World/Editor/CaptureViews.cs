@@ -154,9 +154,7 @@ namespace Relic.World.Editor
             views.Add(new CaptureView { Name = "d3_surface_above", X = cx + 30.0, Z = cz + 12.0, LookAt = true, CamX = cx, CamZ = cz, CamHeight = 2.5f, Height = depth - 1f, ViewDistance = 600f });
         }
 
-        public static void AddPropViews(TerrainGenerator gen, List<CaptureView> views) { }
 
-        internal static void AfterChunksBuilt(SandboxCapture.CaptureEnv env, CaptureView v, ChunkMeshData[] chunks, Transform root, double originX, double originZ) { }
 
         internal static void BeforeRender(SandboxCapture.CaptureEnv env, CaptureView v, Camera cam)
         {

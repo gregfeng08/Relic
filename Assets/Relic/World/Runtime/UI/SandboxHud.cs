@@ -128,7 +128,7 @@ namespace Relic.World.Runtime
             float ms = Perf != null ? Perf.SmoothedMs : 0f;
 
             string text =
-                "<b>Relic terrain sandbox</b>   F3 overlay · F4 fly · F5 new seed · F6 day cycle · F8 benchmark (3 km) · Esc cursor\n" +
+                "<b>Relic terrain sandbox</b>   F3 overlay · F4 fly · F5 new seed · F6 day cycle · F7 props · F8 benchmark (3 km) · Ctrl/C dive · Esc cursor\n" +
                 "Seed <b>" + Seed + "</b>    " + fps.ToString("0") + " fps (" + ms.ToString("0.0") + " ms)\n" +
                 "World x " + wx.ToString("0.0") + "  z " + wz.ToString("0.0") + "  y " + p.y.ToString("0.0") +
                 "   (distance " + System.Math.Sqrt(wx * wx + wz * wz).ToString("0") + " m)\n" +

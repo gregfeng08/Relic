@@ -6,7 +6,7 @@ namespace Relic.World.Terrain
     /// Snow caps (grounded: high peaks are snowy in every climate). The snow line is an absolute
     /// altitude shifted by the region's climate (low in Frost, mid in Meadow and Forest, high in
     /// Badlands and warm coasts) but always low enough for the region's tallest peaks to reach.
-    /// Cover rises through a noisy band of about 40 m: rock and alpine ground, patchy snow,
+    /// Cover rises through a noisy band of about 40 m: rock and alpine turf, patchy snow,
     /// full snow. Slope is left to the shader: snow only holds below ~47 degrees, so cliffs stay
     /// rock with snow on their ledges. Biome follows: alpine tundra (sparse snowy pines) just
     /// below the line, Snow (no trees) above it.
@@ -30,9 +30,9 @@ namespace Relic.World.Terrain
             // so this puts a visible cap on the tallest peaks of every family.
             double reachable = 30.0 + 0.5 * heightScale;
             double line = climateLine < reachable ? climateLine : reachable;
-            // Gentle lowland families (low HeightScale) don't get snowy hills: never below 90 m
+            // Gentle lowland families (low HeightScale) don't get snowy hills: never below 115 m
             // unless the climate itself is that cold.
-            double floor = climateLine < 90.0 ? climateLine : 90.0;
+            double floor = climateLine < 115.0 ? climateLine : 115.0;
             return WorldMath.Max(line, floor);
         }
 
@@ -56,7 +56,7 @@ namespace Relic.World.Terrain
             if (alpine > 0.0) ground = Rgb.Lerp(ground, AlpineGround, (float)(alpine * 0.75));
 
             if (h + wobble > snowLine) biome = Biome.Snow;
-            else if (h + wobble > snowLine - 45.0 && biome != Biome.Snow && biome != Biome.Beach) biome = Biome.Tundra;
+            else if (h + wobble > snowLine - 22.0 && biome != Biome.Snow && biome != Biome.Beach) biome = Biome.Tundra;
         }
     }
 }

@@ -54,6 +54,14 @@ namespace Relic.World.PlayTests
             while (!_sandbox.Streamer.IsSettled && t < 60f) { t += Time.unscaledDeltaTime; yield return null; }
             Assert.IsTrue(_sandbox.Streamer.IsSettled, "streamer never finished the initial view (" + _sandbox.Streamer.PendingWork + " pending)");
             Assert.Greater(_sandbox.Streamer.VisibleChunks, 1500);
+
+            // Props stream in around the player and get drawn.
+            t = 0f;
+            while (_sandbox.Props.PendingJobs > 0 && t < 30f) { t += Time.unscaledDeltaTime; yield return null; }
+            yield return null;
+            Assert.AreEqual(0, _sandbox.Props.PendingJobs, "prop placement never finished");
+            Assert.Greater(_sandbox.PropView.DrawnInstances, 100, "props are drawn");
+            Debug.Log("[Relic.World.Test] props: " + _sandbox.Props.ChunkCount + " chunks, " + _sandbox.PropView.DrawnInstances + " instances in " + _sandbox.PropView.DrawCalls + " draws, gather " + _sandbox.PropView.LastDrawMs.ToString("0.00") + " ms");
             Debug.Log("[Relic.World.Test] settled: " + _sandbox.Streamer.VisibleChunks + " chunks, " + _sandbox.Streamer.TotalBuilt + " builds, avg " +
                       (_sandbox.Streamer.TotalBuildMs / _sandbox.Streamer.TotalBuilt).ToString("0.00") + " ms, max " + _sandbox.Streamer.MaxBuildMs.ToString("0.0") + " ms");
         }
