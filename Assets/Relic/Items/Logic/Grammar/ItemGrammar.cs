@@ -22,7 +22,8 @@ namespace Relic.Items
         static readonly string[] HighQuality = { "Masterwork", "Heirloom" };
         static readonly string[] SomberQuality = { "Mended", "Field-Worn" };
 
-        public static ItemSentence Resolve(ulong seed, BaseType bt, Rarity rarity, int tier, WorldRegion home, WorldContext world, LoreBible bible)
+        /// <param name="overused">Optional: true for form nouns overused in recent names (NameFreshness); those forms are a third as likely, so one culture's relics don't all come out as the same object.</param>
+        public static ItemSentence Resolve(ulong seed, BaseType bt, Rarity rarity, int tier, WorldRegion home, WorldContext world, LoreBible bible, Func<string, bool> overused = null)
         {
             if (bible == null) throw new ArgumentNullException(nameof(bible));
             var s = new ItemSentence { Base = bt, RegionId = home?.Id, Layers = ItemSentence.LayersFor(rarity) };
@@ -41,7 +42,7 @@ namespace Relic.Items
             var frng = Pcg32.ForPurpose(seed, "grammar.form");
             if (forms.Count > 0 && rarity >= Rarity.Rare) // the culture's own words come with the real name (Rare+)
             {
-                var f = forms[frng.Range(0, forms.Count)];
+                var f = PickForm(forms, overused, ref frng);
                 s.Form = f.Form;
                 s.Kit = f.Kit;
                 s.CultureForm = true;
@@ -84,6 +85,21 @@ namespace Relic.Items
                 : theme.Tone == Tone.Somber ? SomberQuality : rarity == Rarity.Rare ? RareQuality : HighQuality;
             s.Quality = q[qrng.Range(0, q.Length)];
             return s;
+        }
+
+        static CultureForms.Entry PickForm(List<CultureForms.Entry> forms, Func<string, bool> overused, ref Pcg32 rng)
+        {
+            var weights = new int[forms.Count];
+            int total = 0;
+            for (int i = 0; i < forms.Count; i++)
+            {
+                var words = forms[i].Form.Split(' ');
+                weights[i] = overused != null && overused(words[words.Length - 1].ToLowerInvariant()) ? 1 : 3;
+                total += weights[i];
+            }
+            int r = rng.Range(0, total);
+            for (int i = 0; i < forms.Count; i++) { r -= weights[i]; if (r < 0) return forms[i]; }
+            return forms[0];
         }
 
         static CultureDef PickCulture(BaseType bt, WorldRegion home, LoreBible bible, ref Pcg32 rng)

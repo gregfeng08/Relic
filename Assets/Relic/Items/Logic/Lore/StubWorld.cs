@@ -197,7 +197,11 @@ namespace Relic.Items
                 {
                     case 0: return "did not come home from the road past " + region.Name;
                     case 1: return "left " + region.Name + " after a quarrel and never went back";
-                    default: return "was last seen during " + w.Events[rng.Range(0, w.Events.Count)].Name;
+                    default:
+                    {
+                        var named = w.Events.FindAll(e => e.Name.StartsWith("the ", StringComparison.Ordinal));
+                        return named.Count > 0 ? "was last seen around the time of " + named[rng.Range(0, named.Count)].Name : "did not come home from the road past " + region.Name;
+                    }
                 }
             }
             switch (rng.Range(0, 5))

@@ -122,7 +122,7 @@ namespace Relic.Items
             var bible = Bible;
 
             // The sentence first (17-item-grammar); everything below reads it.
-            var sentence = ItemGrammar.Resolve(seed, bt, rarity, tier, home, _world, bible);
+            var sentence = ItemGrammar.Resolve(seed, bt, rarity, tier, home, _world, bible, _freshness.IsOverused);
             Theme theme = sentence.Has(GrammarLayer.Theme) ? ItemGrammar.ThemeOf(sentence, bible) : null;
             var archetype = Archetypes.ById(sentence.Archetype);
             float budget = Budget(bt, rarity, tier);

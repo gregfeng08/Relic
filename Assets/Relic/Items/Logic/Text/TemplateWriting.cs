@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Relic.Core.Random;
+using System.Text.RegularExpressions;
 using Relic.Lore;
 
 namespace Relic.Items.Text
@@ -89,7 +90,7 @@ namespace Relic.Items.Text
             "Made in {place}, where they still argue about the best way to oil {material}.",
             "It smells faintly of {word}, like most good things from {place}.",
             "Somebody in {place} scratched a little {word} under the grip, for luck.",
-            "The {material} is {tag}, and the {form} is proud of it.",
+            "Good {material}, {tag}; somebody in {place} made sure of it.",
             "Bought at a fair in {place} for a song, and the seller sang it.",
         };
 
@@ -124,6 +125,9 @@ namespace Relic.Items.Text
             "Its maker learned the trick from a drawing from {era}, still pinned up at {lead}.",
             "The pattern on its side matches a milestone near {lead}, left over from {era}.",
             "Hold it up to the wind and it leans toward {lead}, the way {legend} once walked.",
+            "Wayfarers say {legend} carried one like it on the road to {lead}.",
+            "Ask at {lead}: the old folk there still sing a song about it from {era}.",
+            "It warms a little near {lead}, as if it remembers being carried there in {era}.",
         };
 
         static readonly string[] SomberLeads =
@@ -131,6 +135,7 @@ namespace Relic.Items.Text
             "It grows heavy near {lead}, where the old roads of {era} end in wildflowers.",
             "Someone at {lead} still keeps a candle lit for its owner, as folk there have since {era}.",
             "It points, quietly but always, toward {lead}, and nobody there will say why.",
+            "The last letter that mentions it came from {lead}, a little after {era}.",
         };
 
         static string Lore(RelicBrief b, CultureDef culture, Theme theme, ref Pcg32 rng, out List<string> refs)
@@ -139,8 +144,9 @@ namespace Relic.Items.Text
             var w = b.World;
             var bible = w.Bible ?? LoreSource.Default;
             var tone = theme.Tone;
-            var legends = bible.Legends.FindAll(l => l.Tone == tone);
-            if (legends.Count == 0) legends = bible.Legends;
+            // {legend} is always a person (artifacts can't walk or be known), in the item's tone where possible.
+            var legends = bible.Legends.FindAll(l => l.Tone == tone && l.Kind == LegendKind.Figure);
+            if (legends.Count == 0) legends = bible.Legends.FindAll(l => l.Kind == LegendKind.Figure);
             var motifLegends = legends.FindAll(l => l.Motifs.Contains(theme.Motif.Id));
             var legend = (motifLegends.Count > 0 && rng.Chance(0.6f) ? motifLegends : legends)[rng.Range(0, (motifLegends.Count > 0 ? motifLegends : legends).Count)];
             var factions = w.Factions.FindAll(f => f.Culture == culture.Id);
@@ -183,7 +189,8 @@ namespace Relic.Items.Text
                 if (leadPool.Count == 0) leadPool = w.Regions;
                 var lead = leadPool[rng.Range(0, leadPool.Count)];
                 var leadFaction = w.Factions[rng.Range(0, w.Factions.Count)];
-                var eras = bible.Eras.FindAll(e => tone == Tone.Somber ? (e.Id == "quarrel" || e.Id == "hush") : (e.Id == "lamplit" || e.Id == "rekindling"));
+                // Leads look back: bright ones to the Lamplit Age or the Hush, somber ones to the Quarrel or the Hush (never the present Rekindling).
+                var eras = bible.Eras.FindAll(e => tone == Tone.Somber ? (e.Id == "quarrel" || e.Id == "hush") : (e.Id == "lamplit" || e.Id == "hush"));
                 if (eras.Count == 0) eras = bible.Eras;
                 var leadValues = new Dictionary<string, string>
                 {
@@ -200,6 +207,7 @@ namespace Relic.Items.Text
                 {
                     string cand = Sentences(TemplateText.Fill(l, leadValues));
                     if (StyleGuide.LongSentences(cand).Count > 0) continue;
+                    if (Echoes(line, cand)) continue; // don't hum twice or name the same legend twice
                     chosen = chosen ?? cand;
                     if (HasBibleRef(line + " " + cand, w)) { chosen = cand; break; }
                 }
@@ -213,6 +221,18 @@ namespace Relic.Items.Text
         static void Shuffle<T>(List<T> list, ref Pcg32 rng)
         {
             for (int i = list.Count - 1; i > 0; i--) { int j = rng.Range(0, i + 1); var t = list[i]; list[i] = list[j]; list[j] = t; }
+        }
+
+        static readonly string[] EchoWords = { "hum", "glow", "lean", "warm", "pattern" };
+
+        /// <summary>True when the lead repeats the line's verb or legend ("hums like a kettle" ... "hums a little louder").</summary>
+        static bool Echoes(string line, string lead)
+        {
+            foreach (var w in EchoWords)
+                if (line.IndexOf(w, StringComparison.OrdinalIgnoreCase) >= 0 && lead.IndexOf(w, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            foreach (Match m in Regex.Matches(lead, @"p{Lu}p{L}+ p{Lu}p{L}+"))
+                if (line.Contains(m.Value)) return true;
+            return false;
         }
 
         static bool HasBibleRef(string text, WorldContext w)
