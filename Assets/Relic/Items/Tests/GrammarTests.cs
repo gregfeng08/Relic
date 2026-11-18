@@ -66,6 +66,26 @@ namespace Relic.Items.Tests
         }
 
         [Test]
+        public void BossesBelongToTheirRegionAndMostlyGuardIt()
+        {
+            var w = StubWorld.Create(12);
+            var bible = LoreSource.Default;
+            int bright = 0, n = 0;
+            for (int i = 0; i < 400; i++)
+            {
+                var b = Relic.Items.Bosses.BossGenerator.Generate(12, i, i % 11, w);
+                var region = w.NearestRegion(b.Tier);
+                Assert.AreEqual(region.Culture, b.Culture, b.Name);
+                Assert.IsTrue(new NameGenerator(bible.Culture(b.Culture), bible.Style).IsPlausible(b.Name.Split(' ')[0]), b.Name);
+                Assert.IsEmpty(TemplateText.BannedIn(b.Lore + " " + b.Title + " " + b.Arena, bible.Style.BannedWords), b.Lore);
+                Assert.IsTrue(Relic.Items.Bosses.ReadabilityChecker.Check(b).Passed, b.Name);
+                if (b.Tone == "Bright") bright++;
+                n++;
+            }
+            Assert.AreEqual(0.7, bright / (double)n, 0.07, "about 70% guardians");
+        }
+
+        [Test]
         public void EveryBibleMaterialAndFormIsDescribed()
         {
             var bible = LoreSource.Default;

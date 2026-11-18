@@ -24,7 +24,10 @@ namespace Relic.Items.Bosses
         public string[] Titles;           // "{region}" / "{faction}" / "{landmark}" placeholders
         public string[] Arenas;
         public string[] Hazards;
-        public string[] LoreTemplates;    // placeholders: {name} {region} {landmark} {faction} {event} {figure}
+        /// <summary>Guardian lore, the usual case (canon: many bosses are wild guardians, not villains). Placeholders: {name} {region} {landmark} {faction} {event} {figure} {culture}.</summary>
+        public string[] LoreTemplates;
+        /// <summary>The somber minority: old constructs of the Quarrel, things left alone in the Hush.</summary>
+        public string[] SomberLore;
     }
 
     public static class BossArchetypes
@@ -44,8 +47,12 @@ namespace Relic.Items.Bosses
                 Hazards = new[] { "shelves that topple when struck", "ink pools that leave footprints" },
                 LoreTemplates = new[]
                 {
-                    "{name} kept the archive at {landmark} for {faction} until {event}. When the wages stopped, they kept the books anyway, and nothing leaves {region} unrecorded.",
-                    "{name} catalogued every debt {faction} was ever owed. After {event} they began cataloguing the people who owed them.",
+                    "{name} has kept the reading room at {landmark} since the Hush, long after {faction} stopped sending readers. It still shushes visitors.",
+                    "The {culture} say {name} was a reading-owl once. Now it guards every book in {region} and lends none of them.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} was set to guard an Imperative vault in {region} during the Quarrel. Nobody ever came back to tell it to stop.",
                 },
             },
             new BossArchetype
@@ -55,13 +62,17 @@ namespace Relic.Items.Bosses
                 Statuses = new[] { StatusId.Bleeding, StatusId.Exhausted },
                 PatternNames = new[] { "Shield Wall Breaks", "Wheel of Spears", "Javelin Volley", "Cavalry Sweep", "The Charge", "Caltrops", "Siege Stones", "Palisade" },
                 TellFlourish = "its banner snaps taut and the drummers stop",
-                Titles = new[] { "Marshal of {region}", "the Iron Tithe", "Warlord of {faction}" },
-                Arenas = new[] { "a churned muster-field ringed with stakes", "the courtyard of a burnt fort" },
+                Titles = new[] { "Marshal of {region}", "the Old Marshal", "Keeper of the Muster-Field" },
+                Arenas = new[] { "a churned muster-field ringed with stakes", "the courtyard of a fort nobody remembers the name of" },
                 Hazards = new[] { "stakes that break into splinters", "trampled mud that slows the unwary" },
                 LoreTemplates = new[]
                 {
-                    "{name} held {region} for {faction} through {event}, and never handed it back. Their soldiers still collect the tithe at {landmark}.",
-                    "{name} won {event} for {faction} and was paid in land instead of coin. They have been taking the rest by force ever since.",
+                    "{name} still drills an army of scarecrows on the old muster-field in {region}. It lets travelers pass once they beat it.",
+                    "{faction} hired {name} to guard {landmark} a very long time ago. Nobody remembers to pay it, and it hasn't noticed.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} is an Imperative construct from the Quarrel, still holding {landmark} against an army that went home long ago.",
                 },
             },
             new BossArchetype
@@ -76,8 +87,12 @@ namespace Relic.Items.Bosses
                 Hazards = new[] { "orrery rings that sweep slowly across the floor", "glare from the open roof at noon" },
                 LoreTemplates = new[]
                 {
-                    "{name} told {faction} the date of {event} a year early, and nobody listened. They have been reading {region}'s fortunes alone at {landmark} ever since.",
-                    "{name} put out their own eyes to stop seeing {event}. It did not help.",
+                    "{name} reads the stars over {region} and corrects everyone's almanac, whether they asked or not.",
+                    "Wayfarers climb to {landmark} to ask {name} the way. It answers with a test first, and then with the way.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} saw {event} coming and told nobody. It has watched the sky over {region} alone ever since.",
                 },
             },
             new BossArchetype
@@ -87,13 +102,17 @@ namespace Relic.Items.Bosses
                 Statuses = new[] { StatusId.Poisoned, StatusId.Bleeding },
                 PatternNames = new[] { "Quill Shake", "Circling Brood", "Spit", "Raking Claws", "Lunge", "Nest Rot", "Egg Clutch", "Burrow" },
                 TellFlourish = "the brood in the walls shrieks and goes silent",
-                Titles = new[] { "Mother of the {region} Brood", "the Den-Queen", "the Thing under {landmark}" },
-                Arenas = new[] { "a den of bones and moulted quills", "a flooded quarry where the brood nests in the walls" },
-                Hazards = new[] { "rotting nest-matter that poisons", "brood hatchlings (cosmetic until summons exist)" },
+                Titles = new[] { "Mother of the {region} Brood", "the Den-Queen", "the Den-Mother of {landmark}" },
+                Arenas = new[] { "a den of moulted quills and old nests", "a flooded quarry where the brood nests in the walls" },
+                Hazards = new[] { "soured nest-matter that stings", "brood hatchlings (cosmetic until summons exist)" },
                 LoreTemplates = new[]
                 {
-                    "Herders in {region} left offerings at {landmark} for {name} until {event}. Then the offerings stopped, and the brood came looking for them.",
-                    "{faction} tried to drive {name} out of {region} and lost a generation of hunters doing it.",
+                    "{name} guards the nesting grounds under {landmark}. The {culture} leave her honey cakes, and she leaves them the valley.",
+                    "Herders in {region} call {name} the Den-Mother. She is fierce, fair, and very particular about her eggs.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} grew huge in the quiet of the Hush, and she has not forgiven {region} for leaving her alone.",
                 },
             },
             new BossArchetype
@@ -108,8 +127,12 @@ namespace Relic.Items.Bosses
                 Hazards = new[] { "tides that rise and fall on a cycle", "slick weed on the stones" },
                 LoreTemplates = new[]
                 {
-                    "{name} drowned {region} on the orders of {faction} during {event}. The water never fully went back down, and neither did they.",
-                    "{name} kept {landmark} for {faction} for forty years and was paid in salt. When {event} came they opened the sluices.",
+                    "{name} keeps the tides at {landmark} for the fishing boats of {region}, and tests anyone who wants to cross.",
+                    "The {culture} say {name} was a ferry spirit who grew too big for the ferry. It still keeps the crossing.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} was bound to a weir during the Quarrel and never released. The water at {landmark} still answers to it.",
                 },
             },
             new BossArchetype
@@ -119,13 +142,17 @@ namespace Relic.Items.Bosses
                 Statuses = new[] { StatusId.Burning, StatusId.Exhausted },
                 PatternNames = new[] { "Rivet Burst", "Turning Bellows", "Nail Shot", "Spark Fan", "Quench Line", "Molten Pour", "Slag Toss", "Anvil Drop" },
                 TellFlourish = "the forge-vents roar and the floor grates glow orange",
-                Titles = new[] { "the Smith-King of {region}", "Lord of the Slag", "Master of {landmark}" },
+                Titles = new[] { "the Smith-King of {region}", "Keeper of the Great Forge", "Master of {landmark}" },
                 Arenas = new[] { "a forge hall with quench troughs for cover", "a slag-field around a cold furnace" },
                 Hazards = new[] { "quench troughs that put out Burning", "vents that flare on a cycle" },
                 LoreTemplates = new[]
                 {
-                    "{name} forged the arms {faction} carried through {event} and crowned themself with the leftovers. Their furnace at {landmark} has not gone cold since.",
-                    "{name} melted down the bells of {region} to arm {faction}. The town has been quiet ever since.",
+                    "{name} keeps the great forge at {landmark} burning for all of {region}, and lets only worthy hands near the anvil.",
+                    "{faction} cast their first bells at the forge of {name}. It still checks every one for flaws, loudly.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} was an Imperative forge-construct. It still hammers out orders at {landmark}, though nobody comes to collect them.",
                 },
             },
             new BossArchetype
@@ -140,8 +167,12 @@ namespace Relic.Items.Bosses
                 Hazards = new[] { "broken chandelier glass", "pillars that can be cut through" },
                 LoreTemplates = new[]
                 {
-                    "{name} settled {faction}'s quarrels at {landmark} for a fee, and never lost. After {event} they stopped waiting to be hired.",
-                    "{name} killed {figure}'s heir in a duel over a debt and has been waiting at {landmark} for the next challenger ever since.",
+                    "{name} guards the bridge at {landmark} and asks every traveler for a friendly bout. It has not lost in three hundred years.",
+                    "{faction} send their best to spar with {name} each spring. They come back bruised, delighted and much better.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} swore to guard {landmark} until its duel was finished. Its rival never came back from {event}.",
                 },
             },
             new BossArchetype
@@ -152,12 +183,16 @@ namespace Relic.Items.Bosses
                 PatternNames = new[] { "Curtsey", "The Waltz", "Pointed Remark", "Fan Snap", "Receiving Line", "Spilled Wine", "Thrown Favours", "Folding Screen" },
                 TellFlourish = "the musicians in the gallery stop mid-phrase",
                 Titles = new[] { "the Velvet Magistrate", "Chamberlain of {faction}", "Host of {landmark}" },
-                Arenas = new[] { "a ballroom with folding screens for cover", "a garden court with poisoned fountains" },
-                Hazards = new[] { "fountains laced with poison", "screens that fold and unfold" },
+                Arenas = new[] { "a ballroom with folding screens for cover", "a garden court with fizzing fountains" },
+                Hazards = new[] { "fountains that spit stinging spray", "screens that fold and unfold" },
                 LoreTemplates = new[]
                 {
-                    "{name} hosted the dinner at {landmark} where {faction} agreed to {event}. Every guest who left early is buried in {region}.",
-                    "{name} has outlived three heads of {faction} by never saying no to any of them.",
+                    "{name} hosts a ball at {landmark} every midsummer. Guests who dance badly must try again, and again.",
+                    "{name} keeps the old manners of {region} alive and lets nobody into {landmark} without a proper bow.",
+                },
+                SomberLore = new[]
+                {
+                    "{name} kept up the court at {landmark} after everyone left in the Hush. It is still waiting for the guests.",
                 },
             },
         };

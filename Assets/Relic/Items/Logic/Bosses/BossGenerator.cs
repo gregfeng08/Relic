@@ -16,7 +16,7 @@ namespace Relic.Items.Bosses
     public static class BossGenerator
     {
         public const string GeneratorName = "relic.bosses";
-        public const int GeneratorVersion = 1;
+        public const int GeneratorVersion = 2;
 
         public static ulong BossSeed(ulong worldSeed, int index) => Hash.Combine(worldSeed, Hash.Of("boss"), unchecked((ulong)index));
 
@@ -35,7 +35,7 @@ namespace Relic.Items.Bosses
                 Archetype = arch.Id,
                 Tier = tier,
                 BaseHealth = BossHealth.BaseHealth(tier),
-                Generator = new GeneratorInfo { Name = GeneratorName, Version = GeneratorVersion, Mode = GenerationMode.Template, TextSource = "template-v1" },
+                Generator = new GeneratorInfo { Name = GeneratorName, Version = GeneratorVersion, Mode = GenerationMode.Template, TextSource = TemplateAuthor.Source },
             };
 
             BuildPhases(boss, arch, tier, ref rng);
@@ -188,38 +188,33 @@ namespace Relic.Items.Bosses
         {
             var rng = Pcg32.ForPurpose(seed, "boss.identity");
             world = world ?? StubWorld.Create(seed);
-            WorldRegion region = null;
-            foreach (var r in world.Regions)
-                if (region == null || Math.Abs(r.Tier - boss.Tier) < Math.Abs(region.Tier - boss.Tier)) region = r;
+            var region = world.NearestRegion(boss.Tier);
             var faction = world.Factions[rng.Range(0, world.Factions.Count)];
             var local = world.Events.FindAll(e => e.RegionId == region.Id);
             var ev = local.Count > 0 ? local[rng.Range(0, local.Count)] : world.Events[rng.Range(0, world.Events.Count)];
             var figure = world.Figures[rng.Range(0, world.Figures.Count)];
 
+            // A boss belongs to the people of its region and is named in their phonology. Most are
+            // guardians (canon: "many bosses are wild guardians rather than villains"); about three in
+            // ten are somber: constructs of the Quarrel, or things left alone in the Hush.
             var bible = world.Bible ?? LoreSource.Default;
             var culture = bible.Culture(region.Culture) ?? bible.Cultures[0];
+            var tone = Relic.Lore.MoodPicker.PickTone(ref rng, bible.Moods.BrightShare);
             string name = new Relic.Lore.NameGenerator(culture, bible.Style).Person(ref rng);
             string Fill(string t) => t.Replace("{name}", name).Replace("{region}", region.Name).Replace("{landmark}", region.Landmark)
-                .Replace("{faction}", faction.Name).Replace("{event}", ev.Name).Replace("{figure}", figure.Name);
-            string Sentences(string s) // capitalize each sentence ("the Salt Choir..." at a start)
-            {
-                var parts = s.Split(new[] { ". " }, StringSplitOptions.None);
-                for (int i = 0; i < parts.Length; i++) if (parts[i].Length > 0) parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i].Substring(1);
-                return string.Join(". ", parts);
-            }
+                .Replace("{faction}", faction.Name).Replace("{event}", ev.Name).Replace("{figure}", figure.Name).Replace("{culture}", culture.Adjective);
 
             boss.Name = name;
+            boss.Culture = culture.Id;
+            boss.Tone = tone.ToString();
             boss.Title = Fill(arch.Titles[rng.Range(0, arch.Titles.Length)]);
-            boss.Lore = Sentences(Fill(arch.LoreTemplates[rng.Range(0, arch.LoreTemplates.Length)]));
+            var lore = tone == Relic.Lore.Tone.Somber && arch.SomberLore.Length > 0 ? arch.SomberLore : arch.LoreTemplates;
+            boss.Lore = TemplateAuthor.Sentences(Fill(lore[rng.Range(0, lore.Length)]));
             boss.Arena = Fill(arch.Arenas[rng.Range(0, arch.Arenas.Length)]) + ", in " + region.Name;
             boss.Hazards = new List<string>(arch.Hazards);
-            void Ref(string id, string n) { if (boss.Lore.Contains(DraftValidator.StripArticle(n)) || boss.Title.Contains(DraftValidator.StripArticle(n))) if (!boss.WorldRefs.Contains(id)) boss.WorldRefs.Add(id); }
-            Ref(region.Id, region.Name);
-            Ref(faction.Id, faction.Name);
-            Ref(ev.Id, ev.Name);
-            Ref(figure.Id, figure.Name);
+            foreach (var id in LoreRefs.Scan(boss.Lore + " " + boss.Title, world))
+                if (!boss.WorldRefs.Contains(id)) boss.WorldRefs.Add(id);
             if (!boss.WorldRefs.Contains(region.Id)) boss.WorldRefs.Add(region.Id); // the arena is always in the region
         }
-
     }
 }
