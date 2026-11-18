@@ -170,19 +170,19 @@ namespace Relic.Items
         // ---------- enchantments ----------
 
         static readonly string[] RiderNouns = { "Lash", "Bite", "Mark", "Kiss", "Touch", "Brand" };
-        static readonly string[] ExploitNouns = { "Snare", "Reckoning", "Verdict", "Undoing", "Toll" };
-        static readonly string[] BurstNouns = { "Wake", "Bloom", "Scatter", "Spill", "Requiem" };
+        static readonly string[] ExploitNouns = { "Snare", "Catch", "Follow-Through", "Opening", "Toll" };
+        static readonly string[] BurstNouns = { "Wake", "Bloom", "Scatter", "Spill", "Encore" };
         static readonly string[] RetortNouns = { "Rebuke", "Answer", "Recoil", "Reprisal" };
         static readonly string[] TrailNouns = { "Trail", "Furrow", "Wake", "Track" };
         static readonly string[] NerveNouns = { "Riposte", "Nerve", "Reply", "Flinch" };
         static readonly string[] RefugeNouns = { "Refuge", "Last Light", "Shelter", "Bastion" };
         static readonly string[] SentinelNouns = { "Herald", "Sentinel", "Spark", "Outrider" };
-        static readonly string[] AuraNouns = { "Halo", "Mantle", "Air", "Pall" };
+        static readonly string[] AuraNouns = { "Halo", "Mantle", "Air", "Cloak" };
         static readonly string[] TemperNouns = { "Temper", "Grace", "Bearing", "Mettle" };
         static readonly string[] EchoNouns = { "Echo", "Cascade", "Relay", "Chorus" };
-        static readonly string[] WeatherNouns = { "Omen", "Hour", "Season", "Tithe" };
-        static readonly string[] MercyNouns = { "Mercy", "Coup", "Final Word", "Last Rite" };
-        static readonly string[] HuntNouns = { "Quarry", "Hunt", "Challenge", "Grudge" };
+        static readonly string[] WeatherNouns = { "Omen", "Hour", "Season", "Forecast" };
+        static readonly string[] MercyNouns = { "Mercy", "Finish", "Final Word", "Last Call" };
+        static readonly string[] HuntNouns = { "Quarry", "Hunt", "Challenge", "Rival" };
 
         public static readonly EffectTemplate[] Enchantments =
         {
@@ -418,7 +418,8 @@ namespace Relic.Items
         public const float UltimateCooldown = 30f;
         public const float UltimateResonanceCost = 100f;
 
-        static readonly string[] UltimateNouns = { "Deluge", "Reckoning", "Last Toll", "Unmaking", "Flood", "Verdict", "Homecoming", "Vigil", "Tithe" };
+        static readonly string[] UltimateNouns = { "Deluge", "Homecoming", "Festival", "Chorus", "Great Toll", "Long Road", "Bonfire", "Rally", "Lantern-Walk" };
+        static readonly string[] SomberUltimateNouns = { "Vigil", "Last Toll", "Long Watch", "Reckoning", "Flood" };
 
         public static readonly EffectTemplate[] Ultimates =
         {
@@ -442,7 +443,7 @@ namespace Relic.Items
         static string UltName(TemplateContext ctx, ref Pcg32 rng)
         {
             string word = ctx.Theme != null ? Pick(ctx.Theme.Motif.Words, ref rng) : "grand";
-            return "The " + Cap(word.Split('-')[0]) + " " + Pick(UltimateNouns, ref rng);
+            return "The " + Cap(word.Split('-')[0]) + " " + Pick(ctx.Theme != null && ctx.Theme.IsSomber ? SomberUltimateNouns : UltimateNouns, ref rng);
         }
 
         static EffectFitter.RuleBuilder UDeluge(TemplateContext ctx, ref Pcg32 rng)
