@@ -542,6 +542,8 @@ namespace Relic.Items
             }
         }
 
+        public const string CurseRuleName = "Price of Keeping";
+
         /// <summary>A standing curse rule: lowers one of your stats while equipped.</summary>
         public static EffectRule CurseRule(TemplateContext ctx, ref Pcg32 rng)
         {
@@ -550,7 +552,7 @@ namespace Relic.Items
             float amount = -(float)Math.Round(2f * (1f + 0.2f * ctx.Tier));
             return new EffectRule
             {
-                Name = "Price of Keeping",
+                Name = CurseRuleName,
                 Trigger = new TriggerSpec { Kind = TriggerKind.Passive },
                 Actions = { StatUp(stat, amount, 0f) },
             };

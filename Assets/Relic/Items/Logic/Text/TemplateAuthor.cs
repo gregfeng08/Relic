@@ -90,6 +90,7 @@ namespace Relic.Items.Text
             EffectRule best = null; float bestCost = float.MaxValue;
             foreach (var t in EnchantmentChooser.Ranked(ctx, ref rng, used))
             {
+                if (drawback != null && t.Trigger == TriggerKind.Passive) continue; // a price needs a moment to be paid in
                 var builder = t.Factory(ctx, ref rng);
                 EffectFitter.RuleBuilder withCurse = builder;
                 if (drawback != null)
