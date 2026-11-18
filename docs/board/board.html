@@ -186,7 +186,7 @@ button.act:disabled { opacity: .55; cursor: default; }
   const BOARD_COLS = COLUMNS.filter(c => c.key !== "blocked" && c.key !== "review");
   const LABEL = Object.fromEntries(COLUMNS.map(c => [c.key, c.label]));
 
-  const state = { tasks: [], status: null, log: [], db: null, canWrite: true, tab: "progress", open: new Set(), drafts: {}, busy: new Set(), errors: {} };
+  const state = { tasks: [], status: null, log: [], db: null, comments: null, canWrite: true, tab: "progress", open: new Set(), drafts: {}, busy: new Set(), errors: {}, notices: {} };
   try { const t = localStorage.getItem("relic-tab"); if (t) state.tab = t; } catch (e) {}
 
   const $ = id => document.getElementById(id);
@@ -216,10 +216,34 @@ button.act:disabled { opacity: .55; cursor: default; }
   }
   document.addEventListener("focusout", () => { if (pending) { pending = false; setTimeout(scheduleRender, 0); } });
 
-  async function respond(task, verdict) {
+  // Wake a watching Claude session: post the answer as a comment on the card and send it
+  // to Claude, straight from the viewer's click. Without a session, the hourly run reads
+  // the saved response instead.
+  const VERDICT_WORDS = { approved: "Approved", changes: "Changes requested", answer: "Answer" };
+  async function notifyClaude(task, verdict, note, anchorEl) {
+    const c = state.comments;
+    if (!c || typeof c.sendToClaude !== "function") return "The next hourly run will pick this up.";
+    let can = "off";
+    try { can = await c.canSendToClaude(); } catch (e) { can = "off"; }
+    if (can === "no_session") return "No Claude session is open right now. The next hourly run will pick this up.";
+    if (can !== "available") return "The next hourly run will pick this up.";
+    let text = `Board response on ${task.id} "${task.title}": ${VERDICT_WORDS[verdict] || verdict}${note ? ". " + note : "."}`;
+    if (text.length > 3500) text = text.slice(0, 3500) + "…";
+    try {
+      const anchor = await c.anchorFor(anchorEl);
+      await c.sendToClaude({ anchor, text });
+      return "Sent to Claude. It's starting on this now.";
+    } catch (e) {
+      if (e && (e.code === "consent_required" || e.code === "forbidden")) return "Saved. Claude wasn't pinged (sending from the board is off), so the next hourly run will pick this up.";
+      return "Saved. Couldn't ping Claude just now, so the next hourly run will pick this up.";
+    }
+  }
+
+  async function respond(task, verdict, anchorEl) {
     const note = (state.drafts[task.id] || "").trim();
     if (verdict === "answer" && !note) { state.errors[task.id] = "Write an answer first."; render(); return; }
-    state.busy.add(task.id); delete state.errors[task.id]; render();
+    state.busy.add(task.id); delete state.errors[task.id]; delete state.notices[task.id]; render();
+    state.notices[task.id] = await notifyClaude(task, verdict, note, anchorEl);
     try {
       await state.db.doc("tasks/" + task.id).update({ response: { verdict, note, at: new Date().toISOString() } });
       delete state.drafts[task.id];
@@ -236,7 +260,8 @@ button.act:disabled { opacity: .55; cursor: default; }
     const r = task.response;
     if (!r) return null;
     const what = r.verdict === "approved" ? "You approved this" : r.verdict === "changes" ? "You asked for changes" : "You answered";
-    return h("p", { class: "sent" + (r.verdict === "changes" ? " changes" : "") }, `${what} on ${fmtDate(r.at)}. Claude picks it up next session.`);
+    const after = state.notices[task.id] || "Claude picks it up next session.";
+    return h("p", { class: "sent" + (r.verdict === "changes" ? " changes" : "") }, `${what} on ${fmtDate(r.at)}. ${after}`);
   }
 
   function respondForm(task) {
@@ -250,10 +275,10 @@ button.act:disabled { opacity: .55; cursor: default; }
     });
     ta.value = state.drafts[task.id] ?? (task.response && task.response.note) ?? "";
     const actions = isBlocked
-      ? [h("button", { class: "act primary", type: "button", disabled: busy, onclick: () => respond(task, "answer") }, task.response ? "Update answer" : "Send answer")]
+      ? [h("button", { class: "act primary", type: "button", disabled: busy, onclick: e => respond(task, "answer", e.currentTarget.closest("article")) }, task.response ? "Update answer" : "Send answer")]
       : [
-          h("button", { class: "act primary", type: "button", disabled: busy, onclick: () => respond(task, "approved") }, "Approve"),
-          h("button", { class: "act", type: "button", disabled: busy, onclick: () => respond(task, "changes") }, "Request changes"),
+          h("button", { class: "act primary", type: "button", disabled: busy, onclick: e => respond(task, "approved", e.currentTarget.closest("article")) }, "Approve"),
+          h("button", { class: "act", type: "button", disabled: busy, onclick: e => respond(task, "changes", e.currentTarget.closest("article")) }, "Request changes"),
         ];
     return h("div", { class: "respond" },
       h("label", { for: "note-" + task.id }, isBlocked ? "Answer" : "Note"),
@@ -353,6 +378,7 @@ button.act:disabled { opacity: .55; cursor: default; }
       const can = user ? await user.can("data.write") : null;
       if (can === false) state.canWrite = false;
     } catch (e) {}
+    try { state.comments = await window.claude.use("comments"); } catch (e) { state.comments = null; }
     db.collection("tasks").onSnapshot(snap => {
       state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       scheduleRender();
