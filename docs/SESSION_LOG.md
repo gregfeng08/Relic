@@ -2,6 +2,27 @@
 
 Newest first.
 
+## 2026-11-18 — Character, world, lore merged; endgame and agents designed; autonomous runs start
+
+- **Merged into `rebuild`:**
+  - **stream/world2:** ridge fix (TerrainGenerator v2), smooth movement, diving, snow caps, foliage. The props toggle moved to F10.
+  - **stream/character v2:** cute Genshin-style hero, data-driven `HeroAppearance` with 4 presets on F11, single material.
+  - **stream/lore:** the Lore Bible ("the Listening", the Lanternfold, 7 cultures; docs/lore and Assets/Relic/Lore).
+  - Unity EditMode 223 / PlayMode 8 green. Only the known URP engine error remains (a pristine template reproduces it).
+- **Design:**
+  - 18 compute budget: the LLM is never in the frame loop.
+  - 19 endgame: the Narrator is a fourth-wall character outside the story, not Wren. The fake Linux terminal; `rm -rf /` with a reflective replay. In multiplayer, in-game admin over all players' data with security limits; world deletion is a ~24 h unravelling and ends its server.
+  - 20 the agents: a living Chronicler plus an impartial crew (Cartographer, Smith, Warden, Magister, Herald); the Rogue as a fourth-wall boss.
+  - 21 world layers: L3 graph / L2 region plans / L1 base / L0 deltas over chunks. **Awaiting Greg (RLC-044).**
+- **Autonomous runs:** scheduled task `relic-autonomous-run` every 2 h, **commit-only** (Greg: no merge, no push; the safety classifier also refused self-granted merge/push). Protocol in `docs/PROCESS.md`. Ready cards: RLC-045 fuller world v1, RLC-046 combat runtime, RLC-047 grammar additions, RLC-042 narration layer, RLC-043 Chronicler v0.
+- **In progress interactively:** RLC-038 item grammar on `stream/items2`. Autonomous runs must not touch it.
+- **Waiting on Greg:**
+  - RLC-044 world layers
+  - RLC-032 hero v2 feel
+  - RLC-035 world feel
+  - RLC-037 Lore Bible tone questions
+  - RLC-039 spells v2
+
 ## 2026-10-13 (late night) — M1 merged, budget calibrated, LLM downloaded
 
 - **Agents:** all three stopped early (a 429 rate limit, then 600 s stall watchdogs during long Unity imports). They were resumed one or two at a time, with Unity run in the background. Lesson: at most 2 concurrent agents, and long Unity runs always in the background.
