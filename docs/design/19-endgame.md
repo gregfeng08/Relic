@@ -49,29 +49,37 @@ A **simulated** Linux shell inside the game. It feels real, and it is completely
   - Wren speaks quietly, without persuading either way. Just: "This is what you wrote."
   - After confirming, the world **unravels in reverse order**: your latest steps vanish first, back to the Lanternfold, the last lantern going out last. Deletion becomes a replay of your journey.
 
-### In multiplayer too (Greg, 2026-11-18)
-The terminal exists in multiplayer, and so does deletion. There it means **erasing your own footprint from a shared world**:
-- **What it removes:** your characters, saves, vaults and progress, permanently, through a server-side, server-validated request. Never anyone else's data.
-- **Your world-unique relics:**
-  - **Vaulted** ones return to the world, to be found again; their lore gains a line about a wayfarer who is no longer remembered.
-  - **Carried** ones drop where you stand.
-- **Shared history keeps an absence, not a hole (grounded):**
-  - the Reliquary entries you wrote, and the legends that name you, become **a crossed-out name** ("a wayfarer whose name has been taken back");
-  - your graves become empty waycairns;
-  - other players' records stay intact. They just can't read your name anymore.
-- **Reflection works the same way:** your journey, replayed and unraveled, but only your threads in the shared map.
-- **Account safety:** a stolen or compromised account mustn't be able to wipe someone's history instantly.
-  - The server requires a re-authentication at the moment of deletion.
-  - It keeps a private, out-of-game backup for a short support window (for example 7 days) for account-recovery cases only.
-  - The in-game fiction stays final.
-- **Mounts:** the terminal in multiplayer mounts only the player's own data. Shared world data is read-only and never shows other players' private data.
+### In multiplayer: admin over the whole world (Greg, 2026-11-18)
+Greg: "It should have access to ALL players' characters etc. and admin privileges, just with limits for security considerations. If someone wants to remove the game from multiplayer existence, they can."
 
-## Security rules (non-negotiable)
-1. **No real process execution:** no `Process.Start`, no interpreter, no host filesystem access outside the save directory.
-2. **A read-only mapping onto real data.** The only writable targets are the player's own save files, through the game's save API.
-3. **A command allowlist** implemented in C#. Unknown commands print "command not found".
-4. **Parsing safety:** command parsing never reaches the LLM. If Wren comments on what you type, it receives *data*, not instructions.
-5. **Server side:** the terminal runs on the client against the player's data. The server never exposes anything to it.
+Whoever reaches the end and opens the terminal on a multiplayer server becomes its **in-game admin**:
+- **Everyone's characters are visible:** `/players/<name>/` exposes every player's characters, journeys, wayfarers, vaults and relics, plus the shared world graph.
+- **Real admin commands over game data,** all through the game server's own validated admin API:
+  - edit or delete characters and items;
+  - rewrite world settings;
+  - write legends;
+  - remove players' footprints.
+- **`rm -rf /` can remove the world from multiplayer existence.**
+
+**Recommended shape (lead; awaiting Greg's confirmation):**
+1. **Deleting the world is an event, not an instant wipe.**
+   - `rm -rf /` (after the reflective replay) starts a **server-wide unravelling**: a countdown of about 24 hours, and Wren announces it to every player.
+   - The map's edges dissolve inward hour by hour, and everyone sees and feels it.
+   - Players can **find and stop the deleter** (defeat them, or talk them down at the Narrator's site), or spend the last day saying goodbye.
+   - If nobody stops it, the world really ends. This is the reflection moment for the *whole server*.
+2. **The world ends per server or season.**
+   - The deleted world is archived read-only as history and becomes a **legend in the next season's canon**: "the world that was taken back."
+   - A new world starts.
+3. **Single admin edits** (one character, one item) apply immediately, but are logged in-world: the Reliquary notes "the page was rewritten," so the fiction stays honest.
+
+### Security limits (non-negotiable, even for the in-game admin)
+1. **In-game admin ≠ system access.** The terminal is still a C# emulator. Admin commands call the game server's **admin API**, which can only read and write *game data* (characters, items, the world graph, saves). It never touches the OS, the code, the database engine, credentials or infrastructure.
+2. **Server-authoritative:** every admin command is validated server-side (schema, existence, rate limits). The client can't forge admin rights; they're granted by the server, only after it verifies that the ending was reached.
+3. **Re-authentication** for destructive commands, plus a full **audit log** (who, what, when).
+4. **Operator backups outside the fiction:** private snapshots with short retention, so a **compromised account** or an exploit can be rolled back by the game's operators. A legitimate deletion stays final in the fiction.
+5. **Rate limits and blast-radius caps** on bulk operations (for example, no more than N character deletions per minute; world deletion only via the countdown event).
+6. **Privacy:** admin views show only in-game data. Real account data (emails, payment, IPs) is never mounted.
+7. **Single-player:** the same commands act on the local save only.
 
 ## Build order
 - **Foreshadowing hooks:** Lore Bible data (marginalia lines, a "voice turns toward you" stage), from M2 onward.
