@@ -1,21 +1,66 @@
 # Relic.Items: items, relics and bosses (stream I)
 
-Brief: `docs/design/08-items-bosses.md`. Contract used (not edited): `Relic.Core` effect grammar, `PowerBudget`, `EffectValidator`, `Pcg32`/`Hash`.
+Briefs: `docs/design/08-items-bosses.md`, `docs/design/17-item-grammar.md` (the item grammar), `docs/design/16-lore-and-tone.md` (the Lore Bible). Contracts used (not edited): `Relic.Core` effect grammar, `PowerBudget`, `EffectValidator`, `Pcg32`/`Hash`; `Relic.Lore` (`LoreBible`, `NameGenerator`, `MoodPicker`, `TemplateText`).
 
 ```
-Logic/   (Relic.Items.Logic: pure C#, compiled by the dotnet harness too)
-  Model/       Item, ItemStat, ItemLore, ItemVisual, ItemMemory, GeneratorInfo, ItemJson
-  Rolls/       StatTables (roll tables), StatRoller, Overroll
-  Lore/        StubWorld + WorldContext, Themes + ThemePicker, StyleGuide + NameFreshness, Forms (relic forms, kit parts, table names)
-  Effects/     EffectTemplates (weapon skills, passives, enchantments, ultimates, curses), EffectFitter, EffectDescriber
-  Text/        ITextGenerator, LlamaServerGenerator, FakeGenerator, TemplateGenerator/TemplateAuthor,
-               Prompts, JsonSchemaBuilder, RelicBrief/RelicDraft/DraftValidator
-  Generation/  ItemGenerator (the pipeline), IItemStore (+ in-memory and JSON-file stores), LlmBenchmark
+Logic/   (Relic.Items.Logic: pure C#, compiled by the dotnet harness too; references Relic.Core and Relic.Lore.Logic)
+  Model/       Item (+ Item.Grammar), ItemStat (+ Source), ItemLore, ItemVisual, ItemMemory, GeneratorInfo, ItemJson
+  Grammar/     ItemSentence, ItemGrammar (resolver), Archetypes, ArchetypeLines, Materials, CultureForms, NamePatterns,
+               Theme + ThemePicker + MotifTraits, CoherenceValidator, CoherenceStats, LoreSource
+  Rolls/       StatTables (base tables), StatRoller, Overroll
+  Lore/        StubWorld (a seeded world instantiated from the Lore Bible) + WorldContext, StyleGuide + NameFreshness, Forms
+  Effects/     EffectTemplates (+ GrammarTemplates, EnchantmentChooser), TemplateContext, EffectFitter, EffectDescriber
+  Text/        ITextGenerator, LlamaServerGenerator, FakeGenerator, TemplateGenerator/TemplateAuthor (+ TemplateWriting),
+               Prompts, JsonSchemaBuilder, RelicBrief/RelicDraft/DraftValidator, DraftGrammar, LoreRefs
+  Generation/  ItemGenerator (the pipeline) + ItemTextStep, IItemStore (+ in-memory and JSON-file stores), LlmBenchmark
   Bosses/      BossDefinition, BossHealth, BossArchetypes, PatternLibrary, BossGenerator, ReadabilityChecker
-  Samples/     SampleWriter (markdown samples), CompactJson
+  Samples/     SampleWriter, CoherenceMarkdown, CompactJson
 Runtime/ (Relic.Items: Unity) ItemDebugInspector — add to a GameObject, use the context menu "Generate item"/"Generate boss"
 Tests/   (Relic.Items.Tests) NUnit, pure logic: runs under `dotnet test tools/Relic.Tests` and Unity EditMode
 ```
+
+## The item grammar (17)
+
+An item is a sentence, resolved **before** anything else, in order:
+
+```
+Base → Archetype → Culture/Maker → Material → Theme (mood + motif) → Quality → (stats, effects, look) → Name → Lore
+```
+
+| Step | Where it comes from | What reads it |
+|---|---|---|
+| **Base** | `ItemSpec` or the seed (`item.base`) | slot, budget, kit allowance (05) |
+| **Archetype** | `Archetypes.Pick(base, seed)`: Duelist, Warden, Hunter, Scholar, Wanderer, Smith, Herald, weighted per base (a staff is mostly a Scholar's, heavy armor a Warden's or Smith's) | stat lines, favored triggers, fallback statuses, the base noun ("Sabre", "Walking Staff") |
+| **Culture / maker** | the drop region's family → `bible.CulturesOf(family)` (the region's own culture ×4, cultures that make the base ×3); maker named by the culture's `NameGenerator`, working in one of that culture's regions | the form ("carved longbow"), the name pattern, makers' marks, lore lines |
+| **Material** | culture materials ∩ what the base is made of (`Materials.KindsFor`: a sword is metal, a tome paper or leather; relics by kit form) ∩ tier; generic tier materials fill gaps; a form that names its material ("whalebone bow") is made of it | tint, wear, glow, one small property tag (a tiny stat line: bell-bronze "rings true" → CHR) |
+| **Theme** | `MoodPicker.Pick` (70/30 bright/somber) then `MoodPicker.MotifFor(mood, culture.Motifs)` | statuses and shapes (motif), glow color, decal, effect lean (mood), curse (somber `curse` always, `drawback` 40%) |
+| **Quality** | rarity (Worn/Plain… Fine/Sturdy… Masterwork/Heirloom; somber Mended/Field-Worn) | wear, Common/Uncommon names |
+
+Everything is a pure function of the item seed (each step has its own purpose salt). One exception: a culture's relic forms whose noun is overused in recent names (`NameFreshness`) are a third as likely, so names (already order-dependent and persisted) also steer forms away from repeats.
+
+**Rarity layers** (`ItemSentence.LayersFor`), every field is resolved for every item but only these show:
+
+| Rarity | Shows |
+|---|---|
+| Common | base · material · quality — plain name "Worn Steel Sword" |
+| Uncommon | + one archetype stat line (`ItemStat.Source = "archetype"`) and the archetype's noun |
+| Rare | + theme (motif statuses in effects, motif glow) and a real name from the culture's `itemNaming.patterns` (no `{maker}` patterns yet), a one-line flavor |
+| Epic | + culture and maker, a 1–3 sentence lore line (a Bible mood line), one written enchantment |
+| Legendary | + world references (a place, and a Bible legend or era), a lead toward another place, and an ultimate |
+
+**Downstream rules:**
+* **Stats** (`ArchetypeLines`): base primaries; trinkets carry the archetype's trained stat as their main line; Uncommon+ adds the archetype line (its first favored line the base allows); further secondaries are 3× likelier from the archetype's lines; every item gets its material's tag line. `Archetypes.Forbids`: staves and tomes never carry STR, heavy armor never AGI (lines *and* stat effects).
+* **Effects** (`EnchantmentChooser`): about 80% of enchantments come from the archetype's favored templates (Duelist rider/exploit/riposte/executioner, Warden retort/aura/refuge/temper, Hunter longshot/death-burst/bosshunter, Scholar sentinel/echo, Wanderer trail/tailwind/refuge, Smith exploit/executioner/temper, Herald rally/hearth/aura); the rest follow the mood's `effectLean`; lean-matching templates are 2× likelier within either group. New templates for the bright leans: `hearth` (allies mend), `rally` (ally aura), `lamplight` (Insight), `tailwind` (haste), `longshot` (Hunter range). Statuses come from the motif, then the archetype (`TemplateContext.AllowedStatuses`). Drawbacks only on somber items.
+* **Look** (`TableVisual`, `TemplateAuthor.Visual`): material name, wear (quality + material + mood), motif glow color and decal, kit parts from the relic's kit form. The LLM's visual must keep the material; the color is enforced.
+* **Names and lore** (`TemplateWriting`): name from a culture pattern, always keeping the form's head noun; Rare flavor lines; Epic/Legendary lore from the mood's Bible lines (`{maker} {place} {culture} {form} {word} {legend} {faction}`, `TemplateText.Fill` + `FixArticles`), fitted to the style limits (≤ 22 words per sentence, ≤ 3 sentences); Legendary adds one lead sentence naming another region and a legend or era.
+
+**Coherence validator** (`CoherenceValidator.Validate(item, world)`), next to `EffectValidator`: culture lives in the region's family; material kind fits the base and tier; stat lines (forbidden lines, archetype line, trinket main line, material tag); statuses fit motif ∪ archetype; no stat bonus a base forbids; drawbacks only when somber, and always for a `curse` mood (Epic+); theme/name/lore/maker/enchantment/world-ref/lead/ultimate layers match the rarity; visual material and glow follow the sentence. Messages read like `itm-… "Name" (Epic staff t4; Scholar · Aruvi (…) · amberwood · wonder/lantern · Masterwork): rolls Strength, which a staff never carries`. `CoherenceStats` aggregates the 80% trigger share and the mood split. `CoherenceTests` runs 3,000 items over 5 worlds; every one passes both validators.
+
+### Lore Bible
+* `LoreSource.Default` loads `Assets/Relic/Lore/Data` by walking up from the working/base directory (like the Lore tests). **Player builds** must call `LoreSource.Use(LoreBible.FromJson(...))` with TextAssets first (and optionally `LoreSource.UseStyleGuide(text)`); `StubWorld.FromBible(seed, bible)` takes one explicitly and the world carries it (`WorldContext.Bible`, not serialized).
+* **StubWorld** (v2): 8 regions (every family once + one repeat), each settled by a Bible culture and named by its `NameGenerator`; 5 factions from the culture's faction archetypes (names filled from the seat region); 10 figures named in their culture's phonology with mostly bright fates; 6 events from the Bible's event templates at their weights, dated inside their era. Legends and eras are referenceable as `legend.<id>` / `era.<id>`.
+* **StyleGuide**: Items' banned words plus `bible.Style.BannedWords`; `MaxLoreSentences`/`MaxSentenceWords` from `style.json`. **NameFreshness** bans words in more than 5% of the last 200 names, except the sentence's facts (form noun, maker, place).
+* Items-side tables for fields the Bible doesn't have: `Materials` (kind, tier, tint, glow, wear, tag), `CultureForms` (culture form → base / kit form), `MotifTraits` (damage kind, world condition, decal), `Archetypes`. `GrammarTests` fails if a Bible material, motif or form has no row.
 
 ## Item pipeline
 
@@ -23,38 +68,32 @@ Tests/   (Relic.Items.Tests) NUnit, pure logic: runs under `dotnet test tools/Re
 ItemSpec (world seed, index, tier, rarity, [base type], [region])
   → item seed = Hash.Combine(worldSeed, Hash.Of("item"), index); id = "itm-<hex>"
   → store hit? return the saved item (generated text is never regenerated)
-  → base type, theme (Rare+), home region, form       (Pcg32 per purpose: "item.base", "item.theme", ...)
-  → stats: uniform in [min, ceiling] + overroll steps   (StatRoller)
-  → table effects: weapon skill (E) / armor or trinket passive, + a simple rider (Uncommon 50%, Rare)
+  → base type → ItemGrammar.Resolve → the sentence (Item.Grammar)
+  → stats from the sentence (StatRoller.Roll(sentence, ...)): uniform in [min, ceiling] + overroll steps
+  → table effects: weapon skill (E) / armor or trinket passive, + one archetype-chosen effect (Uncommon 50%, Rare)
   → text step by rarity:
-       Common/Uncommon  table name, no text model
-       Rare             name + one-line flavor
-       Epic             name + lore + 1 written enchantment (budget = item budget − table effects)
-       Legendary relic  name + lore + 1–3 enchantments + ultimate (Q) + visual
-  → parse strictly (unknown fields = error) → DraftValidator → retry ≤ 3 with errors fed back
+       Common/Uncommon  plain table name, no text model
+       Rare             culture-pattern name + one-line flavor
+       Epic             name + lore line + 1 written enchantment (budget = item budget − table effects)
+       Legendary relic  name + lore with lead + 1–3 enchantments + ultimate (Q) + visual
+  → parse strictly (unknown fields = error) → DraftValidator (+ DraftGrammar) → retry ≤ 3 with errors fed back
        → still failing: template relic (GenerationMode.LlmFallback)
   → ScaleToFit if only over budget; ultimate capped at 40% of the budget (see "Resonance pricing")
   → EffectValidator.Validate(effects, ItemGenerator.Budget(baseType, rarity, tier)) must pass → store
 ```
 
-* **Determinism.** Everything except LLM text is a pure function of the seed. Name freshness (below) makes names depend on generation *order* too, so written text (template or LLM) is treated like LLM output: generated once and persisted (`IItemStore`; `JsonFileItemStore` writes one JSON file per item).
-* **Forge reroll** (`ItemGenerator.Reroll`) re-samples stat *values* from sub-seed `Hash.Combine(itemSeed, rerollCount)`; which stat lines an item has, its effects and its text are kept.
-* **Overrolls.** `k = floor(Exponential(λ = 1))`, capped at 10 (hidden). A roll with k ≥ 1 is `ceiling × (1 + 0.05k)` (and always at least one display unit above the ceiling). Test: empirical P(k ≥ n) within 5% of e^−n for n = 1..4 over 400k samples.
-* **Stat tables** (`StatTables`): tier-0 Common ranges × rarity (1.0 / 1.05 / 1.1 / 1.15 / 1.2) × tier growth (power stats `PowerBudget.TierFactor` = 1 + 0.2t, trained-stat bonuses 1 + 0.1t, rates 1 + 0.04t). Attack speed is fixed per weapon type (a feel stat). Calibrated by the lead against the 03-combat power bands (see `Relic.Game.Tests.PowerBandTests`). Secondary lines: Uncommon +1, Rare +2, Epic/Legendary +3.
-* **Effect templates** are functions of a magnitude `s`; `EffectFitter` binary-searches the largest `s` whose tidied rule (whole damage, half-second durations) fits a target pp. Template mode fills 85–98% of the budget. Cursed relics (chance set by the theme's mood) add a drawback action or a standing "Price of Keeping" stat penalty; the negative cost buys power for the other rules.
-
-### Themes, world context, style guide
-* **Theme** = motif (tide, ember, frost, thorn, storm, venom, stone, bell, ink, blood, salt, moth: decides statuses, damage kind, colors, materials, vocabulary) · mood (betrayal, vigil, grief, oath, hunger, exile, pride, mercy, debt, homecoming: decides the story and the curse chance). Motifs that belong to the drop region's tags are 3× as likely.
-* **StubWorld** builds 8 regions (with tiers, tags and a landmark), 5 factions, 10 people (with a fate) and 6 events from the seed, until the world graph exists. Lore must name at least one of them and list its ids in `worldRefs`; every relic's lore ends with a lead to another place or person (pillar 2).
-* **StyleGuide**: banned stock words (ethereal, shadow-whisper, whisper(ing), eternal, ancient power, doom, void), lore 2–4 sentences. **NameFreshness** bans any word that would appear in more than 5% of the last 200 names (with fewer than 20 names, no word repeats), exact repeats, and (template mode) the same words reordered.
+* **Determinism.** Everything except LLM text is a pure function of the seed (see the form exception above). Written text (template or LLM) is generated once and persisted (`IItemStore`; `JsonFileItemStore` writes one JSON file per item).
+* **Forge reroll** (`ItemGenerator.Reroll`) re-samples stat *values* from sub-seed `Hash.Combine(itemSeed, rerollCount)` using the item's sentence; lines, effects and text are kept.
+* **Overrolls.** `k = floor(Exponential(λ = 1))`, capped at 10 (hidden). A roll with k ≥ 1 is `ceiling × (1 + 0.05k)` (and always at least one display unit above the ceiling).
+* **Stat tables** (`StatTables`): tier-0 Common ranges × rarity (1.0 / 1.05 / 1.1 / 1.15 / 1.2) × tier growth (power stats `PowerBudget.TierFactor` = 1 + 0.2t, trained-stat bonuses 1 + 0.1t, rates 1 + 0.04t). Attack speed is fixed per weapon type. Calibrated against `Relic.Game.Tests.PowerBandTests` (currently 6.65× top vs starter). Secondary lines: Uncommon +1, Rare +2, Epic/Legendary +3, plus the material tag.
+* **Effect templates** are functions of a magnitude `s`; `EffectFitter` binary-searches the largest `s` whose tidied rule fits a target pp. Template mode fills 85–98% of the budget. Cursed relics add a drawback action (never on a Passive rule) or a standing "Price of Keeping" stat penalty.
 
 ### LLM step
-* `ITextGenerator.GenerateAsync(TextRequest)`: messages, a JSON schema, sampler settings, and the structured `RelicBrief` in `Context`.
-* `LlamaServerGenerator`: llama.cpp `llama-server` over HTTP. Default `http://127.0.0.1:8080`, `/v1/chat/completions` with `response_format: {type: "json_schema", json_schema: {schema}}` (the server applies the model's chat template), or `/completion` with `json_schema` and a ChatML prompt. Configurable URL, endpoint, timeout (default 120 s), API key; `IsReadyAsync()` polls `/health`. Failures become `TextGenerationException` and count as an attempt.
-* The **schema** (`Prompts.Schema`) is built by reflection from the Core grammar classes (`JsonSchemaBuilder`), so it can't drift from what `EffectJson` accepts. Payload recursion is unrolled to depth 3 (llama.cpp's schema-to-grammar converter dislikes recursive `$ref`s). World refs, kit parts and decals are closed enums.
-* The **system prompt** contains a grammar summary generated from the Core enums, the style guide and the budget rules; the user prompt has the brief (rarity, tier, form, theme, budget, curse, rolled stats, overused words) and the world context with ids.
-* `FakeGenerator`: canned responses (queue or function), records requests, can simulate transport failures. All pipeline tests use it.
-* `TemplateGenerator` writes `TemplateAuthor` drafts as JSON so TEMPLATE MODE goes through the same parse → validate → fit path.
+* `ITextGenerator.GenerateAsync(TextRequest)`: messages, a JSON schema, sampler settings, and the structured `RelicBrief` (now with the `ItemSentence` and archetype) in `Context`.
+* The **system prompt** carries the item-sentence rules, the full narration style guide (`docs/lore/style-guide.md` via `LoreSource.StyleGuideText`), the hard rules (banned words incl. the Bible's, name and sentence limits) and the effect grammar summary. The **user prompt** carries the sentence as facts (form and head noun, archetype and its triggers, material and tag, mood/lean, motif statuses/shapes/words, culture, maker and mark, the culture's naming patterns), the rolled stats, overused words, and the world context including Bible legends and eras with ids.
+* **DraftGrammar** feeds back: a name without the form noun, capitalized words not in the world, the Bible or the sentence ("use only the names you are given"), sentences over 22 words, Legendary lore without a place, a Bible ref or a lead, and a visual material other than the sentence's. `worldRefs` is a closed enum of world and Bible ids.
+* `LlamaServerGenerator`: llama.cpp `llama-server` over HTTP (`/v1/chat/completions` with `response_format: json_schema`, or `/completion` with a ChatML prompt). Failures become `TextGenerationException` and count as an attempt.
+* `FakeGenerator`: canned responses (queue or function), records requests, can simulate transport failures. All pipeline tests use it. `TemplateGenerator` writes `TemplateAuthor` drafts as JSON so TEMPLATE MODE goes through the same parse → validate → fit path.
 
 Running it for real (after the download is approved): start `llama-server -m models/<model>.gguf -ngl 99 -c 8192 --port 8080`, then `new ItemGenerator(world, new LlamaServerGenerator())`.
 
@@ -70,6 +109,7 @@ Running it for real (after the download is approved): start `llama-server -m mod
 * **Phases**: 2 (tier 0–2), 3 (tier 3+), sometimes 4 (tier 7+), at evenly spaced health thresholds. Phase 1 has 2–3 base patterns; each later phase adds a new block and 1–2 **remixes** of earlier patterns: *fused* (A then B), *lingering* (shots leave puddles), *returning*, *shattering* (shots split), *doubled* (a second staggered wave). A remix must change the pattern's structure (`Readability.Signature`), not just its numbers. The rotation plays every pattern once per loop with a recovery window after each.
 * **No enrage timers**: the model has no time-based fields; phases change on health only.
 * **Essence**: archetype stat, `1 + tier / 3`.
+* **Identity** (v2): a boss belongs to the culture of the region it guards (`BossDefinition.Culture`) and is named by that culture's `NameGenerator`. About 70% are **guardians** (canon: "many bosses are wild guardians rather than villains") with bright lore (`LoreTemplates`); the rest (`Tone = "Somber"`, `SomberLore`) are Quarrel constructs or things left alone in the Hush. World refs are scanned from the lore and title.
 
 ### Readability checker (`ReadabilityChecker.Check`)
 Errors (every generated boss must have none; tested over 3,000 seeds):
@@ -108,7 +148,7 @@ The 0.6 uptime is the knob to tune once fights are playable (the share of a figh
 ```
 RELIC_SAMPLE_SEED=2026 dotnet test tools/Relic.Tests --filter Name=WriteSamples
 ```
-writes `docs/samples/relics-<seed>.md` (50 Legendary relics, tiers cycling 0–10, plus 12 ordinary drops) and `docs/samples/bosses-<seed>.md` (10 bosses, tiers 0–10, every archetype). Both are marked **TEMPLATE MODE — not LLM output** until a model is approved. `SampleSetIsValid` checks the same set in the normal test run. To write LLM samples later, pass a `LlamaServerGenerator` to `SampleWriter.GenerateRelics(seed, generator)`.
+writes `docs/samples/relics-<seed>.md` (50 Legendary relics, tiers cycling 0–10 and regions cycling through all eight, plus 12 ordinary drops; each item has a **Coherence** block with its sentence, and the top has the set's coherence numbers and mood split) and `docs/samples/bosses-<seed>.md` (10 bosses, tiers 0–10, every archetype). Both are marked **TEMPLATE MODE — not LLM output** until a model is approved. `SampleSetIsValid` checks the same set in the normal test run. To write LLM samples later, pass a `LlamaServerGenerator` to `SampleWriter.GenerateRelics(seed, generator)`.
 
 ## Model benchmark (pending download approval, RLC-026)
 Harness: `LlmBenchmark.Run(generator, world, seed, relics)` runs N Legendary relics through the real pipeline and reports valid-JSON rate, first-try acceptance, retries per relic, fallbacks and seconds per relic (`BenchmarkReport.ToMarkdownRow`). VRAM: read `nvidia-smi` during the run. Plan: 30 relics per model, chat endpoint, `-ngl 99 -c 8192`, the game closed.
@@ -131,6 +171,9 @@ Expectation (to verify): with schema-constrained decoding the valid-JSON rate sh
 7. Player numbers for readability (body width, run speed) and a player HP baseline for boss hit damage.
 
 ## Known limitations
-* Template prose has limited variety (two origin sentences per mood, one detail per motif): repetition across 50 relics is expected; it's a stand-in for the LLM.
+* Template prose has limited variety (three Bible lines per mood, eight bright and four somber leads): repetition across 50 relics is expected; it's a stand-in for the LLM.
+* Player builds need `LoreSource.Use(...)` before generating (no Assets folder to read the Bible from). `KitRoller` (Character) calls `StubWorld.Create(seed)`, which uses `LoreSource.Default`.
+* New material names (amberwood, bell-bronze, sea-glass...) are not in Character's `MaterialPalette`; it falls back to its defaults. `Materials.Find(name).Tint` has a color for each.
+* The somber "points toward ... nobody will say why" lead names no Bible ref; it is only used when the mood line already names one.
 * The checker measures gaps at one reference distance and treats spirals as rings (conservative); it doesn't simulate overlap between consecutive patterns in a rotation (the recovery window guards that) or arena hazards.
 * Derived stats (attack speed, crit, max HP...) are item-level numbers; the runtime that applies them comes at integration.

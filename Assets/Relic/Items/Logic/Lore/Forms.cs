@@ -17,30 +17,44 @@ namespace Relic.Items
         {
             public string Id;
             public string[] Parts;
+            /// <summary>What it can be made of (17: grounded materials). Empty = any solid material.</summary>
+            public MaterialKind[] Kinds = new MaterialKind[0];
             public RelicForm(string id, params string[] parts) { Id = id; Parts = parts; }
+            public RelicForm Of(params MaterialKind[] kinds) { Kinds = kinds; return this; }
         }
+
+        const MaterialKind Metal = MaterialKind.Metal, Glass = MaterialKind.Glass, Wood = MaterialKind.Wood, Stone = MaterialKind.Stone,
+            Bone = MaterialKind.Bone, Clay = MaterialKind.Clay, Gem = MaterialKind.Gem, Paper = MaterialKind.Paper, Leather = MaterialKind.Leather;
 
         public static readonly RelicForm[] RelicForms =
         {
-            new RelicForm("lantern", "cage", "wick", "lid", "handle", "ring", "lens"),
-            new RelicForm("bell", "bell-mouth", "clapper", "handle", "band", "rim"),
-            new RelicForm("censer", "chamber", "chain", "lid", "flue", "base"),
-            new RelicForm("astrolabe", "dial", "ring", "needle", "rim", "plate"),
-            new RelicForm("reliquary", "lid", "clasp", "chamber", "base", "plate"),
-            new RelicForm("mask", "plate", "band", "horn", "gem", "tassel"),
-            new RelicForm("crown", "band", "spike", "gem", "ring"),
-            new RelicForm("compass", "dial", "needle", "lid", "rim", "chain"),
-            new RelicForm("figurine", "base", "head", "gem", "horn", "antler"),
-            new RelicForm("chalice", "rim", "base", "chamber", "gem", "band"),
-            new RelicForm("hourglass", "chamber", "frame", "base", "rim"),
-            new RelicForm("key", "key-bit", "ring", "band", "gem"),
-            new RelicForm("seal-ring", "ring", "seal-face", "gem", "band"),
-            new RelicForm("horn", "horn", "band", "chain", "rim"),
-            new RelicForm("mirror", "mirror-glass", "frame", "handle", "rim"),
-            new RelicForm("spindle", "spindle", "wheel", "needle", "base"),
-            new RelicForm("ledger", "cover", "clasp", "chain", "binding"),
-            new RelicForm("lodestone", "shard", "cage", "chain", "band"),
-            new RelicForm("music-box", "lid", "chamber", "wheel", "key-bit", "base"),
+            new RelicForm("lantern", "cage", "wick", "lid", "handle", "ring", "lens").Of(Metal, Glass, Paper, Wood),
+            new RelicForm("bell", "bell-mouth", "clapper", "handle", "band", "rim").Of(Metal),
+            new RelicForm("censer", "chamber", "chain", "lid", "flue", "base").Of(Metal, Clay),
+            new RelicForm("astrolabe", "dial", "ring", "needle", "rim", "plate").Of(Metal),
+            new RelicForm("reliquary", "lid", "clasp", "chamber", "base", "plate").Of(Metal, Wood, Stone),
+            new RelicForm("mask", "plate", "band", "horn", "gem", "tassel").Of(Wood, Clay, Metal, Bone),
+            new RelicForm("crown", "band", "spike", "gem", "ring").Of(Metal),
+            new RelicForm("compass", "dial", "needle", "lid", "rim", "chain").Of(Metal, Glass),
+            new RelicForm("figurine", "base", "head", "gem", "horn", "antler").Of(Wood, Stone, Clay, Bone),
+            new RelicForm("chalice", "rim", "base", "chamber", "gem", "band").Of(Metal, Clay, Glass),
+            new RelicForm("hourglass", "chamber", "frame", "base", "rim").Of(Glass, Wood, Metal),
+            new RelicForm("key", "key-bit", "ring", "band", "gem").Of(Metal),
+            new RelicForm("seal-ring", "ring", "seal-face", "gem", "band").Of(Metal, Gem),
+            new RelicForm("horn", "horn", "band", "chain", "rim").Of(Bone, Metal, Wood),
+            new RelicForm("mirror", "mirror-glass", "frame", "handle", "rim").Of(Metal, Glass),
+            new RelicForm("spindle", "spindle", "wheel", "needle", "base").Of(Wood, Bone),
+            new RelicForm("ledger", "cover", "clasp", "chain", "binding").Of(Paper, Leather),
+            new RelicForm("lodestone", "shard", "cage", "chain", "band").Of(Stone, Gem),
+            new RelicForm("music-box", "lid", "chamber", "wheel", "key-bit", "base").Of(Wood, Metal),
+            // forms the Lore Bible's cultures make (CultureForms maps their words onto these)
+            new RelicForm("flute", "tube", "band", "ring", "tassel").Of(Wood, Bone),
+            new RelicForm("charm", "cord", "gem", "band", "ring").Of(Glass, Gem, Stone, Bone, Wood, Metal),
+            new RelicForm("shield", "plate", "rim", "band", "strap", "boss").Of(Wood, Metal),
+            new RelicForm("orb", "orb", "cage", "base", "band").Of(Glass, Gem, Stone),
+            new RelicForm("flask", "chamber", "lid", "band", "cord").Of(Clay, Glass, Metal),
+            new RelicForm("spyglass", "tube", "lens", "band", "cap").Of(Metal, Wood),
+            new RelicForm("scroll-case", "tube", "cap", "band", "cord").Of(Wood, Metal, Leather),
         };
 
         /// <summary>Every kit part the renderer will know. Closed list.</summary>
@@ -49,7 +63,8 @@ namespace Relic.Items
         public static readonly string[] Decals =
         {
             "none", "cracks", "runes", "tally-marks", "salt-stain", "scorch", "barnacles", "ink-blots",
-            "moss", "rust-bloom", "gilt-filigree", "verdigris", "wax-drips", "frost-rime", "thorn-scratches", "bloodstain",
+            "moss", "rust-bloom", "gilt-filigree", "verdigris", "wax-drips", "frost-rime", "thorn-scratches", "wind-ribbons",
+            "petals", "honeycomb", "star-chart", "song-notes", "sun-rays", "painted-flowers", "makers-mark",
         };
 
         static string[] BuildKitParts()
@@ -72,25 +87,7 @@ namespace Relic.Items
             return RelicForms[rng.Range(0, RelicForms.Length)].Id;
         }
 
-        public static string DecalFor(string motif)
-        {
-            switch (motif)
-            {
-                case "tide": return "barnacles";
-                case "ember": return "scorch";
-                case "frost": return "frost-rime";
-                case "thorn": return "thorn-scratches";
-                case "storm": return "cracks";
-                case "venom": return "verdigris";
-                case "stone": return "tally-marks";
-                case "bell": return "gilt-filigree";
-                case "ink": return "ink-blots";
-                case "blood": return "bloodstain";
-                case "salt": return "salt-stain";
-                case "moth": return "wax-drips";
-                default: return "none";
-            }
-        }
+        public static string DecalFor(string motif) => MotifTraits.Has(motif) ? MotifTraits.For(motif).Decal : "none";
 
         // ---------- table names for ordinary drops ----------
 

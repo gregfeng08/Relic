@@ -77,6 +77,10 @@ namespace Relic.Items.Bosses
         public string Name;
         public string Title;
         public string Archetype;
+        /// <summary>Lore Bible culture of the region it guards (its name follows their phonology).</summary>
+        public string Culture;
+        /// <summary>"Bright" (a guardian, most bosses) or "Somber" (an old construct, something left alone).</summary>
+        public string Tone;
         public int Tier;
         /// <summary>Solo health. Group health = BaseHealth × (1 + 0.8 × (players − 1)).</summary>
         public float BaseHealth;

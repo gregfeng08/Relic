@@ -76,7 +76,7 @@ namespace Relic.Items.Tests
             Assert.AreNotEqual(ItemJson.Serialize(item.Stats), ItemJson.Serialize(r1.Stats));
             Assert.AreEqual(item.Name, r1.Name);
             // The same reroll count always gives the same sample.
-            Assert.AreEqual(ItemJson.Serialize(r1.Stats), ItemJson.Serialize(StatRoller.Roll(item.BaseType, item.Rarity, item.Tier, item.Seed, 1)));
+            Assert.AreEqual(ItemJson.Serialize(r1.Stats), ItemJson.Serialize(StatRoller.Roll(item.Grammar, item.Rarity, item.Tier, item.Seed, 1)));
         }
     }
 
@@ -176,13 +176,21 @@ namespace Relic.Items.Tests
         }
 
         [Test]
-        public void ThemePickerFavorsRegionMotifs()
+        public void ThemePickerUsesCultureMotifsAndBrightMoods()
         {
-            int tide = 0;
+            var bible = LoreSource.Default;
+            var culture = bible.Culture("solanne");
+            int bright = 0, inCulture = 0;
             for (ulong s = 0; s < 4000; s++)
-                if (ThemePicker.Pick(s, new[] { "coast" }).Motif.Id == "tide") tide++;
-            // tide is one of 3 coast motifs (weight 3) among 12: 3 / (3*3 + 9) = 1/6
-            Assert.AreEqual(4000 / 6.0, tide, 120);
+            {
+                var rng = Relic.Core.Random.Pcg32.ForPurpose(s, "test.theme");
+                var t = ThemePicker.Pick(bible, culture, ref rng);
+                if (t.Tone == Relic.Lore.Tone.Bright) bright++;
+                if (culture.Motifs.Contains(t.Motif.Id)) inCulture++;
+                Assert.IsTrue(t.Motif.Tones.Contains(t.Tone), t.ToString());
+            }
+            Assert.AreEqual(0.7, bright / 4000.0, 0.03, "about 70% bright");
+            Assert.Greater(inCulture / 4000.0, 0.95, "motifs come from the culture's list when any fit");
         }
 
         [Test]
@@ -208,7 +216,8 @@ namespace Relic.Items.Tests
             for (int i = 0; i < 50; i++)
             {
                 var item = gen.Generate(new ItemSpec { WorldSeed = 2026, Index = i, Tier = i % 11, Rarity = Rarity.Legendary });
-                foreach (var w in StyleGuide.Words(item.Name)) counts[w] = (counts.TryGetValue(w, out int c) ? c : 0) + 1;
+                var facts = Relic.Items.Text.TemplateAuthor.FactWords(item.Grammar); // the form noun, maker and place are facts, not flair
+                foreach (var w in StyleGuide.Words(item.Name)) if (!facts.Contains(w)) counts[w] = (counts.TryGetValue(w, out int c) ? c : 0) + 1;
             }
             foreach (var kv in counts) Assert.LessOrEqual(kv.Value, 3, $"\"{kv.Key}\" used in {kv.Value} of 50 names");
         }

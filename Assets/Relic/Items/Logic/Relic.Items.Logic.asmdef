@@ -1,7 +1,7 @@
 {
     "name": "Relic.Items.Logic",
     "rootNamespace": "Relic.Items",
-    "references": ["Relic.Core"],
+    "references": ["Relic.Core", "Relic.Lore.Logic"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
