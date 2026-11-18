@@ -19,22 +19,30 @@ namespace Relic.Items.Text
         public static string SystemPrompt(DraftKind kind)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("You write items for Relic, an action RPG set in one procedurally generated world.");
+            sb.AppendLine("You write items for Relic, a bright medieval fantasy action RPG set in one procedurally generated world, the Wide.");
             sb.AppendLine("Answer with a single JSON object that matches the schema. No prose outside the JSON.");
             sb.AppendLine();
-            sb.AppendLine("STYLE GUIDE");
-            sb.AppendLine("- Names and lore must sound like THIS world: use the places, factions, people and events in the world context, and its plain, concrete vocabulary (weirs, tithes, kilns, ferries, ledgers).");
-            sb.AppendLine("- Not generic fantasy. Never use these words: " + string.Join(", ", StyleGuide.Forbidden) + ".");
+            sb.AppendLine("THE ITEM SENTENCE");
+            sb.AppendLine("- Every item arrives already decided: base, archetype (its purpose), culture and maker, material, mood and motif. These are facts. Keep them; do not change or contradict them.");
+            sb.AppendLine("- The name follows one of the culture's naming patterns and keeps the item's form noun. You may add flair inside the pattern, never new proper nouns.");
+            sb.AppendLine("- Effects should match the motif (its statuses) and the archetype (its triggers); the mood says whether they lean bright (allies, auras, discovery) or somber (drawbacks, curses).");
+            sb.AppendLine();
+            sb.AppendLine("STYLE GUIDE (docs/lore/style-guide.md)");
+            sb.AppendLine(LoreSource.StyleGuideText.Trim());
+            sb.AppendLine();
+            sb.AppendLine("HARD RULES (checked in code)");
+            sb.AppendLine("- Never use these words: " + string.Join(", ", StyleGuide.Forbidden) + ".");
             sb.AppendLine("- Avoid any word listed as overused in the request.");
             sb.AppendLine("- Names: at most " + DraftValidator.MaxNameWords + " words and " + DraftValidator.MaxNameLength + " characters.");
+            sb.AppendLine("- Every sentence: at most " + StyleGuide.MaxSentenceWords + " words. Capitalized names must come from the request.");
             if (kind == DraftKind.RareName)
             {
                 sb.AppendLine("- flavor: exactly one short, concrete sentence (under " + DraftValidator.MaxFlavorLength + " characters).");
                 return sb.ToString();
             }
-            sb.AppendLine("- lore: 2–4 sentences. Concrete and historical: who made or carried it, what happened, where it went. Mention at least one place, faction, person or event from the world context BY NAME and list their ids in worldRefs.");
-            sb.AppendLine("- End the lore with a lead: a hint that points the player toward another place or person in the world.");
-            sb.AppendLine("- Make the enchantments match the lore: if the lore says it drowned a town, the effects should soak and pull.");
+            sb.AppendLine("- lore: " + StyleGuide.MinLoreSentences + "–" + StyleGuide.MaxLoreSentences + " sentences. Concrete: who made or carried it, what it did, who cared about it. Mention at least one place, faction, person, legend or era from the world context BY NAME and list their ids in worldRefs.");
+            if (kind == DraftKind.Legendary)
+                sb.AppendLine("- Legendary lore names a legend or an era (ids legend.* / era.*) and ends with a lead: a hint toward a place other than where it was made or found.");
             sb.AppendLine();
             sb.AppendLine(GrammarSummary());
             return sb.ToString();
@@ -84,11 +92,12 @@ namespace Relic.Items.Text
                 default:
                     sb.AppendLine($"Write a Legendary relic, a {b.Form} (region tier {b.Tier}): name, lore, worldRefs, {b.EnchantmentCount} enchantment rule(s), an ultimate, and visual parameters.");
                     sb.AppendLine(string.Format(ci, "Budget for enchantments + ultimate together: {0:0.0} pp. The ultimate is an Active rule released with Q; it always costs one full resonance bar and has a {1:0} s cooldown (set by the game).", b.BudgetPp, EffectTemplates.UltimateCooldown));
-                    sb.AppendLine("visual.kitParts must come from: " + string.Join(", ", Forms.FormById(b.Form)?.Parts ?? Forms.KitParts) + " (any of: " + string.Join(", ", Forms.KitParts) + ").");
+                    sb.AppendLine("visual.kitParts must come from: " + string.Join(", ", Forms.FormById(b.Sentence?.Kit ?? b.Form)?.Parts ?? Forms.KitParts) + " (any of: " + string.Join(", ", Forms.KitParts) + ").");
                     sb.AppendLine("visual.decal must be one of: " + string.Join(", ", Forms.Decals) + ". wear 0–1, emissiveIntensity 0–4, emissiveColor \"#RRGGBB\".");
                     break;
             }
-            if (b.Theme != null) sb.AppendLine($"Theme: {b.Theme.Motif.Id}, {b.Theme.Mood.Id}. Preferred statuses: {b.Theme.Primary}, {b.Theme.Secondary}.");
+            if (b.Sentence != null) sb.AppendLine(SentenceSummary(b));
+            else if (b.Theme != null) sb.AppendLine($"Theme: {b.Theme.Motif.Id}, {b.Theme.Mood.Id}. Preferred statuses: {b.Theme.Primary}, {b.Theme.Secondary}.");
             if (b.Cursed) sb.AppendLine("This one is cursed: include a drawback for the wearer (self damage, a status on Self, or lowering a stat of Self) and spend the power it buys.");
             if (b.HomeRegion != null) sb.AppendLine($"It was found in {b.HomeRegion.Name} (id {b.HomeRegion.Id}, tags: {string.Join(", ", b.HomeRegion.Tags)}).");
             if (b.Stats != null && b.Stats.Count > 0)
@@ -110,6 +119,40 @@ namespace Relic.Items.Text
             return sb.ToString();
         }
 
+        /// <summary>The item sentence as facts for the writer (17-item-grammar).</summary>
+        public static string SentenceSummary(RelicBrief b)
+        {
+            var s = b.Sentence;
+            if (s == null) return "";
+            var bible = b.World?.Bible ?? LoreSource.TryDefault();
+            var culture = bible?.Culture(s.Culture);
+            var arch = b.Archetype ?? Archetypes.ById(s.Archetype);
+            var sb = new StringBuilder();
+            sb.AppendLine("ITEM SENTENCE (facts: keep them)");
+            sb.AppendLine($"- form: {s.Form} (the name must keep \"{Relic.Lore.LoreSampler.Title(s.HeadNoun)}\")");
+            sb.AppendLine($"- archetype: {arch?.Label} ({arch?.Feel}); favored triggers: {string.Join(", ", arch?.Triggers ?? new TriggerKind[0])}");
+            sb.AppendLine($"- material: {s.Material}{(s.Accent != null ? ", trimmed with " + s.Accent : "")} ({s.MaterialTag})");
+            if (b.Theme != null)
+            {
+                sb.AppendLine($"- mood: {b.Theme.Mood.Id} ({b.Theme.Tone}); effects lean: {string.Join(", ", b.Theme.Mood.EffectLean)}");
+                sb.AppendLine($"- motif: {b.Theme.Motif.Id}; statuses: {string.Join(", ", b.Theme.Motif.Statuses)}; shapes: {string.Join(", ", b.Theme.Motif.Shapes)}; words: {string.Join(", ", b.Theme.Motif.Words)}");
+            }
+            if (b.Kind != DraftKind.RareName)
+            {
+                sb.AppendLine($"- culture: {culture?.Name} ({culture?.Identity})");
+                sb.AppendLine($"- maker: {s.Maker} of {s.MakerHome}{(s.MakersMark != null ? "; signs work with " + s.MakersMark : "")}");
+            }
+            else sb.AppendLine($"- made in: {s.MakerHome}");
+            if (culture != null)
+            {
+                var patterns = new List<string>();
+                foreach (var p in culture.ItemNaming.Patterns) if (b.Kind != DraftKind.RareName || !p.Contains("{maker}")) patterns.Add(p);
+                sb.AppendLine($"- naming patterns: {string.Join(" | ", patterns)}");
+                sb.AppendLine($"- {{epithet}}: {string.Join(", ", culture.ItemNaming.Epithets)}; {{adjective}}: {string.Join(", ", culture.ItemNaming.Adjectives)}");
+            }
+            return sb.ToString().TrimEnd();
+        }
+
         static string Noun(RelicBrief b) => b.Form ?? b.BaseType.ToString().ToLowerInvariant();
 
         public static string WorldSummary(WorldContext w)
@@ -119,6 +162,11 @@ namespace Relic.Items.Text
             foreach (var f in w.Factions) sb.AppendLine($"- {f.Id}: {f.Name}, faction: {f.Ethos}");
             foreach (var p in w.Figures) sb.AppendLine($"- {p.Id}: {p.Name}, {p.Title} of {w.NameOf(p.FactionId)}; {p.Fate}");
             foreach (var e in w.Events) sb.AppendLine($"- {e.Id}: {e.Name}, {e.YearsAgo} years ago");
+            if (w.Bible != null)
+            {
+                foreach (var l in w.Bible.Legends) sb.AppendLine($"- {WorldContext.LegendId(l)}: {Relic.Lore.LoreSampler.LegendName(l)}, legend ({l.Tone}): {l.Summary}");
+                foreach (var e in w.Bible.Eras) sb.AppendLine($"- {WorldContext.EraId(e)}: {e.Name}, era, {e.StartYearsAgo}-{e.EndYearsAgo} years ago: {e.Summary}");
+            }
             return sb.ToString().TrimEnd();
         }
 

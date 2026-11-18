@@ -28,6 +28,44 @@ namespace Relic.Items.Tests
         }
 
         [Test]
+        public void PromptCarriesTheSentenceAndTheStyleGuide()
+        {
+            var fake = new FakeGenerator((req, call) => ItemJson.Serialize(TemplateAuthor.Compose((RelicBrief)req.Context)));
+            var item = new ItemGenerator(StubWorld.Create(77), fake).Generate(new ItemSpec { WorldSeed = 77, Index = 0, Tier = 3, Rarity = Rarity.Legendary });
+            var req = fake.Requests[0];
+            StringAssert.Contains("well-traveled aunt", req.Messages[0].Content); // docs/lore/style-guide.md
+            StringAssert.Contains("ITEM SENTENCE", req.Messages[1].Content);
+            StringAssert.Contains(item.Grammar.Maker, req.Messages[1].Content);
+            StringAssert.Contains(item.Grammar.Material, req.Messages[1].Content);
+            StringAssert.Contains("legend.wren", req.JsonSchema); // Bible names are referenceable
+        }
+
+        [Test]
+        public void WriterMustKeepTheGrammarsNamesAndFacts()
+        {
+            var fake = new FakeGenerator((req, call) =>
+            {
+                var o = Newtonsoft.Json.Linq.JObject.Parse(ItemJson.Serialize(TemplateAuthor.Compose((RelicBrief)req.Context)));
+                if (call == 0)
+                {
+                    o["name"] = "The Gleaming Thing";
+                    o["lore"] = "Forged by Grimbold of Zarathax, who sold it to a wandering merchant.";
+                    o["visual"]["material"] = "obsidian";
+                    o["worldRefs"] = new Newtonsoft.Json.Linq.JArray(((RelicBrief)req.Context).World.Regions[0].Id);
+                }
+                return o.ToString();
+            });
+            var item = new ItemGenerator(StubWorld.Create(77), fake).Generate(new ItemSpec { WorldSeed = 77, Index = 5, Tier = 6, Rarity = Rarity.Legendary });
+            string feedback = fake.Requests[1].Messages.Last().Content;
+            StringAssert.Contains("form noun", feedback);
+            StringAssert.Contains("\"Grimbold\"", feedback);
+            StringAssert.Contains("\"Zarathax\"", feedback);
+            StringAssert.Contains("visual.material", feedback);
+            StringAssert.Contains("legend or an era", feedback);
+            Assert.AreEqual(GenerationMode.Llm, item.Generator.Mode, "the corrected second answer is accepted");
+        }
+
+        [Test]
         public void EveryBibleMaterialAndFormIsDescribed()
         {
             var bible = LoreSource.Default;
