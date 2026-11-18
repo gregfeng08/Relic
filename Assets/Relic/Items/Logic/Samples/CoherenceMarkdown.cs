@@ -23,7 +23,7 @@ namespace Relic.Items.Samples
             sb.AppendLine("**Coherence** — *the item sentence*");
             sb.AppendLine();
             string kit = s.Kit != null ? $" (kit: {s.Kit})" : "";
-            sb.AppendLine($"- **Base:** {Pretty(it.BaseType)}, a *{s.Form}*{kit}{(s.CultureForm ? $" — a {culture?.Adjective} form" : "")}");
+            sb.AppendLine(TemplateText.FixArticles($"- **Base:** {Pretty(it.BaseType)}, a *{s.Form}*{kit}{(s.CultureForm ? $" — a {culture?.Adjective} form" : "")}"));
             sb.AppendLine($"- **Archetype:** {arch?.Label} ({arch?.Feel}) → archetype line {Lines(it, ArchetypeLines.ArchetypeSource)}; favored triggers {string.Join(", ", arch?.Triggers ?? new Relic.Core.Effects.TriggerKind[0])}");
             string maker = s.Has(GrammarLayer.Maker) ? $"; made by **{s.Maker}** of {s.MakerHome}{(s.MakersMark != null ? ", who signs with " + s.MakersMark : "")}" : $" (from {s.MakerHome}; maker shown from Epic)";
             sb.AppendLine($"- **Culture:** {culture?.Adjective}{maker}");

@@ -89,7 +89,7 @@ namespace Relic.Items.Text
         {
             "Made in {place}, where they still argue about the best way to oil {material}.",
             "It smells faintly of {word}, like most good things from {place}.",
-            "Somebody in {place} scratched a little {word} under the grip, for luck.",
+            "Somebody in {place} scratched a little {word} on the {form}, for luck.",
             "Good {material}, {tag}; somebody in {place} made sure of it.",
             "Bought at a fair in {place} for a song, and the seller sang it.",
         };
