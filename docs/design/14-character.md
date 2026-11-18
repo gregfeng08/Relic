@@ -56,3 +56,14 @@ A player uploads a picture, and a vision-capable model maps it onto `HeroAppeara
 - **Grounded rules still apply:** only parameters the game supports.
 - **Safety:** clamped parameters can't produce offensive geometry. Uploaded images are processed and then discarded, never stored or shared.
 - **Multiplayer:** other players only ever see the parameters.
+
+## Proposal: the unwritten wayfarer (lead, 2026-11-18; awaiting Greg)
+Greg wondered whether players should start as a default faceless character and build it from the ground up. That fits the canon (things gain identity by being used, named and noticed: the Listening) and the Narrator (who writes you). The risk: Genshin-style players want to look good *early*, and a long faceless stretch feels like a punishment. Proposal:
+1. **Start unwritten (the first ~5–10 minutes):** a soft, featureless silhouette in a plain cloak (cute and readable, not creepy) waking at the Lanternfold. It's a brief prologue: walk, dash, find your lantern. The Narrator: "I haven't written you yet."
+2. **Being written:** at the Old Hearth you're "written" through a character creator framed in-world. The Narrator asks how you'd like to be described. Sliders and presets come from `HeroAppearance`, or later the photo upload (RLC-040). You can also stay simple and be written as you go.
+3. **Written by play, gradually and cosmetically:**
+   - clothes take on the style of the culture you spend the most time with;
+   - an accent color comes from your first relic;
+   - small marks come from your deeds (a Teskari bell charm after the festival, a sun-faded coat in the badlands).
+   - You can always override any of it at a sanctuary mirror.
+4. **Permadeath ritual:** each new wayfarer starts unwritten again. At the Reliquary you can "write them like" a past wayfarer (copy a look), or start fresh.
