@@ -45,8 +45,8 @@ Three systems are built in parallel by separate agents, each on its own git bran
 4. Before stopping, update the board and add a session log entry: what changed, what's next, where it stopped.
 5. Never push, publish, or change anything outside the repo without Greg's go-ahead on the board or in chat.
 
-## Autonomous runs (every 2 hours; Greg, 2026-11-18)
-A scheduled task in the Claude desktop app starts a fresh session every 2 hours. It **builds, tests and commits on stream branches only**, and **never merges or pushes**. Greg reviews ready-to-merge cards on the board; merging and pushing happen only in an interactive session with Greg.
+## Autonomous runs (hourly since 2026-11-18; Greg)
+A scheduled task in the Claude desktop app starts a fresh session every hour. It **builds, tests and commits on stream branches only**, and **never merges or pushes**. Greg reviews ready-to-merge cards on the board; merging and pushing happen only in an interactive session with Greg.
 
 **Every run:**
 1. **Lock.** If `.wt/AUTORUN.lock` exists and is less than 3 hours old, stop without doing anything. Otherwise write it (timestamp), and delete it at the end.

@@ -43,3 +43,14 @@ Yes, if it writes the **rules and palettes**, not the places. An infinite world 
 1. **A Lore agent drafts the Bible** (`docs/lore/`): canon, cultures and templates as structured data plus readable prose.
 2. **Greg reviews the tone and cultures** (the main feel review).
 3. The Items stub world and the template moods are **replaced by Bible data**, and the sample relics are regenerated. Later, the world graph (M2) consumes it too.
+
+## Decision 2026-11-18: wipe the story, keep the rules (Greg)
+Lore is now **procedural and event-driven** (20: the Chronicler). The hand-written Bible is cut down to a lean **constitution**:
+- **Keep (the rules):**
+  - the tone and style guide (bright medieval fantasy, 70/30 moods, banned words);
+  - a few one-line mechanical truths that ground the systems (pillar 7): loved, used things gain resonance, which is why relics, essences, graves and sanctuaries work;
+  - the name phonology generators;
+  - faction, event and motif *templates*.
+- **Wipe (the story):** the four eras, the ten legends, Corvane and the Quarrel, specific festivals, fixed place names (the Lanternfold and the Old Hearth become generated or generic: "the first hearth"), and the seven fixed cultures as *content*.
+- **Procedural cultures:** each world generates its own cultures from culture templates (climate affinities, crafts, material palettes, values, phonology families). They keep the same data shape Items consumes today, so the item grammar keeps working.
+- **World creation:** a short procedural prehistory (a few generated eras, founders and relic-worthy events), so the first relics have something to remember. After that, the Chronicler writes history as players act. Like the wayfarer, *the world starts mostly unwritten*.

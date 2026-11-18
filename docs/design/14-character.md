@@ -67,3 +67,9 @@ Greg wondered whether players should start as a default faceless character and b
    - small marks come from your deeds (a Teskari bell charm after the festival, a sun-faded coat in the badlands).
    - You can always override any of it at a sanctuary mirror.
 4. **Permadeath ritual:** each new wayfarer starts unwritten again. At the Reliquary you can "write them like" a past wayfarer (copy a look), or start fresh.
+
+## Decision 2026-11-18: hero base = Unity Humanoid (Mecanim) + Animator (Greg)
+- **The unwritten wayfarer base** is a smooth, neutral humanoid rigged as a **Unity Humanoid avatar**, so a real **Animator** (state machine plus blend trees) drives it, and clips can be retargeted from any humanoid source. It should look *less like a test mannequin and more like the story*: a soft, rounded, cute silhouette in a plain cloak, with only a hint of a face, fitting "the Narrator hasn't written you yet."
+- **Written layers** (hair, clothes, gear from `HeroAppearance` and items) attach to the Humanoid skeleton as today's procedural parts do.
+- **Animation clips:** first, bake our existing procedural poses (idle, run, sprint, dash, jump, fall, land, climb, swim, dive) into AnimationClips, so there's no download. Later, optionally, Quaternius' CC0 Universal Animation Library (Greg downloads it, or approves a download) for richer motion.
+- **Secondary motion** (hair, scarf, coat chains) stays procedural on top of the Animator.
