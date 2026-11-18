@@ -15,6 +15,12 @@ namespace Relic.Character
         {
             HairSpec h = b.App.Hair;
             Cap(b);
+            if (b.HoodUp)
+            {
+                // Under a raised hood only the fringe and the cheek locks show.
+                Bangs(b, h.Bangs);
+                return;
+            }
             AngelRing(b);
             Bangs(b, h.Bangs);
             HeroHairStyles.Back(b, h);

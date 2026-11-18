@@ -48,9 +48,9 @@ namespace Relic.Character.Editor
         }
 
 
-        public static void Capture(string dir)
+        /// <summary>A fresh scene with the sun, sky and a grey ground plane; returns the toon material.</summary>
+        static Material Stage()
         {
-            Directory.CreateDirectory(dir);
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var toon = AssetDatabase.LoadAssetAtPath<Material>("Assets/Relic/World/Materials/ToonCharacter.mat");
             var skyMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Relic/World/Materials/SkyGradient.mat");
@@ -73,6 +73,13 @@ namespace Relic.Character.Editor
             groundMat.SetColor("_BaseColor", new Color(0.62f, 0.62f, 0.62f));
             groundMat.SetFloat("_OutlineWidth", 0f);
             ground.GetComponent<MeshRenderer>().sharedMaterial = groundMat;
+            return toon;
+        }
+
+        public static void Capture(string dir)
+        {
+            Directory.CreateDirectory(dir);
+            Material toon = Stage();
 
             var heroGo = new GameObject("Hero");
             var hero = heroGo.AddComponent<HeroAvatar>();
@@ -151,6 +158,126 @@ namespace Relic.Character.Editor
 
             Object.DestroyImmediate(heroGo);
             Debug.Log("[Relic.Character] Captures written to " + dir);
+        }
+
+        /// <summary>
+        /// v3 (RLC-059, the Humanoid + Animator hero): the unwritten wayfarer front / three-quarter /
+        /// back / running, a head close-up and its Animator motion sheet, then a turnaround of every
+        /// other preset. Default output: art-ref/renders/v3.
+        /// Unity -batchmode -quit -projectPath . -executeMethod Relic.Character.Editor.HeroCapture.RunV3 [-captureDir DIR]
+        /// </summary>
+        public static void RunV3()
+        {
+            try { CaptureV3(Arg("-captureDir") ?? Path.Combine(DefaultDir(), "v3")); }
+            catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+        }
+
+        public static void CaptureV3(string dir)
+        {
+            Directory.CreateDirectory(dir);
+            Material toon = Stage();
+            var heroGo = new GameObject("Hero");
+            var hero = heroGo.AddComponent<HeroAvatar>();
+            hero.ToonMaterial = toon;
+            var cam = MakeCamera();
+            var roller = new KitRoller(1337);
+
+            // The unwritten wayfarer: carries nothing yet.
+            hero.Appearance = AppearancePresets.Unwritten();
+            hero.Kit = new HeroKit();
+            hero.Input = new HeroAnimInput { Motion = HeroMotion.Idle };
+            hero.Rebuild();
+            Settle(hero, Vector3.zero, 120);
+            Debug.Log("[Relic.Character] v3 unwritten: " + hero.TriangleCount + " triangles, avatar valid " + hero.HumanAvatar.isValid + " human " + hero.HumanAvatar.isHuman
+                + ", animator " + (hero.Mecanim != null) + " [" + hero.Breakdown + "]");
+            var views = new (string name, float yaw)[] { ("front", 180f), ("three_quarter", 215f), ("back", 0f) };
+            foreach (var v in views)
+            {
+                var one = new Texture2D(W, H, TextureFormat.RGB24, false);
+                Orbit(cam, v.yaw, 0.88f, 3.6f, 4f, 30f);
+                Blit(cam, one, 0);
+                Save(one, Path.Combine(dir, "v3_unwritten_" + v.name + ".png"));
+            }
+            var head = new Texture2D(W, H, TextureFormat.RGB24, false);
+            Orbit(cam, 190f, 1.5f, 0.85f, 3f, 24f);
+            Blit(cam, head, 0);
+            Save(head, Path.Combine(dir, "v3_unwritten_head.png"));
+            // Running (Animator Move state at run speed), three-quarter and side.
+            var run = new Texture2D(W * 2, H, TextureFormat.RGB24, false);
+            Pose(hero, new HeroAnimInput { Motion = HeroMotion.Run, Speed = 6f }, new Vector3(0f, 0f, 6f), 37);
+            Orbit(cam, 215f, 0.9f, 3.8f, 5f, 30f); Blit(cam, run, 0);
+            Orbit(cam, 270f, 0.9f, 3.8f, 5f, 30f); Blit(cam, run, W);
+            Save(run, Path.Combine(dir, "v3_unwritten_running.png"));
+            AnimatorSheet(hero, cam, Path.Combine(dir, "v3_unwritten_motion.png"));
+
+            // Every other preset, written looks with a kit each.
+            var kits = new[] { (BaseType.Staff, BaseType.LightArmor), (BaseType.Sword, BaseType.LightArmor), (BaseType.Bow, BaseType.MediumArmor), (BaseType.Tome, BaseType.LightArmor) };
+            int k = 0;
+            foreach (HeroAppearance look in AppearancePresets.All())
+            {
+                if (look.Name == "Unwritten") continue;
+                var (weapon, armor) = kits[k % kits.Length];
+                hero.Appearance = look;
+                hero.Kit = roller.Roll(3, ++k, weapon, armor);
+                hero.Input = new HeroAnimInput { Motion = HeroMotion.Idle };
+                hero.transform.position = Vector3.zero;
+                hero.Rebuild();
+                Settle(hero, Vector3.zero, 90);
+                Debug.Log("[Relic.Character] v3 " + look.Name + ": " + hero.TriangleCount + " triangles, animator " + (hero.Mecanim != null) + " [" + hero.Breakdown + "]");
+                float[] yaws = { 180f, 215f, 270f, 0f };
+                var sheet = new Texture2D(W * yaws.Length, H, TextureFormat.RGB24, false);
+                for (int v = 0; v < yaws.Length; v++)
+                {
+                    Orbit(cam, yaws[v], 0.92f, 4.3f, 4f, 30f);
+                    Blit(cam, sheet, v * W);
+                }
+                Save(sheet, Path.Combine(dir, "v3_" + look.Name.ToLowerInvariant() + "_turnaround.png"));
+            }
+            Object.DestroyImmediate(heroGo);
+            Debug.Log("[Relic.Character] v3 captures written to " + dir);
+        }
+
+        /// <summary>Snaps the hero into a pose and lets the Animator and chains run, moving with the velocity.</summary>
+        static void Pose(HeroAvatar hero, HeroAnimInput input, Vector3 vel, int frames)
+        {
+            hero.transform.position = Vector3.zero;
+            hero.Input = input;
+            hero.Rebuild();
+            Vector3 p = Vector3.zero;
+            for (int f = 0; f < frames; f++)
+            {
+                p += vel * (1f / 60f);
+                hero.transform.position = p;
+                hero.Animate(1f / 60f, vel);
+            }
+            hero.transform.position = Vector3.zero;
+            hero.Chains.Step(0f);
+        }
+
+        static void AnimatorSheet(HeroAvatar hero, Camera cam, string file)
+        {
+            var poses = new (HeroAnimInput input, Vector3 vel)[]
+            {
+                (new HeroAnimInput { Motion = HeroMotion.Idle }, Vector3.zero),
+                (new HeroAnimInput { Motion = HeroMotion.Run, Speed = 6f }, new Vector3(0f, 0f, 6f)),
+                (new HeroAnimInput { Motion = HeroMotion.Run, Speed = 9.5f, Sprint = true }, new Vector3(0f, 0f, 9.5f)),
+                (new HeroAnimInput { Motion = HeroMotion.Run, Speed = 14f, Dash = true }, new Vector3(0f, 0f, 14f)),
+                (new HeroAnimInput { Motion = HeroMotion.Air, VerticalSpeed = 5f, Speed = 5f }, new Vector3(0f, 5f, 5f)),
+                (new HeroAnimInput { Motion = HeroMotion.Air, VerticalSpeed = -8f, Speed = 3f }, new Vector3(0f, -8f, 3f)),
+                (new HeroAnimInput { Motion = HeroMotion.Idle, LandingSquash = 0.8f }, Vector3.zero),
+                (new HeroAnimInput { Motion = HeroMotion.Climb, ClimbSpeed = 2f }, new Vector3(0f, 1.5f, 0f)),
+                (new HeroAnimInput { Motion = HeroMotion.Swim, Speed = 3.6f }, new Vector3(0f, 0f, 3.6f)),
+                (new HeroAnimInput { Motion = HeroMotion.Dive, Speed = 3f, DivePitch = 10f, Underwater = true }, new Vector3(0f, -0.5f, 3f)),
+            };
+            var sheet = new Texture2D(W * poses.Length, H, TextureFormat.RGB24, false);
+            for (int i = 0; i < poses.Length; i++)
+            {
+                Pose(hero, poses[i].input, poses[i].vel, 41);
+                Orbit(cam, 250f, 0.9f, 3.8f, 5f, 30f);
+                Blit(cam, sheet, i * W);
+            }
+            Save(sheet, file);
+            hero.Input = new HeroAnimInput { Motion = HeroMotion.Idle };
         }
 
         static void MotionSheet(HeroAvatar hero, Camera cam, string file)

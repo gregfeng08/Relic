@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Relic.Character
 {
-    /// <summary>Hair accessories from the appearance: a crossed hair pin, a flower, or a ribbon bow.</summary>
+    /// <summary>Accessories from the appearance: a crossed hair pin, a flower, a ribbon bow, or a bookmark ribbon.</summary>
     public static class HeroAccessories
     {
         public static void Build(HeroBuild b)
@@ -10,6 +10,9 @@ namespace Relic.Character
             int slot = 0;
             foreach (AccessorySpec a in b.App.Accessories)
             {
+                if (a.Kind == AccessoryKind.Bookmark) { Bookmark(b, a); continue; }
+                // Hair accessories are hidden under a raised hood.
+                if (b.HoodUp) { slot++; continue; }
                 // A ribbon that already ties the hair (tail styles) is shown as the tie itself.
                 bool tied = a.Kind == AccessoryKind.Ribbon && slot == 0 && HasTie(b.App.Hair.Style);
                 if (!tied) Place(b, a, slot);
@@ -18,6 +21,44 @@ namespace Relic.Character
         }
 
         static bool HasTie(HairStyle s) => s == HairStyle.LowTail || s == HairStyle.Ponytail || s == HairStyle.TwinTails;
+
+        /// <summary>
+        /// A book's ribbon bookmark trailing from the hood's point (or the back of the head): the
+        /// unwritten wayfarer's one mark of the story they belong to. Swings on a spring chain.
+        /// </summary>
+        static void Bookmark(HeroBuild b, AccessorySpec a)
+        {
+            int s = a.Side == Side.Left ? -1 : 1;
+            Vector3 top = b.HoodUp ? HeroCloak.HoodTip + new Vector3(0f, -0.012f, 0.006f) : HeroHair.OnCap(0.25f, Mathf.PI, 0.008f);
+            var joints = new[]
+            {
+                top,
+                top + new Vector3(0.008f * s, -0.065f, -0.012f),
+                top + new Vector3(0.014f * s, -0.135f, -0.018f),
+                top + new Vector3(0.018f * s, -0.205f, -0.016f),
+                top + new Vector3(0.02f * s, -0.27f, -0.01f),
+            };
+            Color c = HeroBuild.C(a.Color);
+            b.Toon(c, 1f);
+            b.Rigid(HeroRig.Head);
+            b.Kit.Ellipsoid(top + new Vector3(0f, 0.004f, 0f), new Vector3(0.011f, 0.009f, 0.011f), 10, 5);
+            ChainDef chain = b.Chain("Bookmark", HeroRig.Head, joints, "hair");
+            chain.Stiffness = 0.18f;
+            chain.Drag = 0.32f;
+            chain.Radius = 0.012f;
+            chain.CollideFrom = 1;
+            b.Toon(c, 1f);
+            b.Kit.Weigh = p => b.ChainWeight(chain, HeroRig.Head, p);
+            var pts = MeshKit.Spline(joints, 3);
+            var rad = new System.Collections.Generic.List<float>();
+            for (int i = 0; i < pts.Count; i++) rad.Add(0.0105f);
+            b.Kit.Path(pts, rad, 4, 0.22f, Vector3.back);
+            // The cut end: a small swallowtail notch.
+            Vector3 end = joints[joints.Length - 1];
+            for (int k = -1; k <= 1; k += 2)
+                b.Kit.Path(new System.Collections.Generic.List<Vector3> { end + new Vector3(0.004f * k, 0.004f, 0f), end + new Vector3(0.008f * k, -0.022f, 0.002f) },
+                    new System.Collections.Generic.List<float> { 0.0055f, 0.0012f }, 4, 0.4f, Vector3.back);
+        }
 
         static void Place(HeroBuild b, AccessorySpec a, int slot)
         {

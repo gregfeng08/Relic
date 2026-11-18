@@ -13,6 +13,7 @@ namespace Relic.Character
         public static void Build(HeroBuild b)
         {
             Head(b);
+            if (b.App.Face.Style == FaceStyle.Hint) { HintFace(b); return; }
             Eyes(b);
             Details(b);
         }
@@ -108,6 +109,37 @@ namespace Relic.Character
                     rad.Add(Mathf.Lerp(0.0015f, 0.0034f, Mathf.Sin(Mathf.PI * i / 7f)));
                 }
                 b.Kit.Path(pts, rad, 4, 0.6f, Vector3.forward);
+            }
+            b.Kit.Xf = Matrix4x4.identity;
+        }
+
+        /// <summary>
+        /// The unwritten wayfarer's face: only a hint of one. Two soft ink-dot eyes with a tiny
+        /// highlight and a blush, no nose and no mouth yet (the Narrator hasn't written them).
+        /// </summary>
+        static void HintFace(HeroBuild b)
+        {
+            FaceSpec f = b.App.Face;
+            b.Rigid(HeroRig.Head);
+            Color ink = HeroBuild.C(f.EyeColor);
+            float size = f.EyeSize;
+            for (int s = -1; s <= 1; s += 2)
+            {
+                float x = 0.041f * s, y = 1.562f;
+                float z = FrontZ(y, x) - 0.002f;
+                b.Kit.Xf = Matrix4x4.TRS(new Vector3(x, y, z), Quaternion.Euler(0f, 22f * s, 0f), Vector3.one * size);
+                b.Flat(ink);
+                b.Kit.Ellipsoid(Vector3.zero, new Vector3(0.0088f, 0.0118f, 0.004f), 14, 4);
+                b.Flat(Color.white, 1.1f);
+                b.Kit.Ellipsoid(new Vector3(0.003f * s, 0.0042f, 0.0034f), new Vector3(0.0028f, 0.0032f, 0.0015f), 8, 3);
+            }
+            Color skin = b.SkinColor;
+            b.Flat(Color.Lerp(skin, new Color(1f, 0.55f, 0.58f), 0.5f));
+            for (int s = -1; s <= 1; s += 2)
+            {
+                float bx = 0.06f * s, by = 1.535f;
+                b.Kit.Xf = Matrix4x4.TRS(new Vector3(bx, by, FrontZ(by, bx) - 0.001f), Quaternion.Euler(0f, 32f * s, 0f), Vector3.one);
+                b.Kit.Ellipsoid(Vector3.zero, new Vector3(0.017f, 0.008f, 0.0035f), 12, 3);
             }
             b.Kit.Xf = Matrix4x4.identity;
         }

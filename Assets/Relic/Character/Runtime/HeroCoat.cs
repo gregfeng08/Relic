@@ -20,13 +20,18 @@ namespace Relic.Character
             Color coat = Tinted(HeroBuild.C(spec.Color), b.Look.Armor);
             Color trim = HeroBuild.C(spec.TrimColor);
             Color dark = coat * 0.82f; dark.a = 1f;
-            Torso(b, coat, dark, trim);
-            for (int s = -1; s <= 1; s += 2) Sleeve(b, coat, dark, trim, s);
-            Skirt(b, spec, coat, dark, trim);
+            if (spec.Style == CoatStyle.Cloak) HeroCloak.Build(b, spec, coat, dark, trim);
+            else
+            {
+                Torso(b, coat, dark, trim);
+                for (int s = -1; s <= 1; s += 2) Sleeve(b, coat, dark, trim, s);
+                Skirt(b, spec, coat, dark, trim);
+            }
+            if (b.HoodUp) HeroCloak.Hood(b, coat, dark * 0.86f + Color.black * 0.14f, trim);
         }
 
         /// <summary>Armor tints the chosen coat color the way it tints the default brown.</summary>
-        static Color Tinted(Color coat, ArmorLook armor)
+        internal static Color Tinted(Color coat, ArmorLook armor)
         {
             Rgb d = MaterialPalette.Coat, a = armor.Coat;
             return new Color(coat.r * Ratio(a.R, d.R), coat.g * Ratio(a.G, d.G), coat.b * Ratio(a.B, d.B), 1f);
@@ -34,7 +39,7 @@ namespace Relic.Character
 
         static float Ratio(float a, float d) => Mathf.Clamp(a / Mathf.Max(0.05f, d), 0.6f, 1.4f);
 
-        static BoneWeight ShoulderAware(Vector3 p)
+        internal static BoneWeight ShoulderAware(Vector3 p)
         {
             BoneWeight torso = HeroBuild.TorsoWeight(p);
             float ax = Mathf.Abs(p.x);
@@ -91,7 +96,8 @@ namespace Relic.Character
             b.Kit.Tube(tg + new Vector3(-0.015f, -0.003f, 0f), tg + new Vector3(0.015f, 0.003f, 0f), 0.007f, 0.007f, 8);
             b.Toon(MaterialPalette.Cord, 1.1f);
             b.Kit.Torus(new Vector3(0.012f, 1.388f, 0.10f), Vector3.forward, 0.022f, 0.01f, 0.003f, 10, 4);
-            // The hood, folded down behind the neck.
+            // The hood, folded down behind the neck (unless it is raised).
+            if (b.HoodUp) return;
             b.Toon(coat);
             b.Kit.Weigh = HeroBuild.TorsoWeight;
             b.Kit.Ellipsoid(new Vector3(0f, 1.40f, -0.102f), new Vector3(0.115f, 0.05f, 0.048f), 14, 6);
@@ -100,7 +106,7 @@ namespace Relic.Character
         static List<float> GearFill(int n, float v) => HeroGear.Fill(n, v);
 
         /// <summary>An open cloth tube with thickness (outer, lining and edges).</summary>
-        static void Shell(HeroBuild b, IList<Ring> rings, int sides, float a0, float a1, System.Func<Vector3, BoneWeight> weigh)
+        internal static void Shell(HeroBuild b, IList<Ring> rings, int sides, float a0, float a1, System.Func<Vector3, BoneWeight> weigh)
         {
             int rows = rings.Count - 1;
             b.Kit.Sheet(rows, sides,

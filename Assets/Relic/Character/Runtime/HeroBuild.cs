@@ -66,6 +66,9 @@ namespace Relic.Character
             Kit.NormalBend = 0f;
         }
 
+        /// <summary>The hood is raised: back hair, hair accessories and the folded hood are skipped.</summary>
+        public bool HoodUp => App.Outfit.Coat.On && App.Outfit.Coat.HoodUp;
+
         public Color SkinColor => C(App.Body.SkinTone);
         public Color SkinShade { get { Color s = SkinColor; return new Color(s.r * 0.96f, s.g * 0.80f, s.b * 0.80f); } }
         public Color HairColor => C(App.Hair.Color);
