@@ -65,8 +65,25 @@ namespace Relic.Items.Text
             sb.AppendLine("statuses: " + Names<StatusId>(skipFirst: true) + ". stats: " + Names<StatId>() + ". resources: " + Names<ResourceId>() + ".");
             sb.AppendLine("Limits: ≤ 4 rules, ≤ 4 actions per list, payload nesting ≤ 3, ≤ 24 projectiles (count × (1 + splitCount)). Passive rules may only ModifyStat or CreateArea.");
             sb.AppendLine("Units: meters, seconds; damage 10 = one starter-weapon hit at tier 0.");
-            sb.AppendLine("POWER BUDGET: every rule costs power points (pp); 1 pp ≈ one 10-damage hit every 4 s. Cost grows with damage, status weight × duration, projectile count, area size × ticks, and how often the trigger fires (OnHit ≈ 2.5×, OnKill 0.5×, Periodic 4/interval). Chance, cooldowns and conditions make rules cheaper. Self-harm (damage or statuses on Self, lowering your own stats) has NEGATIVE cost: a drawback buys power elsewhere. Stay under the budget you are given; over-budget effects are shrunk.");
+            sb.AppendLine("POWER BUDGET: every rule costs power points (pp); 1 pp ≈ one 10-damage hit every 4 s. Cost grows with damage, status weight × duration, projectile count, area size × ticks, and how often the trigger fires (" + TriggerFrequencies() + "). Chance, cooldowns and conditions make rules cheaper. Self-harm (damage or statuses on Self, lowering your own stats) has NEGATIVE cost: a drawback buys power elsewhere. Stay under the budget you are given; over-budget effects are shrunk.");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Trigger frequency multipliers, read from <see cref="PowerBudget.Frequency"/> so the
+        /// prompt always quotes the numbers the budget actually charges.
+        /// </summary>
+        static string TriggerFrequencies()
+        {
+            var parts = new List<string>();
+            foreach (TriggerKind kind in Enum.GetValues(typeof(TriggerKind)))
+            {
+                if (kind == TriggerKind.Periodic) { parts.Add("Periodic 4/interval"); continue; }
+                float f = PowerBudget.Frequency(new TriggerSpec { Kind = kind }, 0f);
+                if (Math.Abs(f - 1f) < 0.001f) continue;
+                parts.Add(kind + " " + f.ToString("0.##", CultureInfo.InvariantCulture) + "×");
+            }
+            return string.Join(", ", parts) + ", other triggers 1×";
         }
 
         static string Names<T>(bool skipFirst = false) where T : Enum

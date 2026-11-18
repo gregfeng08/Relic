@@ -26,6 +26,23 @@ namespace Relic.Items.Tests
         static JObject GoodObject(TextRequest req) => JObject.Parse(Good(req));
 
         [Test]
+        public void PromptQuotesTheTriggerFrequenciesThePowerBudgetCharges()
+        {
+            // The model can only stay in budget if the prompt states the real multipliers.
+            float onHit = PowerBudget.Frequency(new TriggerSpec { Kind = TriggerKind.OnHit }, 0f);
+            float onKill = PowerBudget.Frequency(new TriggerSpec { Kind = TriggerKind.OnKill }, 0f);
+            foreach (DraftKind kind in Enum.GetValues(typeof(DraftKind)))
+            {
+                string prompt = Prompts.SystemPrompt(kind);
+                if (!prompt.Contains("POWER BUDGET")) continue;
+                StringAssert.Contains("OnHit " + onHit.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "×", prompt);
+                StringAssert.Contains("OnKill " + onKill.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "×", prompt);
+                StringAssert.DoesNotContain("2.5×", prompt);
+            }
+            StringAssert.Contains("POWER BUDGET", Prompts.SystemPrompt(DraftKind.Legendary));
+        }
+
+        [Test]
         public void ValidFirstAnswerIsAcceptedAsLlmOutput()
         {
             var fake = new FakeGenerator((req, call) => Good(req)) { Name = "fake-model" };
