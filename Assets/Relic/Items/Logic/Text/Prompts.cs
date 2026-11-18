@@ -88,7 +88,7 @@ namespace Relic.Items.Text
                     sb.AppendLine("visual.decal must be one of: " + string.Join(", ", Forms.Decals) + ". wear 0–1, emissiveIntensity 0–4, emissiveColor \"#RRGGBB\".");
                     break;
             }
-            if (b.Theme != null) sb.AppendLine($"Theme: {b.Theme.Motif.Id}, {b.Theme.Mood.Id}. Preferred statuses: {b.Theme.Motif.Primary}, {b.Theme.Motif.Secondary}.");
+            if (b.Theme != null) sb.AppendLine($"Theme: {b.Theme.Motif.Id}, {b.Theme.Mood.Id}. Preferred statuses: {b.Theme.Primary}, {b.Theme.Secondary}.");
             if (b.Cursed) sb.AppendLine("This one is cursed: include a drawback for the wearer (self damage, a status on Self, or lowering a stat of Self) and spend the power it buys.");
             if (b.HomeRegion != null) sb.AppendLine($"It was found in {b.HomeRegion.Name} (id {b.HomeRegion.Id}, tags: {string.Join(", ", b.HomeRegion.Tags)}).");
             if (b.Stats != null && b.Stats.Count > 0)

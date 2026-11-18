@@ -176,13 +176,21 @@ namespace Relic.Items.Tests
         }
 
         [Test]
-        public void ThemePickerFavorsRegionMotifs()
+        public void ThemePickerUsesCultureMotifsAndBrightMoods()
         {
-            int tide = 0;
+            var bible = LoreSource.Default;
+            var culture = bible.Culture("solanne");
+            int bright = 0, inCulture = 0;
             for (ulong s = 0; s < 4000; s++)
-                if (ThemePicker.Pick(s, new[] { "coast" }).Motif.Id == "tide") tide++;
-            // tide is one of 3 coast motifs (weight 3) among 12: 3 / (3*3 + 9) = 1/6
-            Assert.AreEqual(4000 / 6.0, tide, 120);
+            {
+                var rng = Relic.Core.Random.Pcg32.ForPurpose(s, "test.theme");
+                var t = ThemePicker.Pick(bible, culture, ref rng);
+                if (t.Tone == Relic.Lore.Tone.Bright) bright++;
+                if (culture.Motifs.Contains(t.Motif.Id)) inCulture++;
+                Assert.IsTrue(t.Motif.Tones.Contains(t.Tone), t.ToString());
+            }
+            Assert.AreEqual(0.7, bright / 4000.0, 0.03, "about 70% bright");
+            Assert.Greater(inCulture / 4000.0, 0.95, "motifs come from the culture's list when any fit");
         }
 
         [Test]

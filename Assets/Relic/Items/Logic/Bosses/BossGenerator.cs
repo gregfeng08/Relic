@@ -196,7 +196,9 @@ namespace Relic.Items.Bosses
             var ev = local.Count > 0 ? local[rng.Range(0, local.Count)] : world.Events[rng.Range(0, world.Events.Count)];
             var figure = world.Figures[rng.Range(0, world.Figures.Count)];
 
-            string name = StubWorld.PersonName(ref rng);
+            var bible = world.Bible ?? LoreSource.Default;
+            var culture = bible.Culture(region.Culture) ?? bible.Cultures[0];
+            string name = new Relic.Lore.NameGenerator(culture, bible.Style).Person(ref rng);
             string Fill(string t) => t.Replace("{name}", name).Replace("{region}", region.Name).Replace("{landmark}", region.Landmark)
                 .Replace("{faction}", faction.Name).Replace("{event}", ev.Name).Replace("{figure}", figure.Name);
             string Sentences(string s) // capitalize each sentence ("the Salt Choir..." at a start)

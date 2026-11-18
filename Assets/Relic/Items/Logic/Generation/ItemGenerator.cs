@@ -116,7 +116,8 @@ namespace Relic.Items
 
             int tier = Math.Max(0, Math.Min(Difficulty.MaxTier, spec.Tier));
             var home = spec.RegionId != null ? _world.Region(spec.RegionId) : NearestRegion(tier);
-            Theme theme = rarity >= Rarity.Rare ? ThemePicker.Pick(seed, home?.Tags) : null;
+            Theme theme = null;
+            if (rarity >= Rarity.Rare) { var bible = _world.Bible ?? Relic.Items.LoreSource.Default; var trng = Pcg32.ForPurpose(seed, "item.theme"); theme = ThemePicker.Pick(bible, home != null ? bible.Culture(home.Culture) : null, ref trng); }
             float budget = Budget(bt, rarity, tier);
 
             var item = new Item
@@ -254,7 +255,7 @@ namespace Relic.Items
                 float x = rng.NextFloat();
                 count = x < 0.3f ? 1 : x < 0.75f ? 2 : 3;
             }
-            bool cursed = kind != DraftKind.RareName && theme != null && rng.Chance(theme.Mood.CurseChance);
+            bool cursed = kind != DraftKind.RareName && theme != null && theme.IsSomber && rng.Chance(theme.Leans("curse") ? 1f : theme.Leans("drawback") ? 0.4f : 0f);
             return new RelicBrief
             {
                 Kind = kind,

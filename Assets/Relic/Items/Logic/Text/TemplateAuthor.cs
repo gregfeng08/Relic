@@ -172,8 +172,8 @@ namespace Relic.Items.Text
             var motif = b.Theme?.Motif;
             var mood = b.Theme?.Mood;
             string noun = CapWords(b.Kind == DraftKind.Legendary ? b.Form.Replace('-', ' ') : (b.Form ?? b.BaseType.ToString()));
-            string word() => CapWords(motif != null ? motif.Words[rng.Range(0, motif.Words.Length)] : "plain");
-            string moodWord() => mood != null ? mood.Words[rng.Range(0, mood.Words.Length)] : "Old";
+            string word() => CapWords(motif != null ? motif.Words[rng.Range(0, motif.Words.Count)] : "plain");
+            string moodWord() => mood != null ? mood.Words[rng.Range(0, mood.Words.Count)] : "Old";
 
             var candidates = new List<string>();
             for (int round = 0; round < 6; round++)
@@ -221,7 +221,7 @@ namespace Relic.Items.Text
         static string Flavor(RelicBrief b, Refs r, ref Pcg32 rng)
         {
             var motif = b.Theme?.Motif;
-            string word = motif != null ? motif.Words[rng.Range(0, motif.Words.Length)] : "oil";
+            string word = motif != null ? motif.Words[rng.Range(0, motif.Words.Count)] : "oil";
             string[] lines =
             {
                 $"Carried out of {r.Region.Name} by one of {r.Faction.Name}.",
@@ -246,7 +246,7 @@ namespace Relic.Items.Text
             int years = r.Event.YearsAgo;
             string mood = b.Theme?.Mood.Id ?? "vigil";
             string motif = b.Theme?.Motif.Id ?? "stone";
-            string material = b.Theme != null ? b.Theme.Motif.Materials[rng.Range(0, b.Theme.Motif.Materials.Length)] : "iron";
+            string material = b.Theme != null ? b.Theme.Motif.Materials[rng.Range(0, b.Theme.Motif.Materials.Count)] : "iron";
 
             string[] origins;
             switch (mood)
@@ -376,7 +376,7 @@ namespace Relic.Items.Text
             return new ItemVisual
             {
                 KitParts = parts,
-                Material = motif != null ? motif.Materials[rng.Range(0, motif.Materials.Length)] : "iron",
+                Material = motif != null ? motif.Materials[rng.Range(0, motif.Materials.Count)] : "iron",
                 Wear = (float)Math.Round(Math.Min(1f, wear), 2),
                 EmissiveColor = motif?.Color ?? "#FFFFFF",
                 Decal = Forms.DecalFor(motif?.Id),

@@ -15,9 +15,9 @@ namespace Relic.Items
         public BaseType BaseType;
         public WorldRegion HomeRegion; // region the item is tied to (for InRegionTag); may be null
 
-        public StatusId Primary => Theme?.Motif.Primary ?? DefaultStatus(BaseType);
-        public StatusId Secondary => Theme?.Motif.Secondary ?? StatusId.Staggered;
-        public DamageKind DamageKind => Theme?.Motif.DamageKind ?? (BaseType == BaseType.Staff || BaseType == BaseType.Tome ? DamageKind.Magical : DamageKind.Physical);
+        public StatusId Primary => Theme?.Primary ?? DefaultStatus(BaseType);
+        public StatusId Secondary => Theme != null && Theme.Secondary != StatusId.None ? Theme.Secondary : StatusId.Staggered;
+        public DamageKind DamageKind => Theme?.DamageKind ?? (BaseType == BaseType.Staff || BaseType == BaseType.Tome ? DamageKind.Magical : DamageKind.Physical);
         public float PowerBand => 1f + 0.5f * Math.Max(0, Math.Min(10, Tier));
 
         static StatusId DefaultStatus(BaseType t)
@@ -90,7 +90,7 @@ namespace Relic.Items
 
         static string Cap(string w) => string.IsNullOrEmpty(w) ? w : char.ToUpperInvariant(w[0]) + w.Substring(1);
 
-        static string Pick(string[] a, ref Pcg32 rng) => a[rng.Range(0, a.Length)];
+        static string Pick(IList<string> a, ref Pcg32 rng) => a[rng.Range(0, a.Count)];
 
         static string RuleName(TemplateContext ctx, string[] nouns, ref Pcg32 rng, string fallbackWord)
         {
@@ -98,7 +98,7 @@ namespace Relic.Items
             return Cap(word.Split('-')[0]) + " " + Pick(nouns, ref rng);
         }
 
-        static StatId Favored(TemplateContext ctx) => ctx.Theme?.Motif.FavoredStat ?? StatId.STR;
+        static StatId Favored(TemplateContext ctx) => ctx.Theme?.FavoredStat ?? StatId.STR;
 
         // ---------- weapon skills (E) ----------
 
@@ -402,8 +402,8 @@ namespace Relic.Items
             string name = RuleName(ctx, WeatherNouns, ref rng, "fair");
             var st = ctx.Primary; var kind = ctx.DamageKind;
             ConditionSpec cond;
-            var motif = ctx.Theme?.Motif;
-            if (motif?.WorldCondition != null && rng.Chance(0.6f)) cond = new ConditionSpec { Kind = motif.WorldCondition.Value };
+            var worldCond = ctx.Theme?.WorldCondition;
+            if (worldCond != null && rng.Chance(0.6f)) cond = new ConditionSpec { Kind = worldCond.Value };
             else if (ctx.HomeRegion != null && ctx.HomeRegion.Tags.Count > 0)
                 cond = new ConditionSpec { Kind = ConditionKind.InRegionTag, Tag = ctx.HomeRegion.Tags[rng.Range(0, ctx.HomeRegion.Tags.Count)] };
             else cond = new ConditionSpec { Kind = rng.Chance(0.5f) ? ConditionKind.IsNight : ConditionKind.IsRaining };
@@ -570,7 +570,7 @@ namespace Relic.Items
                 // Self-damage stays survivable: about 2% of a tier-appropriate HP pool per proc.
                 case 0: return new ActionSpec { Kind = ActionKind.Damage, Target = TargetKind.Self, Amount = (float)Math.Round(2f * PowerBudget.TierFactor(ctx.Tier)), DamageKind = DamageKind.Physical };
                 case 1: return new ActionSpec { Kind = ActionKind.ApplyStatus, Target = TargetKind.Self, Status = StatusId.Exhausted, Duration = 2f, Stacks = 1 };
-                default: return new ActionSpec { Kind = ActionKind.ApplyStatus, Target = TargetKind.Self, Status = ctx.Theme?.Motif.Primary == StatusId.Burning ? StatusId.Burning : StatusId.Bleeding, Duration = 2f, Stacks = 1 };
+                default: return new ActionSpec { Kind = ActionKind.ApplyStatus, Target = TargetKind.Self, Status = ctx.Theme?.Primary == StatusId.Burning ? StatusId.Burning : StatusId.Bleeding, Duration = 2f, Stacks = 1 };
             }
         }
 
@@ -578,7 +578,7 @@ namespace Relic.Items
         public static EffectRule CurseRule(TemplateContext ctx, ref Pcg32 rng)
         {
             var stat = (StatId)rng.Range(0, 6);
-            if (ctx.Theme != null && stat == ctx.Theme.Motif.FavoredStat) stat = stat == StatId.CHR ? StatId.STR : stat + 1;
+            if (ctx.Theme != null && stat == ctx.Theme.FavoredStat) stat = stat == StatId.CHR ? StatId.STR : stat + 1;
             float amount = -(float)Math.Round(2f * (1f + 0.2f * ctx.Tier));
             return new EffectRule
             {

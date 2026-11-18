@@ -1,7 +1,7 @@
 {
     "name": "Relic.Items.Tests",
     "rootNamespace": "Relic.Items.Tests",
-    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Items.Logic"],
+    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Lore.Logic", "Relic.Items.Logic"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
