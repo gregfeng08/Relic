@@ -1,6 +1,6 @@
 # 21 — World layers: an infinite world that agents can change
 
-Status: **PROPOSAL (lead) — needs Greg's review** · Last updated 2026-11-18
+Status: **AGREED (Greg, 2026-11-18)** · Last updated 2026-11-18
 Greg: "I wonder if chunk-wise generation is the best? That way we can manage adaptability." The Chronicler writes living history, the Cartographer redraws, the Rogue corrupts regions, and players leave graves and change things. So the world must be **adaptable**, not just generated.
 
 ## Answer: chunks for *building*, layers for *meaning*
