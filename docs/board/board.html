@@ -92,6 +92,14 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin
 .card.open .chev { transform: rotate(90deg); }
 .detail { padding: 0 16px 16px; display: grid; gap: 12px; border-top: 1px dashed var(--line); padding-top: 12px; margin-inline: 0; }
 .detail p { margin: 0; max-width: 65ch; overflow-wrap: anywhere; }
+.rich { display: grid; gap: 8px; max-width: 65ch; overflow-wrap: anywhere; }
+.rich p { margin: 0; }
+.rich h4 { margin: 6px 0 0; font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.rich ul, .rich ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.rich li { padding-left: 2px; }
+.rich strong { font-weight: 650; }
+.rich em { font-style: normal; color: var(--teal); }
+.ask .rich { gap: 6px; }
 .ask { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
 .ask b { display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
 .ref { font-family: var(--font-mono); font-size: 12px; color: var(--teal); overflow-wrap: anywhere; }
@@ -201,6 +209,44 @@ button.act:disabled { opacity: .55; cursor: default; }
     for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
     return el;
   }
+  // Light formatting for card text, built as DOM nodes (never innerHTML).
+  // Lines: "## Heading", "- bullet", "1. numbered", blank line = paragraph break; **bold** inline.
+  // Text without newlines renders exactly as before: one paragraph.
+  function inline(text) {
+    const out = [];
+    const parts = String(text).split(/\*\*(.+?)\*\*/g);
+    parts.forEach((p, i) => {
+      if (!p) return;
+      if (i % 2) { out.push(h("strong", {}, p)); return; }
+      p.split(/\*([^*\s][^*]*?)\*/g).forEach((q, j) => { if (q) out.push(j % 2 ? h("em", {}, q) : q); });
+    });
+    return out;
+  }
+  function rich(text) {
+    const lines = String(text).split(/\r?\n/);
+    if (lines.length === 1) return h("p", {}, inline(text));
+    const box = h("div", { class: "rich" });
+    let list = null, listTag = null, para = null;
+    const close = () => { list = null; listTag = null; para = null; };
+    for (const raw of lines) {
+      const line = raw.trim();
+      let m;
+      if (!line) { close(); continue; }
+      if ((m = line.match(/^#{2,3}\s+(.*)$/))) { close(); box.append(h("h4", {}, inline(m[1]))); continue; }
+      if ((m = line.match(/^[-•]\s+(.*)$/)) || (m = line.match(/^(\d+)[.)]\s+(.*)$/))) {
+        const ordered = m.length === 3;
+        const tag = ordered ? "ol" : "ul";
+        if (!list || listTag !== tag) {
+          list = h(tag, ordered ? { start: m[1] } : {}); listTag = tag; para = null; box.append(list);
+        }
+        list.append(h("li", {}, inline(ordered ? m[2] : m[1])));
+        continue;
+      }
+      if (para) { para.append(h("br", {}), ...inline(line)); }
+      else { list = null; listTag = null; para = h("p", {}, inline(line)); box.append(para); }
+    }
+    return box;
+  }
   const fmtDate = iso => {
     if (!iso) return "";
     const d = new Date(iso);
@@ -303,8 +349,8 @@ button.act:disabled { opacity: .55; cursor: default; }
         h("span", { class: "tid" }, task.id + (task.updated ? " · updated " + fmtDate(task.updated) : "")),
       ),
       open ? h("div", { class: "detail" },
-        task.summary ? h("p", {}, task.summary) : null,
-        task.ask ? h("div", { class: "ask" }, h("b", {}, "What Claude needs from you"), task.ask) : null,
+        task.summary ? rich(task.summary) : null,
+        task.ask ? h("div", { class: "ask" }, h("b", {}, "What Claude needs from you"), rich(task.ask)) : null,
         task.ref ? h("p", { class: "ref" }, task.ref) : null,
         responseLine(task),
         (task.column === "review" || task.column === "blocked") ? respondForm(task) : null,
