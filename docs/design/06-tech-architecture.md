@@ -3,7 +3,7 @@
 Status: **v1** · Last updated 2026-10-13
 
 ## Platform
-- **Unity 6000.3.9f1, URP.** Starts from the Universal 3D template. New Input System.
+- **Unity 6000.3.28f1, URP** (upgraded from 6000.3.9f1 on 2026-11-18). Starts from the Universal 3D template. New Input System.
 - **Target machine (Greg's dev laptop):** Core Ultra 9 275HX, 31 GB RAM, **RTX 5060 Laptop, 8 GB VRAM**. Target 60 fps at 1080p with the LLM idle.
 
 ## Code layout and ownership

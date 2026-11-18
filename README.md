@@ -8,7 +8,7 @@ A procedural action RPG: an endless, Genshin-styled world, RotMG-style loot and 
 - **Session log:** [docs/SESSION_LOG.md](docs/SESSION_LOG.md)
 
 ## Requirements
-- Unity **6000.3.9f1** (URP)
+- Unity **6000.3.28f1** (URP)
 - .NET SDK 8+ (for the fast test harness)
 
 ## Tests
