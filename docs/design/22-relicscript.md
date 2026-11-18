@@ -52,7 +52,7 @@ for (int i = 0; i < 3; i++)
 spell.Then(Delay(0.5f)).Area(Shape.Ring, radius: 4).Apply(Root(1));
 ```
 
-## Constructs: ComputerCraft-style programmable helpers (Greg, 2026-11-18)
+## Constructs: ComputerCraft-style programmable helpers (LATER: Greg, 2026-11-18: "a todo later")
 Greg spent hours programming ComputerCraft turtles, so Relic gets its own: **constructs**. These are small programmable automatons, powered by resonance in-world: clockwork beetles, lantern-wisps, stone golems.
 - **What they do:** dig, build, farm, haul, ferry, scout, light paths and guard, all run by RelicScript programs you write. They act through the same world-edit layer as everything else (L0 deltas, 21) and are limited per action, so they can't flatten the world.
 - **The API (turtle-like):** `move(dir)`, `turn()`, `dig()`, `place(item)`, `inspect()`, `detect()`, `suck()`/`drop()` for inventory, `refuel(resonance)`, `say()`, plus events (`onTick`, `onSee`, `onMessage`) and messaging between constructs (`send`, `receive`, a little wireless network).
@@ -74,5 +74,5 @@ Boot.dev is a gamified coding *course*: XP, levels, daily quests, chests, streak
 ## Build order
 1. **The interpreter** (lexer, parser, interpreter, metering, errors, whitelisted host API) with heavy tests. One self-contained agent job (RLC-048).
 2. **The Spell API, a spellbook editor and base spells:** code to EffectProgram, the in-game code editor (syntax highlighting, errors, a preview dummy), and about 20 base spells as readable scripts. Lands with or after the combat runtime (M3).
-3. **Constructs:** after the world layers' L0 deltas (21), since construct edits are deltas. A sandbox area first.
+3. **Constructs: later** (Greg: a todo for later, too specific for now). It depends on the world layers (21) when it happens.
 4. **Workshop and personal bindings,** then the endgame `relic` command.
