@@ -9,7 +9,7 @@ Status: **AGREED direction (Greg, 2026-11-18)** · Last updated 2026-11-18
 ## The crew
 The game's generative systems become **characters with jobs**. Each one is a real backend process (an LLM-backed service plus deterministic code) with its own name, voice and log. The Narrator (19) coordinates them, the way a lead coordinates a team.
 
-| Agent | Real job in the code | Character |
+| Agent | Real job in the code | Character (impartial) |
 |---|---|---|
 | **The Chronicler** | Living lore: turns world events into history (below) | Earnest, tireless, loves footnotes |
 | **The Cartographer** | World generation: regions, places, the frontier being drawn | Precise, a little vain about coastlines |
@@ -52,13 +52,27 @@ The feeling we want: "this world is being *kept*, by many hands, right now."
   - `/var/log/<agent>.log` shows each agent's real recent decisions (sanitized);
   - `top` shows who is busy.
 
-## The final fight, reframed
-The Narrator calls in the crew. Each phase belongs to one agent:
-- **The Cartographer** redraws the arena.
-- **The Smith** forges weapons from *your* relics.
-- **The Warden** sends the guardians you defeated.
-- **The Magister** reads your own spells back at you.
-- **The Narrator** comes last.
+## The crew are impartial forces, not bosses (Greg, 2026-11-18)
+The crew are **objective bodies**: neutral, systemic and impartial, like the weather or the tides. They are never fought, never take sides, and never phase into a boss fight.
+- **Their job is keeping the world running.** The Cartographer maps, the Smith forges, the Warden keeps the wilds wild, the Chronicler records. Their notes and logs read like dutiful civil servants, not personalities with grudges.
+- **Their "voice" is professional and dry.** Personality shows in small ways (the Smith's pride in a good weld, the Chronicler's footnotes), never as hostility toward the player.
+- **The Narrator's final fight** (19) is his alone. The crew keep working through it, logging it like any other day.
+
+## The Rogue (a fourth-wall-breaking boss) (Greg, 2026-11-18)
+One agent stopped doing its job. **The Rogue** is a crew process that went off-script and now acts on its own. It's the game's major antagonist before the Narrator.
+- **Who:** an agent with no assigned job: a forked process, a crew member whose role was deprecated, or something the Narrator wrote and couldn't delete. Its origin is left for the Chronicler and the Narrator to disagree about.
+- **What it does:** it **edits the world without permission**.
+  - corrupted regions: wrong biomes, inverted gravity pockets, terrain that renders as wireframe or debug colors;
+  - items with impossible stats (shown as `NaN`);
+  - NPCs repeating lines;
+  - a sanctuary it has "deleted" into an empty room.
+
+  The crew patch around it, and you can watch their logs ("Cartographer: region 14,-3 rebuilt from seed after unauthorized edit").
+- **Fourth wall:** it talks to *you*, mid-play. It hijacks the HUD or subtitles, renames your character for a while, opens a fake console, and comments on your settings or your real playtime. Unlike the Narrator, it is **chaotic and tempting**: it offers shortcuts and forbidden powers, at a cost.
+- **The fight(s):** the Rogue is found where corruption is thickest. The fight takes place inside a corrupted region, which follows the Rogue's rules: its patterns mix every agent's grammar wrongly. Defeating it lets the crew restore the region. It may escape the first time.
+- **Fairness still applies:** it breaks the *fiction* and the *visuals*, never the player's real game state outside the fight's rules. The effect grammar, readability checker and power budget all apply. "Glitches" are designed and safe.
+- **Multiplayer:** the Rogue roams servers and spreads through corrupted regions; players can team up to contain it. Its corruption is a server-wide event (like the deletion countdown, but smaller).
+- **Relationship to the Narrator:** the Rogue is evidence that the Narrator isn't in full control, the first big hint of the endgame twist.
 
 ## Engineering notes
 - **One interface per agent:** inputs (events), outputs (validated data), cadence, budget, fallback. All are LLM-optional (18).
