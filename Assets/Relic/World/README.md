@@ -1,7 +1,7 @@
 # Relic World (stream W): terrain sandbox
 
 ## Run it
-1. Open `Assets/Relic/World/Scenes/TerrainSandbox.unity` and press Play.
+1. Open `Assets/_Playtest/TerrainSandbox.unity` and press Play.
    If the scene or materials are missing, run **Relic > World > Build Terrain Sandbox**.
 2. Click the Game view to capture the mouse (Esc releases it).
 

@@ -17,7 +17,8 @@ namespace Relic.World.Editor
         public const string Root = "Assets/Relic/World";
         public const string MaterialsDir = Root + "/Materials";
         public const string SettingsDir = Root + "/Settings";
-        public const string ScenePath = Root + "/Scenes/TerrainSandbox.unity";
+        // Playtest scenes live in Assets/_Playtest so Greg can find everything he should try in one place.
+        public const string ScenePath = "Assets/_Playtest/TerrainSandbox.unity";
 
         [MenuItem("Relic/World/Build Terrain Sandbox")]
         public static void BuildMenu()
@@ -36,7 +37,7 @@ namespace Relic.World.Editor
         {
             EnsureFolder(Root, "Materials");
             EnsureFolder(Root, "Settings");
-            EnsureFolder(Root, "Scenes");
+            EnsureFolder("Assets", "_Playtest");
 
             Material terrain = EnsureMaterial("ToonTerrain", "Relic/World/ToonTerrain");
             Material water = EnsureMaterial("Water", "Relic/World/Water");

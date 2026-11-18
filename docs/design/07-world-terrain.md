@@ -62,5 +62,5 @@ Noise is implemented in `Logic` (OpenSimplex2 or Perlin, seeded through Pcg32/Ha
 ## Deliverables
 - `Assets/Relic/World/Logic`: noise, region field, blending, climate/biome, height function, chunk math. **All tested.**
 - `Assets/Relic/World/Runtime`: chunk streamer, mesh builder, floating origin, water, shaders/materials, player controller, camera, a debug overlay (seed, position, region, tier, biome, fps).
-- `Assets/Relic/World/Scenes/TerrainSandbox.unity`: press Play and explore.
+- `Assets/_Playtest/TerrainSandbox.unity`: press Play and explore.
 - A short `Assets/Relic/World/README.md`: how to run it, the knobs, known issues.

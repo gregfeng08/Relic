@@ -108,7 +108,7 @@ The v1 recognizer and the Writing Desk carry over. What changes is the glyph set
 5. **Name and flavor** come through an `ISpellNamer` interface (the LLM later). Use a deterministic stub name for now.
 
 **Unity side (`Magic/Runtime`):**
-- A **Writing Desk scene** (`Magic/Scenes/WritingDesk.unity`): draw with the mouse on a parchment canvas, see the recognized glyphs highlighted, and see the compiled spell's JSON, cost, cooldown and mana.
+- A **Writing Desk scene** (now archived at `Assets/_Playtest/Archive/WritingDesk.unity`): draw with the mouse on a parchment canvas, see the recognized glyphs highlighted, and see the compiled spell's JSON, cost, cooldown and mana.
 - A **glyph palette** fallback (click to place glyphs in slots).
 - A **preview** that plays the spell's emitter shape as simple debug gizmos or particles in a test arena.
 

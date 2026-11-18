@@ -10,6 +10,7 @@ Claude owns day-to-day development. Greg sets direction and reviews.
 | Design decisions | `docs/design/*.md` |
 | What happened each session | `docs/SESSION_LOG.md` |
 | Legacy 2022 prototype | git tag `legacy-2022` |
+| Scenes for Greg to playtest | `Assets/_Playtest/` (top level = needs review; `Archive/` = retired). Rules in its `README.md`: new review scenes go there with a table row; after a verdict or retirement, move to `Archive/` or delete. |
 
 ## Board columns
 

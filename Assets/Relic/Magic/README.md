@@ -13,7 +13,7 @@ recipe ─► RecipeDrawer ─► strokes        (pre-written pages; round-trips
 
 ## Run the Writing Desk
 
-1. Open `Assets/Relic/Magic/Scenes/WritingDesk.unity` (or use the menu **Relic → Magic → Open Writing Desk**) and press Play.
+1. (Retired: spells are programs now, see doc 22.) Open `Assets/_Playtest/Archive/WritingDesk.unity` (or use the menu **Relic → Magic → Open Writing Desk**) and press Play.
 2. Draw on the parchment with the left mouse button:
    - one **large closed circle** first (lifting the pen partway is fine, and so is a small gap of up to 20°);
    - a **core sigil** in the middle;

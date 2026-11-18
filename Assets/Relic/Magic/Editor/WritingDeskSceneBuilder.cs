@@ -7,13 +7,13 @@ using UnityEngine;
 namespace Relic.Magic.DeskEditor
 {
     /// <summary>
-    /// Creates Assets/Relic/Magic/Scenes/WritingDesk.unity: one GameObject with
+    /// Creates Assets/_Playtest/Archive/WritingDesk.unity (retired v1 glyph spell desk): one GameObject with
     /// WritingDeskBootstrap, which builds everything else at runtime.
     /// Batchmode: Unity.exe -batchmode -quit -projectPath . -executeMethod Relic.Magic.DeskEditor.WritingDeskSceneBuilder.Build
     /// </summary>
     public static class WritingDeskSceneBuilder
     {
-        public const string ScenePath = "Assets/Relic/Magic/Scenes/WritingDesk.unity";
+        public const string ScenePath = "Assets/_Playtest/Archive/WritingDesk.unity";
 
         [MenuItem("Relic/Magic/Rebuild Writing Desk Scene")]
         public static void Build()
