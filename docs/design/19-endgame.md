@@ -44,7 +44,27 @@ A **simulated** Linux shell inside the game. It feels real, and it is completely
   - Then the world unravels on screen, file by file. Terrain, places and relics vanish as their files go.
   - Your **world save is permanently erased.** Only the player's own save data is affected, never real files outside the save folder.
   - **A memory remains** (Undertale-style): a single flag in the profile survives. The next new world's Narrator has a faint, unsettling line about it ("I've written this opening before…").
-- **Multiplayer:** the terminal only ever operates on the player's personal copy (saves, discovered data). Shared world state is read-only, or not mounted at all.
+- **Reflection before deletion (Greg, 2026-11-18): "This gives the player the opportunity to reflect."** Deleting is the most deliberate act in the game, so the terminal makes you look back first:
+  - `history` and `cat /wayfarers/*` show your whole journey: every wayfarer and how they fell, places discovered, relics found and where they came from, bosses beaten, hours walked, people met.
+  - Wren speaks quietly, without persuading either way. Just: "This is what you wrote."
+  - After confirming, the world **unravels in reverse order**: your latest steps vanish first, back to the Lanternfold, the last lantern going out last. Deletion becomes a replay of your journey.
+
+### In multiplayer too (Greg, 2026-11-18)
+The terminal exists in multiplayer, and so does deletion. There it means **erasing your own footprint from a shared world**:
+- **What it removes:** your characters, saves, vaults and progress, permanently, through a server-side, server-validated request. Never anyone else's data.
+- **Your world-unique relics:**
+  - **Vaulted** ones return to the world, to be found again; their lore gains a line about a wayfarer who is no longer remembered.
+  - **Carried** ones drop where you stand.
+- **Shared history keeps an absence, not a hole (grounded):**
+  - the Reliquary entries you wrote, and the legends that name you, become **a crossed-out name** ("a wayfarer whose name has been taken back");
+  - your graves become empty waycairns;
+  - other players' records stay intact. They just can't read your name anymore.
+- **Reflection works the same way:** your journey, replayed and unraveled, but only your threads in the shared map.
+- **Account safety:** a stolen or compromised account mustn't be able to wipe someone's history instantly.
+  - The server requires a re-authentication at the moment of deletion.
+  - It keeps a private, out-of-game backup for a short support window (for example 7 days) for account-recovery cases only.
+  - The in-game fiction stays final.
+- **Mounts:** the terminal in multiplayer mounts only the player's own data. Shared world data is read-only and never shows other players' private data.
 
 ## Security rules (non-negotiable)
 1. **No real process execution:** no `Process.Start`, no interpreter, no host filesystem access outside the save directory.
