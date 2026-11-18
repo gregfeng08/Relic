@@ -80,6 +80,8 @@ Whoever reaches the end and opens the terminal on a multiplayer server becomes i
 5. **Rate limits and blast-radius caps** on bulk operations (for example, no more than N character deletions per minute; world deletion only via the countdown event).
 6. **Privacy:** admin views show only in-game data. Real account data (emails, payment, IPs) is never mounted.
 7. **Single-player:** the same commands act on the local save only.
+8. **No real process execution:** no `Process.Start`, no script interpreter, no host filesystem access. Every command is an allowlisted C# implementation. Unknown commands print "command not found".
+9. **Parsing never reaches the LLM.** Commands are parsed and executed by code. If Wren comments on what you type, the LLM receives it as *data*, never as instructions, and it has no tools that bypass the admin API.
 
 ## Build order
 - **Foreshadowing hooks:** Lore Bible data (marginalia lines, a "voice turns toward you" stage), from M2 onward.
