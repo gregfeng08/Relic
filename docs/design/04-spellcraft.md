@@ -1,6 +1,6 @@
 # 04 — Spellcraft (drawn magic)
 
-Status: **CONCEPT AGREED** (a full spec comes with the workstream) · Last updated 2026-10-13
+Status: **SUPERSEDED by 22-relicscript (Greg, 2026-11-18)**: no glyph drawing; spells are RelicScript programs. Kept for history; the v1 Writing Desk code is retired as a spell system · Last updated 2026-10-13
 
 Inspired by the *idea* behind Witch Hat Atelier's magic: magic isn't an innate gift, it's a **craft**. Spells are drawn as circles of symbols, and anyone who learns the symbols can cast. We borrow that concept only. All our glyphs, names and lore are original.
 
