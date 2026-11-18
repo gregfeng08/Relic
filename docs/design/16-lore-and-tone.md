@@ -1,6 +1,6 @@
 # 16 — Lore & Tone: the Lore Bible
 
-Status: **PROPOSAL — needs Greg's review** · Last updated 2026-10-28
+Status: **AGREED; superseded in part by 20-the-agents** (the Bible is now the constitution and seed for a living Chronicler agent) · Last updated 2026-11-18
 
 ## Tone (Greg, 2026-10-28)
 The template samples read "too Elden Ring-coded." Relic is **bright medieval fantasy**: wonder, warmth, craft, community and adventure, with light humor. **Darkness is an accent, not the baseline.** Ruins, old wars and the occasional villain exist so the bright parts mean something.

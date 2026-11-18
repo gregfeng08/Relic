@@ -65,13 +65,13 @@ Whoever reaches the end and opens the terminal on a multiplayer server becomes i
   - remove players' footprints.
 - **`rm -rf /` can remove the world from multiplayer existence.**
 
-**Shape (1 confirmed by Greg; 2–3 recommended by the lead, awaiting confirmation):**
+**Shape (1–2 confirmed by Greg; 3 recommended by the lead):**
 1. **Deleting the world is an event, not an instant wipe** (confirmed by Greg, 2026-11-18).
    - `rm -rf /` (after the reflective replay) starts a **server-wide unravelling**: a countdown of about 24 hours, and the Narrator announces it to every player.
    - The map's edges dissolve inward hour by hour, and everyone sees and feels it.
    - Players can **find and stop the deleter** (defeat them, or talk them down at the Narrator's site), or spend the last day saying goodbye.
    - If nobody stops it, the world really ends. This is the reflection moment for the *whole server*.
-2. **The world ends per server or season.**
+2. **A deleted world ends its server** (confirmed by Greg, 2026-11-18).
    - The deleted world is archived read-only as history and becomes a **legend in the next season's canon**: "the world that was taken back."
    - A new world starts.
 3. **Single admin edits** (one character, one item) apply immediately, but are logged in-world: the Reliquary notes "the page was rewritten," so the fiction stays honest.
