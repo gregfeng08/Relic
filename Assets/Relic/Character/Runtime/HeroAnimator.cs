@@ -25,7 +25,8 @@ namespace Relic.Character
     }
 
     /// <summary>
-    /// Procedural animation, no clips: idle breathing and weight shift, run/sprint cycle with a
+    /// Procedural poses: the source HeroClipBaker bakes the Animator's clips from, and the fallback
+    /// when no controller is available. Idle breathing and weight shift, run/sprint cycle with a
     /// forward lean, a low dash lunge, jump/fall, climb and swim. Targets are Euler angles per
     /// bone (rest rotations are identity), eased toward with frame-rate independent smoothing.
     /// Bone conventions: +X pitch tips a down-pointing limb backward and leans the torso forward;
@@ -35,6 +36,8 @@ namespace Relic.Character
     {
         const int N = 18;
         public const float RunSpeed = 6f, SprintSpeed = 9.5f;
+        /// <summary>The idle's full period: one slow weight shift (0.45 rad/s), four breaths.</summary>
+        public const float IdleLoop = Mathf.PI * 2f / 0.45f;
 
         readonly HeroRig _rig;
         readonly Vector3[] _target = new Vector3[N];
@@ -63,7 +66,8 @@ namespace Relic.Character
 
             // Idle: breathing and a slow weight shift (always underneath, faded by motion).
             float idle = (1f - _run) * (1f - _air) * (a.Motion == HeroMotion.Idle || a.Motion == HeroMotion.Run ? 1f : 0f);
-            float breath = Mathf.Sin(_time * 1.7f);
+            // Four breaths per weight shift, so the idle loops seamlessly every IdleLoop seconds (baked clip).
+            float breath = Mathf.Sin(_time * 1.8f);
             float shift = Mathf.Sin(_time * 0.45f);
             Add(HeroRig.Chest, -1.6f * breath * idle, 0f, 0f);
             Add(HeroRig.Neck, 1.2f * breath * idle, 0f, 0f);
