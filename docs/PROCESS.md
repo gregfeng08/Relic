@@ -59,4 +59,11 @@ A scheduled task in the Claude desktop app starts a fresh session every hour. It
 7. **Log:** a `meta/log` entry on the board and a `docs/SESSION_LOG.md` entry (committed on the stream branch, not on `main`).
 8. **Unlock and stop.** If a usage limit interrupts a run, the next run resumes from the branches and the board.
 
+**Idle mode: review and research (Greg, 2026-11-18).** When step 4 finds nothing to build (no unfinished stream branch with a card in progress, no eligible Ready card), the run reviews and researches the game instead of stopping. It never skips a card it could build.
+- **What:** go deep on one or two topics per run. Examples: a code review of one assembly, design-vs-code consistency, the quality of generated samples, prior art and techniques, performance and minimum spec, risks and scope.
+- **Where:** first read `docs/research/INDEX.md` on branch `stream/research` (worktree `.wt/research`) and the standing card **RLC-065**, so no work is repeated. Write one note per topic at `docs/research/YYYY-MM-DD-<topic>.md` and add it to the index. Commit on `stream/research`.
+- **Board:** keep RLC-065 current in place: the top 10 recommendations, what's new, and note paths. It moves to Review once it has findings. A clear bug with a failing test may become a Ready card. Everything else goes to Backlog as `RESEARCH:` cards, at most 3 per run. Research recommends; Greg or the orchestrator decides.
+- **Budget:** stop at 85% of the 5-hour or weekly limit, or at 50% of the 5-hour limit if another Relic session was active in the last 30 minutes. Re-check the board after each topic, and stop if a buildable Ready card appears.
+- **Web:** reading public pages is allowed. Never download anything, and never send Greg's personal or private project details to outside services.
+
 **Never:** merge, push, commit directly to `main`, download anything, commit `art-ref/`, change ProjectSettings or Packages without a card that says so, decide anything awaiting Greg's review, or delete branches.
