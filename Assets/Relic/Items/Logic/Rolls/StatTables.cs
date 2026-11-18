@@ -24,6 +24,8 @@ namespace Relic.Items
         public float Ceiling;
         public TierGrowth Growth;
         public int Decimals;
+        /// <summary>Why the item has this line: null (base table), "archetype" or "material".</summary>
+        public string Source;
 
         public StatLine(ItemStatKind stat, float min, float ceiling, TierGrowth growth, int decimals = 1)
         {
@@ -58,7 +60,7 @@ namespace Relic.Items
             }
         }
 
-        static StatLine L(ItemStatKind k, float min, float ceil, TierGrowth g, int dec = 1) => new StatLine(k, min, ceil, g, dec);
+        internal static StatLine L(ItemStatKind k, float min, float ceil, TierGrowth g, int dec = 1) => new StatLine(k, min, ceil, g, dec);
 
         public static List<StatLine> Primary(BaseType t)
         {
@@ -78,7 +80,7 @@ namespace Relic.Items
             return new List<StatLine>();
         }
 
-        static StatLine Trained(ItemStatKind k) => L(k, 1f, 2f, TierGrowth.Moderate);
+        internal static StatLine Trained(ItemStatKind k) => L(k, 1f, 2f, TierGrowth.Moderate);
 
         public static List<StatLine> SecondaryPool(BaseType t)
         {
@@ -141,23 +143,7 @@ namespace Relic.Items
         /// The stat lines an item has. Which lines it gets is fixed by the item seed
         /// (forge rerolls change values, not lines).
         /// </summary>
-        public static List<StatLine> LinesFor(BaseType t, Rarity r, ulong itemSeed)
-        {
-            var rng = Pcg32.ForPurpose(itemSeed, "item.statlines");
-            var lines = Primary(t);
-            if (t == BaseType.Trinket) lines.Add(L(TrainedStats[rng.Range(0, TrainedStats.Length)], 1f, 2f, TierGrowth.Moderate));
-
-            var pool = SecondaryPool(t);
-            pool.RemoveAll(p => lines.Exists(l => l.Stat == p.Stat));
-            int want = Math.Min(SecondaryLines(r), pool.Count);
-            for (int i = 0; i < want; i++)
-            {
-                int pick = rng.Range(0, pool.Count);
-                lines.Add(pool[pick]);
-                pool.RemoveAt(pick);
-            }
-            return lines;
-        }
+        public static List<StatLine> LinesFor(BaseType t, Rarity r, ulong itemSeed) => ArchetypeLines.LinesFor(t, r, itemSeed, Archetypes.Pick(t, itemSeed), null);
 
         /// <summary>The Core trained stat a line maps to, if any.</summary>
         public static StatId? CoreStat(ItemStatKind k)
@@ -196,6 +182,19 @@ namespace Relic.Items
             return stats;
         }
 
+        /// <summary>
+        /// Rolls an item's lines as its grammar sentence decides them: the archetype's lines
+        /// and the material's property tag (ArchetypeLines). Same sub-seeds as the plain overload.
+        /// </summary>
+        public static List<ItemStat> Roll(ItemSentence s, Rarity r, int tier, ulong itemSeed, int rerollCount)
+        {
+            var lines = ArchetypeLines.LinesFor(s.Base, r, itemSeed, Archetypes.ById(s.Archetype), Materials.Find(s.Material));
+            var rng = Pcg32.ForPurpose(Hash.Combine(itemSeed, (ulong)rerollCount), "item.stats");
+            var stats = new List<ItemStat>(lines.Count);
+            foreach (var line in lines) stats.Add(RollLine(line, r, tier, ref rng));
+            return stats;
+        }
+
         public static ItemStat RollLine(StatLine line, Rarity r, int tier, ref Pcg32 rng)
         {
             // Attack speed is a feel stat: a weapon type swings at its own pace at every rarity and tier.
@@ -213,6 +212,7 @@ namespace Relic.Items
                 Min = min,
                 Ceiling = ceiling,
                 OverrollSteps = steps,
+                Source = line.Source,
                 Value = value,
             };
         }

@@ -70,6 +70,8 @@ namespace Relic.Items
         public float Ceiling;
         /// <summary>Steps past the ceiling (0 = a normal roll). Hidden cap 10.</summary>
         public int OverrollSteps;
+        /// <summary>Why the item has this line: null (base table), "archetype" (the item grammar's purpose line) or "material" (the material's property tag).</summary>
+        public string Source;
     }
 
     public sealed class ItemLore
@@ -161,6 +163,8 @@ namespace Relic.Items
         public ItemLore Lore;
         public ItemVisual Visual = new ItemVisual();
         public ItemMemory Memory;
+        /// <summary>The item sentence (17-item-grammar) everything above was built from.</summary>
+        public ItemSentence Grammar;
         public GeneratorInfo Generator = new GeneratorInfo();
     }
 

@@ -76,7 +76,7 @@ namespace Relic.Items.Tests
             Assert.AreNotEqual(ItemJson.Serialize(item.Stats), ItemJson.Serialize(r1.Stats));
             Assert.AreEqual(item.Name, r1.Name);
             // The same reroll count always gives the same sample.
-            Assert.AreEqual(ItemJson.Serialize(r1.Stats), ItemJson.Serialize(StatRoller.Roll(item.BaseType, item.Rarity, item.Tier, item.Seed, 1)));
+            Assert.AreEqual(ItemJson.Serialize(r1.Stats), ItemJson.Serialize(StatRoller.Roll(item.Grammar, item.Rarity, item.Tier, item.Seed, 1)));
         }
     }
 

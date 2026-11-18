@@ -6,51 +6,13 @@ using Relic.Core.Stats;
 
 namespace Relic.Items
 {
-    /// <summary>Everything a template needs to theme and size an effect.</summary>
-    public sealed class TemplateContext
-    {
-        public Theme Theme;            // null for unthemed (Common/Uncommon) items
-        public int Tier;
-        public Rarity Rarity;
-        public BaseType BaseType;
-        public WorldRegion HomeRegion; // region the item is tied to (for InRegionTag); may be null
-
-        public StatusId Primary => Theme?.Primary ?? DefaultStatus(BaseType);
-        public StatusId Secondary => Theme != null && Theme.Secondary != StatusId.None ? Theme.Secondary : StatusId.Staggered;
-        public DamageKind DamageKind => Theme?.DamageKind ?? (BaseType == BaseType.Staff || BaseType == BaseType.Tome ? DamageKind.Magical : DamageKind.Physical);
-        public float PowerBand => 1f + 0.5f * Math.Max(0, Math.Min(10, Tier));
-
-        static StatusId DefaultStatus(BaseType t)
-        {
-            switch (t)
-            {
-                case BaseType.Staff: return StatusId.Burning;
-                case BaseType.Tome: return StatusId.Dazed;
-                case BaseType.Bow: return StatusId.Bleeding;
-                case BaseType.Greatsword: return StatusId.Staggered;
-                default: return StatusId.Bleeding;
-            }
-        }
-    }
-
-    public delegate EffectFitter.RuleBuilder TemplateFactory(TemplateContext ctx, ref Pcg32 rng);
-
-    public sealed class EffectTemplate
-    {
-        public string Id;
-        public TemplateFactory Factory;
-        /// <summary>True when the template has a damage term that can soak up any budget.</summary>
-        public bool Absorbs;
-        public EffectTemplate(string id, bool absorbs, TemplateFactory f) { Id = id; Absorbs = absorbs; Factory = f; }
-    }
-
     /// <summary>
     /// Hand-written effect shapes, themed by motif and sized by EffectFitter.
     /// Used for table items (weapon skills, armor/trinket passives), as the
     /// deterministic TEMPLATE MODE stand-in for LLM enchantments, and as the
     /// fallback when the LLM fails.
     /// </summary>
-    public static class EffectTemplates
+    public static partial class EffectTemplates
     {
         // ---------- small builders ----------
 
@@ -98,7 +60,7 @@ namespace Relic.Items
             return Cap(word.Split('-')[0]) + " " + Pick(nouns, ref rng);
         }
 
-        static StatId Favored(TemplateContext ctx) => ctx.Theme?.FavoredStat ?? StatId.STR;
+        static StatId Favored(TemplateContext ctx) => ctx.FavoredStat;
 
         // ---------- weapon skills (E) ----------
 
@@ -194,7 +156,7 @@ namespace Relic.Items
                     };
                 default:
                 {
-                    var stat = ctx.Theme != null ? fav : (StatId)rng.Range(0, 6);
+                    var stat = fav;
                     return s =>
                     {
                         var r = Rule("Keepsake", TriggerKind.Passive);
@@ -224,20 +186,25 @@ namespace Relic.Items
 
         public static readonly EffectTemplate[] Enchantments =
         {
-            new EffectTemplate("rider", true, Rider),
-            new EffectTemplate("exploit", true, Exploit),
-            new EffectTemplate("death-burst", true, DeathBurst),
-            new EffectTemplate("retort", true, Retort),
-            new EffectTemplate("trail", true, Trail),
-            new EffectTemplate("riposte", true, Riposte),
-            new EffectTemplate("refuge", true, Refuge),
-            new EffectTemplate("sentinel", true, Sentinel),
-            new EffectTemplate("aura", true, Aura),
-            new EffectTemplate("temper", false, Temper),
-            new EffectTemplate("echo", true, Echo),
-            new EffectTemplate("weather", true, Weather),
-            new EffectTemplate("executioner", true, Executioner),
-            new EffectTemplate("bosshunter", true, BossHunter),
+            new EffectTemplate("rider", true, TriggerKind.OnHit, "precision crit stat", Rider),
+            new EffectTemplate("exploit", true, TriggerKind.OnHit, "stagger precision", Exploit),
+            new EffectTemplate("death-burst", true, TriggerKind.OnKill, "power celebration", DeathBurst),
+            new EffectTemplate("retort", true, TriggerKind.OnTakeDamage, "defense durability", Retort),
+            new EffectTemplate("trail", true, TriggerKind.OnDash, "haste stamina journey", Trail),
+            new EffectTemplate("riposte", true, TriggerKind.OnCloseCall, "precision crit", Riposte),
+            new EffectTemplate("refuge", true, TriggerKind.OnLowHealth, "lowHealth regen defense", Refuge),
+            new EffectTemplate("sentinel", true, TriggerKind.Periodic, "discovery insight", Sentinel),
+            new EffectTemplate("aura", true, TriggerKind.Passive, "aura", Aura),
+            new EffectTemplate("temper", false, TriggerKind.Passive, "stat durability", Temper),
+            new EffectTemplate("echo", true, TriggerKind.OnStatusApplied, "discovery power", Echo),
+            new EffectTemplate("weather", true, TriggerKind.OnHit, "reveal discovery", Weather),
+            new EffectTemplate("executioner", true, TriggerKind.OnHit, "power crit", Executioner),
+            new EffectTemplate("bosshunter", true, TriggerKind.OnHit, "solo power", BossHunter),
+            new EffectTemplate("longshot", true, TriggerKind.OnHit, "precision", Longshot),
+            new EffectTemplate("tailwind", false, TriggerKind.OnDash, "haste stamina celebration", Tailwind),
+            new EffectTemplate("hearth", false, TriggerKind.Periodic, "ally regen", Hearth),
+            new EffectTemplate("rally", false, TriggerKind.Passive, "ally aura celebration", Rally),
+            new EffectTemplate("lamplight", false, TriggerKind.Passive, "reveal insight discovery", Lamplight),
         };
 
         public static EffectTemplate EnchantmentById(string id) => Array.Find(Enchantments, t => t.Id == id);
@@ -268,9 +235,10 @@ namespace Relic.Items
                 r.Conditions.Add(new ConditionSpec { Kind = ConditionKind.TargetHasStatus, Status = st });
                 r.Actions.Add(Dmg(8f * s, kind));
                 if (motif == "tide") r.Actions.Add(Pull(3f));
-                else if (motif == "storm" || motif == "bell" || motif == "stone") r.Actions.Add(Push(3f));
+                else if (motif == "wind" || motif == "bell" || motif == "stone") r.Actions.Add(Push(3f));
                 else if (second == StatusId.Rooted) r.Actions.Add(Status(StatusId.Rooted, Math.Min(3f, 1f + 0.2f * s)));
-                else r.Actions.Add(Status(second == st ? StatusId.Staggered : second, 1.5f + 0.25f * s));
+                else if (second == st) r.Actions.Add(Push(2.5f));
+                else r.Actions.Add(Status(second, 1.5f + 0.25f * s));
                 return r;
             };
         }
@@ -387,7 +355,7 @@ namespace Relic.Items
         {
             string name = RuleName(ctx, EchoNouns, ref rng, "answering");
             var st = ctx.Primary; var kind = ctx.DamageKind;
-            var second = ctx.Secondary == st ? StatusId.Staggered : ctx.Secondary;
+            var second = ctx.Secondary;
             return s =>
             {
                 var r = Rule(name, TriggerKind.OnStatusApplied, 1f, 0.5f);
