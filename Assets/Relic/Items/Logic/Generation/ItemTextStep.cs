@@ -40,6 +40,8 @@ namespace Relic.Items
                 BannedWords = _freshness.Banned(),
                 TakenNames = _freshness.RecentNames(),
                 Stats = item.Stats,
+                Sentence = item.Grammar,
+                Archetype = Archetypes.ById(item.Grammar.Archetype),
             };
         }
 
@@ -119,6 +121,8 @@ namespace Relic.Items
         float Apply(Item item, RelicDraft d, RelicBrief brief, float itemBudget)
         {
             item.Name = d.Name.Trim();
+            var culture = Bible.Culture(item.Grammar.Culture);
+            item.Grammar.NamePattern = NamePatterns.Match(item.Name, item.Grammar, culture);
             _freshness.Add(item.Name);
             float scale = 1f;
             switch (brief.Kind)
@@ -154,6 +158,9 @@ namespace Relic.Items
                     if (PowerBudget.Cost(all) > brief.BudgetPp) scale = Math.Min(scale, EffectValidator.ScaleToFit(all, brief.BudgetPp));
                     item.Effects = all;
                     item.Visual = d.Visual;
+                    // The look keeps the grammar's facts: its material and the motif's color.
+                    item.Visual.Material = item.Grammar.Material;
+                    if (brief.Theme != null) item.Visual.EmissiveColor = brief.Theme.Color;
                     return scale;
                 }
             }

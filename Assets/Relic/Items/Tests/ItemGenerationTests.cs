@@ -216,7 +216,8 @@ namespace Relic.Items.Tests
             for (int i = 0; i < 50; i++)
             {
                 var item = gen.Generate(new ItemSpec { WorldSeed = 2026, Index = i, Tier = i % 11, Rarity = Rarity.Legendary });
-                foreach (var w in StyleGuide.Words(item.Name)) counts[w] = (counts.TryGetValue(w, out int c) ? c : 0) + 1;
+                var facts = Relic.Items.Text.TemplateAuthor.FactWords(item.Grammar); // the form noun, maker and place are facts, not flair
+                foreach (var w in StyleGuide.Words(item.Name)) if (!facts.Contains(w)) counts[w] = (counts.TryGetValue(w, out int c) ? c : 0) + 1;
             }
             foreach (var kv in counts) Assert.LessOrEqual(kv.Value, 3, $"\"{kv.Key}\" used in {kv.Value} of 50 names");
         }

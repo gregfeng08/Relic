@@ -145,13 +145,7 @@ namespace Relic.Items.Text
             else
             {
                 var ids = new JArray();
-                if (b.World != null)
-                {
-                    foreach (var r in b.World.Regions) ids.Add(r.Id);
-                    foreach (var f in b.World.Factions) ids.Add(f.Id);
-                    foreach (var p in b.World.Figures) ids.Add(p.Id);
-                    foreach (var e in b.World.Events) ids.Add(e.Id);
-                }
+                if (b.World != null) foreach (var id in b.World.AllIds()) ids.Add(id);
                 props["lore"] = new JObject { ["type"] = "string" };
                 props["worldRefs"] = new JObject { ["type"] = "array", ["minItems"] = 1, ["maxItems"] = 6, ["items"] = ids.Count > 0 ? new JObject { ["type"] = "string", ["enum"] = ids } : new JObject { ["type"] = "string" } };
                 props["enchantments"] = JsonSchemaBuilder.Program(1, b.Kind == DraftKind.Epic ? 1 : 3);

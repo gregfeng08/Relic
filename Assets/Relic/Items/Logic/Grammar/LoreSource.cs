@@ -41,6 +41,13 @@ namespace Relic.Items
             }
         }
 
+        /// <summary>The default Bible, or null when none can be found (style checks then use the Items lists only).</summary>
+        public static LoreBible TryDefault()
+        {
+            try { return Default; }
+            catch (LoreDataException) { return null; }
+        }
+
         /// <summary>Injects a Bible (e.g. built from TextAssets in Unity). Null clears it so the next use reloads from disk.</summary>
         public static void Use(LoreBible bible)
         {

@@ -45,6 +45,9 @@ namespace Relic.Items.Text
         public List<string> TakenNames = new List<string>();
         /// <summary>Stat lines already rolled, for the writer's context.</summary>
         public List<ItemStat> Stats = new List<ItemStat>();
+        /// <summary>The item sentence (17-item-grammar): the writer keeps its names and facts.</summary>
+        public ItemSentence Sentence;
+        public ArchetypeDef Archetype;
     }
 
     /// <summary>
@@ -90,7 +93,7 @@ namespace Relic.Items.Text
                 foreach (var w in StyleGuide.ForbiddenIn(d.Name)) errors.Add($"name uses the banned word \"{w}\"");
                 if (freshness != null && freshness.Contains(d.Name)) errors.Add("name is already used by another recent item");
                 if (freshness != null)
-                    foreach (var w in freshness.OverusedIn(d.Name)) errors.Add($"name uses \"{w}\", which is overused in recent names; pick another word");
+                    foreach (var w in freshness.OverusedIn(d.Name, TemplateAuthor.FactWords(brief.Sentence))) errors.Add($"name uses \"{w}\", which is overused in recent names; pick another word");
             }
 
             if (brief.Kind == DraftKind.RareName)
@@ -102,6 +105,7 @@ namespace Relic.Items.Text
                     if (StyleGuide.SentenceCount(d.Flavor) > 1) errors.Add("flavor must be one sentence");
                     foreach (var w in StyleGuide.ForbiddenIn(d.Flavor)) errors.Add($"flavor uses the banned word \"{w}\"");
                 }
+                DraftGrammar.Check(d, brief, errors);
                 return errors;
             }
 
@@ -156,6 +160,7 @@ namespace Relic.Items.Text
                 if (d.Visual == null) errors.Add("visual is missing");
                 else ValidateVisual(d.Visual, errors);
             }
+            DraftGrammar.Check(d, brief, errors);
             return errors;
         }
 

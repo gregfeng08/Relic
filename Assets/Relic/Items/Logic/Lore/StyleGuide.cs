@@ -5,22 +5,43 @@ using System.Text.RegularExpressions;
 namespace Relic.Items
 {
     /// <summary>
-    /// The style guide from 08-items-bosses: names and lore must sound like this
-    /// world, never stock fantasy. Checks are applied to every LLM draft (a
-    /// violation is fed back as an error and retried) and the template generator
-    /// avoids the same words.
+    /// The narration style guide (docs/lore/style-guide.md) as checks: names and lore must
+    /// sound like this world, never stock fantasy or doom. The banned list is the Items
+    /// list plus the Lore Bible's (style.json); sentence limits come from the Bible too.
+    /// A violation in an LLM draft is fed back as an error and retried; the template
+    /// writer avoids the same words.
     /// </summary>
     public static class StyleGuide
     {
-        /// <summary>Banned stock words and phrases (case-insensitive, matched on word boundaries).</summary>
-        public static readonly string[] Forbidden =
+        /// <summary>Items' own banned stock words (the Bible's list is added at check time).</summary>
+        public static readonly string[] ItemsForbidden =
         {
             "ethereal", "shadow-whisper", "shadow whisper", "whispering", "whisper", "whispers", "eternal", "eternity",
-            "ancient power", "doom", "void",
+            "ancient power", "doom", "void", "bloodstained", "bane",
         };
 
-        public const int MinLoreSentences = 2;
-        public const int MaxLoreSentences = 4;
+        /// <summary>Every banned word or phrase: Items' list plus the Bible's bannedWords.</summary>
+        static string[] _forbidden;
+        static object _forbiddenFor;
+
+        public static string[] Forbidden
+        {
+            get
+            {
+                var current = LoreSource.TryDefault();
+                if (_forbidden != null && ReferenceEquals(_forbiddenFor, current)) return _forbidden;
+                var set = new SortedSet<string>(ItemsForbidden, StringComparer.OrdinalIgnoreCase);
+                var bible = LoreSource.TryDefault();
+                if (bible != null) foreach (var w in bible.Style.BannedWords) set.Add(w);
+                _forbiddenFor = current;
+                return _forbidden = new List<string>(set).ToArray();
+            }
+        }
+
+        /// <summary>Relic lore: 1–3 sentences (style.json maxLoreSentences), each at most 22 words (maxSentenceWords).</summary>
+        public const int MinLoreSentences = 1;
+        public static int MaxLoreSentences => LoreSource.TryDefault()?.Style.MaxLoreSentences ?? 3;
+        public static int MaxSentenceWords => LoreSource.TryDefault()?.Style.MaxSentenceWords ?? 22;
 
         static readonly HashSet<string> Stopwords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -38,6 +59,18 @@ namespace Relic.Items
             return found;
         }
 
+        /// <summary>Sentences longer than the style guide allows (word counts), empty when fine.</summary>
+        public static List<int> LongSentences(string text)
+        {
+            var longOnes = new List<int>();
+            if (string.IsNullOrWhiteSpace(text)) return longOnes;
+            foreach (Match m in Regex.Matches(text.Trim(), @"[^.!?]+[.!?]*"))
+            {
+                int words = m.Value.Split(new[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                if (words > MaxSentenceWords) longOnes.Add(words);
+            }
+            return longOnes;
+        }
         /// <summary>Lower-case content words of a name ("Isel's Weir-Bell" → isel, weir, bell).</summary>
         public static List<string> Words(string name)
         {
@@ -120,6 +153,14 @@ namespace Relic.Items
         {
             var bad = new List<string>();
             foreach (var w in StyleGuide.Words(name)) if (IsOverused(w)) bad.Add(w);
+            return bad;
+        }
+
+        /// <summary>Overused words, ignoring the item sentence's facts (its form noun, maker, place): those must stay in the name.</summary>
+        public List<string> OverusedIn(string name, ICollection<string> exempt)
+        {
+            var bad = OverusedIn(name);
+            if (exempt != null) bad.RemoveAll(w => exempt.Contains(w));
             return bad;
         }
     }
