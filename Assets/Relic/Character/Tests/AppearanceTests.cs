@@ -18,6 +18,30 @@ namespace Relic.Character.Tests
         }
 
         [Test]
+        public void UnwrittenIsTheStartingBody()
+        {
+            HeroAppearance u = AppearancePresets.Unwritten();
+            Assert.AreEqual("Unwritten", AppearancePresets.All()[0].Name, "F11 starts from the unwritten body");
+            Assert.AreEqual(FaceStyle.Hint, u.Face.Style);
+            Assert.AreEqual(CoatStyle.Cloak, u.Outfit.Coat.Style);
+            Assert.IsTrue(u.Outfit.Coat.HoodUp);
+            Assert.IsFalse(u.Outfit.Pack);
+            Assert.IsFalse(u.Outfit.Scarf.On);
+            Assert.AreEqual(AccessoryKind.Bookmark, u.Accessories[0].Kind);
+            Assert.AreEqual("Unwritten", AppearancePresets.ByName(" unwritten ").Name);
+            Assert.AreEqual("Mira", AppearancePresets.ByName("MIRA").Name);
+            Assert.IsNull(AppearancePresets.ByName("Nobody"));
+            Assert.IsNull(AppearancePresets.ByName(null));
+            // Older documents (no style fields) still read as the written defaults.
+            HeroAppearance old = AppearanceJson.Deserialize("{\"name\":\"Old\",\"outfit\":{\"coat\":{\"length\":0.5}}}");
+            Assert.AreEqual(CoatStyle.Trench, old.Outfit.Coat.Style);
+            Assert.IsFalse(old.Outfit.Coat.HoodUp);
+            Assert.IsTrue(old.Outfit.Pack);
+            Assert.AreEqual(FaceStyle.Full, old.Face.Style);
+            Assert.IsFalse(AppearanceJson.TryDeserialize("{\"face\":{\"style\":\"Blank\"}}", out _, out _), "unknown face style");
+        }
+
+        [Test]
         public void JsonIsCamelCaseWithStringEnums()
         {
             string json = AppearanceJson.Serialize(AppearancePresets.Mira());

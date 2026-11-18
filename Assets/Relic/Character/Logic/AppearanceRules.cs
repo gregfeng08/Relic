@@ -73,6 +73,7 @@ namespace Relic.Character
             a.Face.EyeSize = Clamp(a.Face.EyeSize, MinEyeSize, MaxEyeSize, "face.eyeSize", fixes);
             a.Face.EyeColor = Hex(a.Face.EyeColor, d.Face.EyeColor, "face.eyeColor", fixes);
             a.Face.EyeShape = Enum(a.Face.EyeShape, d.Face.EyeShape, "face.eyeShape", fixes);
+            a.Face.Style = Enum(a.Face.Style, d.Face.Style, "face.style", fixes);
             a.Hair.Style = Enum(a.Hair.Style, d.Hair.Style, "hair.style", fixes);
             a.Hair.Bangs = Enum(a.Hair.Bangs, d.Hair.Bangs, "hair.bangs", fixes);
             a.Hair.Length = Clamp(a.Hair.Length, 0f, 1f, "hair.length", fixes);
@@ -80,6 +81,7 @@ namespace Relic.Character
             a.Hair.ShadeTint = Hex(a.Hair.ShadeTint, d.Hair.ShadeTint, "hair.shadeTint", fixes);
             OutfitSpec o = a.Outfit, od = d.Outfit;
             o.Coat.Length = Clamp(o.Coat.Length, 0f, 1f, "outfit.coat.length", fixes);
+            o.Coat.Style = Enum(o.Coat.Style, od.Coat.Style, "outfit.coat.style", fixes);
             o.Coat.Color = Hex(o.Coat.Color, od.Coat.Color, "outfit.coat.color", fixes);
             o.Coat.TrimColor = Hex(o.Coat.TrimColor, od.Coat.TrimColor, "outfit.coat.trimColor", fixes);
             o.Scarf.Color = Hex(o.Scarf.Color, od.Scarf.Color, "outfit.scarf.color", fixes);

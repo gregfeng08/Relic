@@ -12,8 +12,12 @@ namespace Relic.Character
     public enum EyeShape { Round, Soft, Sharp }
     public enum LegwearKind { Trousers, Skirt }
     public enum HandsKind { Gauntlets, Gloves, Bare }
-    public enum AccessoryKind { HairPin, Flower, Ribbon }
+    public enum AccessoryKind { HairPin, Flower, Ribbon, Bookmark }
     public enum Side { Left, Right }
+    /// <summary>Full: the anime face. Hint: the unwritten wayfarer (two ink-dot eyes and a blush, no mouth).</summary>
+    public enum FaceStyle { Full, Hint }
+    /// <summary>Trench: the long open coat. Cloak: a plain closed cloak with a shoulder mantle.</summary>
+    public enum CoatStyle { Trench, Cloak }
 
     public sealed class BodySpec
     {
@@ -26,6 +30,7 @@ namespace Relic.Character
 
     public sealed class FaceSpec
     {
+        public FaceStyle Style = FaceStyle.Full;
         public string EyeColor = "#3A9E5C";
         public EyeShape EyeShape = EyeShape.Soft;
         /// <summary>0.85..1.2.</summary>
@@ -49,6 +54,9 @@ namespace Relic.Character
     public sealed class CoatSpec
     {
         public bool On = true;
+        public CoatStyle Style = CoatStyle.Trench;
+        /// <summary>The hood raised over the head (hides the back hair; the bangs peek out).</summary>
+        public bool HoodUp;
         /// <summary>0 = hip-length jacket .. 1 = below the knee.</summary>
         public float Length = 1f;
         public string Color = "#B57B42";
@@ -74,6 +82,8 @@ namespace Relic.Character
         public HandsKind Hands = HandsKind.Gauntlets;
         public string HandsColor = "#8C9099";
         public string BeltColor = "#EEB834";
+        /// <summary>The backpack, waterskin and belt flasks (off for the unwritten wayfarer, who carries nothing yet).</summary>
+        public bool Pack = true;
     }
 
     public sealed class AccessorySpec

@@ -4,11 +4,63 @@ namespace Relic.Character
 {
     /// <summary>
     /// Built-in looks. Default is Greg's hero (white hair, red scarf, brown trench coat, olive
-    /// trousers, gauntlets); the others prove the parameters really change the character.
+    /// trousers, gauntlets); Unwritten is the starting body (and the sandbox default); the others
+    /// prove the parameters really change the character.
     /// </summary>
     public static class AppearancePresets
     {
         public static HeroAppearance Default() => new HeroAppearance { Name = "Wanderer" };
+
+        /// <summary>
+        /// The unwritten wayfarer (docs/design/14-character.md, Decision 2026-11-18): the body every
+        /// player starts in, before the Narrator has written them. A blank page: a soft, rounded
+        /// figure in a plain parchment cloak with the hood up, an ink-dark fringe, two ink-dot eyes
+        /// and a blush (no mouth yet), soft mittens and cloth-wrapped boots, no pack. A faded red
+        /// bookmark ribbon trails from the hood's tip, the one mark of the book they belong to.
+        /// </summary>
+        public static HeroAppearance Unwritten()
+        {
+            var a = new HeroAppearance { Name = "Unwritten" };
+            a.Body.Height = 0.94f;
+            a.Body.Build = 0.6f;
+            a.Body.SkinTone = "#F8ECDF";
+            a.Face.Style = FaceStyle.Hint;
+            a.Face.EyeColor = "#3B3848";
+            a.Face.EyeShape = EyeShape.Round;
+            a.Face.EyeSize = 1f;
+            a.Hair.Style = HairStyle.Bob;
+            a.Hair.Length = 0f;
+            a.Hair.Bangs = BangsStyle.Straight;
+            a.Hair.SideLock = false;
+            a.Hair.Cowlick = false;
+            a.Hair.Color = "#4F5368";
+            a.Hair.ShadeTint = "#8C90AC";
+            a.Outfit.Coat.Style = CoatStyle.Cloak;
+            a.Outfit.Coat.HoodUp = true;
+            a.Outfit.Coat.Length = 0.6f;
+            a.Outfit.Coat.Color = "#F1E6CF";
+            a.Outfit.Coat.TrimColor = "#D7C49C";
+            a.Outfit.Scarf.On = false;
+            a.Outfit.ShirtColor = "#7F89A3";
+            a.Outfit.Legwear = LegwearKind.Trousers;
+            a.Outfit.LegwearColor = "#666D84";
+            a.Outfit.BootsColor = "#BCA88A";
+            a.Outfit.Hands = HandsKind.Gloves;
+            a.Outfit.HandsColor = "#EADFC8";
+            a.Outfit.BeltColor = "#BCA88A";
+            a.Outfit.Pack = false;
+            a.Accessories.Add(new AccessorySpec { Kind = AccessoryKind.Bookmark, Color = "#C95F4E", Side = Side.Right });
+            return a;
+        }
+
+        /// <summary>A preset by name (case-insensitive), or null.</summary>
+        public static HeroAppearance ByName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            foreach (HeroAppearance a in All())
+                if (string.Equals(a.Name, name.Trim(), System.StringComparison.OrdinalIgnoreCase)) return a;
+            return null;
+        }
 
         /// <summary>Black twin tails, short blue jacket, skirt, gloves, a flower pin, no scarf.</summary>
         public static HeroAppearance Mira()
@@ -92,6 +144,7 @@ namespace Relic.Character
             return a;
         }
 
-        public static IReadOnlyList<HeroAppearance> All() => new[] { Default(), Mira(), Rowan(), Ash() };
+        /// <summary>F11 order: the unwritten starting body first, then the written looks.</summary>
+        public static IReadOnlyList<HeroAppearance> All() => new[] { Unwritten(), Default(), Mira(), Rowan(), Ash() };
     }
 }
