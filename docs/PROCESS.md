@@ -28,7 +28,7 @@ Three systems are built in parallel by separate agents, each on its own git bran
 | **I — Items & bosses** | Relic generator (local LLM), power budget, boss/pattern generator | Effect grammar contract, item spec |
 | **Lead** | `Relic.Core` (effect grammar, seeds, shared types), `Relic.Combat` (combat rules engine + balance sim), specs, board, integration | — |
 
-**Worktrees:** `.wt/world`, `.wt/magic`, `.wt/items` (gitignored) on branches `stream/world`, `stream/magic`, `stream/items`, created from `rebuild`. Each is a separate Unity project with its own `Library/`. They're created manually with `git worktree add .wt/<s> -b stream/<s> rebuild`, because the automatic worktree tool checks out `main`, whose committed `Library/` has paths too long for Windows.
+**Worktrees:** `.wt/world`, `.wt/magic`, `.wt/items` (gitignored) on branches `stream/world`, `stream/magic`, `stream/items`, created from `main`. Each is a separate Unity project with its own `Library/`. Create them with `git worktree add .wt/<s> -b stream/<s> main`. (Since 2026-11-18, `main` is the working branch; the old `rebuild` branch was fast-forwarded into it.)
 
 **Rules for parallel work**
 - **Do first (lead, in order):** project skeleton → effect grammar contract → tech architecture → the specs each stream needs. Then streams start.
@@ -52,10 +52,10 @@ A scheduled task in the Claude desktop app starts a fresh session every 2 hours.
 1. **Lock.** If `.wt/AUTORUN.lock` exists and is less than 3 hours old, stop without doing anything. Otherwise write it (timestamp), and delete it at the end.
 2. **Read:** the latest `docs/SESSION_LOG.md` entry, this file, the relevant `docs/design/` docs, and the board (`docs/BOARD_URL.txt`). Note any new responses from Greg in the log, so the next interactive session acts on them.
 3. **Check the machine:** never run Unity on the main checkout (Greg may have it open); use worktrees. GPU work only if no game is running.
-4. **Pick work:** the top **Ready** cards that aren't already in progress, at most 2 at a time, each in its own worktree and branch `stream/<name>` (from `rebuild`). Resume unfinished stream branches before starting new ones. Never touch cards in Review or Blocked.
+4. **Pick work:** the top **Ready** cards that aren't already in progress, at most 2 at a time, each in its own worktree and branch `stream/<name>` (from `main`). Resume unfinished stream branches before starting new ones. Never touch cards in Review or Blocked.
 5. **Verify:** `dotnet test tools/Relic.Tests`; Unity EditMode and PlayMode in the worktree (background); the Unity log scanned for errors; screenshots reviewed for visual work.
 6. **Commit** on the stream branch, then move the card to **Needs review** with: the branch name, what changed, test results, screenshot paths (`art-ref/renders/`, local only), and "what to try."
-7. **Log:** a `meta/log` entry on the board and a `docs/SESSION_LOG.md` entry (committed on the stream branch, not on `rebuild`).
+7. **Log:** a `meta/log` entry on the board and a `docs/SESSION_LOG.md` entry (committed on the stream branch, not on `main`).
 8. **Unlock and stop.** If a usage limit interrupts a run, the next run resumes from the branches and the board.
 
-**Never:** merge, push, touch `main` or `rebuild` directly, download anything, commit `art-ref/`, change ProjectSettings or Packages without a card that says so, decide anything awaiting Greg's review, or delete branches.
+**Never:** merge, push, commit directly to `main`, download anything, commit `art-ref/`, change ProjectSettings or Packages without a card that says so, decide anything awaiting Greg's review, or delete branches.
