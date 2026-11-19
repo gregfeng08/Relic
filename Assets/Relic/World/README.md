@@ -52,7 +52,7 @@ expressions): Unity's Mono may evaluate float expressions at higher precision th
 golden hash once. The same golden hash is checked in dotnet and Unity EditMode.
 
 ## Known issues / not done
-- No Burst port: chunks are built by the pure Logic code on worker threads (~1–6 ms per chunk).
+- No Burst port: chunks are built by the pure Logic code on worker threads (~2–8 ms per chunk; RLC-069 shapes and region blend added ~45%, off the main thread).
 - Shadow distance is the URP asset's 50 m (lead-owned); long terrain shadows stop there.
 - Swimming on the surface has no stamina drain yet; drowning only drains stamina (HP hook: `PlayerController.Suffocating`, TODO(HP)). No rivers. Lakes use a sloping water table, so a lake that
   straddles a region border can tilt slightly.
@@ -73,4 +73,20 @@ golden hash once. The same golden hash is checked in dotnet and Unity EditMode.
   streams them on worker threads, draws them with `Graphics.RenderMeshInstanced` (procedural
   low-poly meshes, `ToonProp`/`ToonGrass` shaders with wind sway and shrink-fade), and adds
   trunk/boulder colliders near the player on layer 1 (the camera ignores them).
-- Captures: `-captureSet default|ridges|snow|dive|props|all`.
+- Captures: `-captureSet default|ridges|snow|dive|props|shapes|all`.
+
+## Shapes (RLC-069)
+- **Massifs, not fins:** the peaks layer uses a gentler domain warp (0.4 of the full warp), a
+  1600 m wavelength, a linear ridged profile, crest rounding that widens in taller regions and
+  per-octave rounding (`SimplexNoise2.Ridged(..., softnessGrowth: 2)`). Escarpment cliff bands
+  fade out on high ridges and hilltops, where a step would leave a spine.
+- **Region blend:** every region within one band (250) of the nearest is blended; the old
+  three-slot blend swung within meters at four-way junctions and made walls there.
+- **Mesas only in the mesa band** (`TerrainGenerator.Mesa.cs`): terraces are full up to 40 m over
+  the local ground, gone at 70 m and always 12 m under the snow line; beds are 9-24 m thick and dip.
+- `Tests/TerrainShapeTests` is the slice detector: no crest falls steeper than 55 degrees by 20 m+
+  on both sides, no staircase above the mesa band, steep ground stays rare, plus Greg's two spots.
+- Captures: `-captureSet shapes -captureSeeds 1338,1337,7` (seed 1338 includes both playtest spots).
+- **Perf log:** frames while the editor is unfocused or paused (and the 2 frames after) are left out
+  of `[Relic.Perf]` stats and the HUD fps. Playtest "hitches" of 2.7-23 s were these stalls
+  (screenshots, alt-tab), not streaming; the 50-80 ms ones were F7 hero kit rebuilds.
