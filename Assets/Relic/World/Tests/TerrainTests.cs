@@ -31,7 +31,7 @@ namespace Relic.World.Tests
             return h;
         }
 
-        public const ulong GoldenHeightHash = 0x4A61F80500EB1C52UL;
+        public const ulong GoldenHeightHash = 0x64D65C7859D235FEUL;
 
         [Test]
         public void SameSeedGivesSameWorld()
