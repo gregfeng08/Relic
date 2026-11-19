@@ -68,14 +68,23 @@ namespace Relic.Character
             var sb = new System.Text.StringBuilder();
             int last = 0;
             void Mark(string part) { int t = b.Kit.TriangleCount; sb.Append(part).Append(' ').Append(t - last).Append(' '); last = t; }
-            HeroBody.Build(b); Mark("body");
-            HeroCoat.Build(b); Mark("coat");
-            HeroArmor.Build(b); Mark("armor");
-            HeroScarf.Build(b); Mark("scarf");
-            HeroHair.Build(b); Mark("hair");
-            HeroAccessories.Build(b); Mark("accessories");
-            HeroGear.Build(b); Mark("gear");
-            HeroWeapon.Build(b); Mark("weapon");
+            if (Appearance.Blank)
+            {
+                // The unwritten wayfarer: the plain body only (a drawn or stowed weapon still shows).
+                HeroBlank.Build(b); Mark("body");
+                HeroWeapon.Build(b); Mark("weapon");
+            }
+            else
+            {
+                HeroBody.Build(b); Mark("body");
+                HeroCoat.Build(b); Mark("coat");
+                HeroArmor.Build(b); Mark("armor");
+                HeroScarf.Build(b); Mark("scarf");
+                HeroHair.Build(b); Mark("hair");
+                HeroAccessories.Build(b); Mark("accessories");
+                HeroGear.Build(b); Mark("gear");
+                HeroWeapon.Build(b); Mark("weapon");
+            }
             Breakdown = sb.ToString();
 
             _mesh = b.Kit.Build("Hero");
@@ -126,8 +135,8 @@ namespace Relic.Character
             Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.06f, 0.05f, -0.01f), new Vector3(0.06f, 0.05f, -0.01f), 0.105f);
             Chains.AddCollider(B(HeroRig.Spine), new Vector3(0f, -0.05f, 0f), new Vector3(0f, 0.09f, 0f), 0.11f);
             Chains.AddCollider(B(HeroRig.Hips), new Vector3(-0.04f, -0.04f, 0f), new Vector3(0.04f, -0.04f, 0f), 0.11f);
-            // The backpack keeps the hair and scarf off the back.
-            if (Appearance.Outfit.Pack)
+            // The backpack keeps the hair and scarf off the back (the blank body has neither).
+            if (!Appearance.Blank)
                 Chains.AddCollider(B(HeroRig.Chest), new Vector3(-0.05f, -0.08f, -0.17f), new Vector3(0.05f, -0.08f, -0.17f), 0.065f);
             for (int s = -1; s <= 1; s += 2)
             {

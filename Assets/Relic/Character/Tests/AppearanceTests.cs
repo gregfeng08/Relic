@@ -22,24 +22,16 @@ namespace Relic.Character.Tests
         {
             HeroAppearance u = AppearancePresets.Unwritten();
             Assert.AreEqual("Unwritten", AppearancePresets.All()[0].Name, "F11 starts from the unwritten body");
-            Assert.AreEqual(FaceStyle.Hint, u.Face.Style);
-            Assert.AreEqual(CoatStyle.Cloak, u.Outfit.Coat.Style);
-            Assert.IsTrue(u.Outfit.Coat.HoodUp);
-            Assert.Greater(u.Body.HeadSize, 1f, "a bigger, younger head");
-            Assert.IsFalse(u.Outfit.Pack);
-            Assert.IsFalse(u.Outfit.Scarf.On);
-            Assert.AreEqual(AccessoryKind.Bookmark, u.Accessories[0].Kind);
+            Assert.IsTrue(u.Blank, "a blank, faceless body");
+            Assert.AreEqual(1f, u.Body.HeadSize, "moderate head, not chibi");
+            Assert.AreEqual(0, u.Accessories.Count);
+            Assert.IsFalse(AppearancePresets.Default().Blank, "the written looks are not blank");
             Assert.AreEqual("Unwritten", AppearancePresets.ByName(" unwritten ").Name);
             Assert.AreEqual("Mira", AppearancePresets.ByName("MIRA").Name);
             Assert.IsNull(AppearancePresets.ByName("Nobody"));
             Assert.IsNull(AppearancePresets.ByName(null));
-            // Older documents (no style fields) still read as the written defaults.
-            HeroAppearance old = AppearanceJson.Deserialize("{\"name\":\"Old\",\"outfit\":{\"coat\":{\"length\":0.5}}}");
-            Assert.AreEqual(CoatStyle.Trench, old.Outfit.Coat.Style);
-            Assert.IsFalse(old.Outfit.Coat.HoodUp);
-            Assert.IsTrue(old.Outfit.Pack);
-            Assert.AreEqual(FaceStyle.Full, old.Face.Style);
-            Assert.IsFalse(AppearanceJson.TryDeserialize("{\"face\":{\"style\":\"Blank\"}}", out _, out _), "unknown face style");
+            // Older documents (no blank field) read as written looks.
+            Assert.IsFalse(AppearanceJson.Deserialize("{\"name\":\"Old\"}").Blank);
         }
 
         [Test]

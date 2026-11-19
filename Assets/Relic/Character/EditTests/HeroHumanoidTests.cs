@@ -49,29 +49,20 @@ namespace Relic.Character.EditTests
         }
 
         [Test]
-        public void UnwrittenLooksUnwritten()
+        public void UnwrittenIsABlankFacelessBody()
         {
             _hero.Appearance = AppearancePresets.Unwritten();
             _hero.Kit = new HeroKit();
             _hero.Rebuild();
-            StringAssert.Contains("Bookmark", string.Join(",", BoneNames()), "the bookmark ribbon hangs on a spring chain");
-            Assert.IsFalse(BoneNames().Exists(n => n.StartsWith("ScarfTail") || n.StartsWith("SideLock") || n.StartsWith("Coat")), "no scarf, side lock or trench coat");
-            int unwrittenBones = _hero.Rig.Bones.Count;
-            _hero.Appearance = AppearancePresets.Default();
-            _hero.Rebuild();
-            Assert.Less(unwrittenBones, _hero.Rig.Bones.Count, "no back hair chains under the hood");
-            _hero.Appearance = AppearancePresets.Unwritten();
-            _hero.Rebuild();
-            Assert.That(_hero.Chains.ChainCount, Is.GreaterThan(4), "cloak panels and the bookmark swing");
-            // A bigger head on a smaller, rounder body: younger and cuter than the written looks.
-            Assert.That(_hero.Shape.HeadsTall, Is.InRange(5.4f, 6.0f));
-        }
-
-        List<string> BoneNames()
-        {
-            var names = new List<string>();
-            foreach (Transform t in _hero.Rig.Bones) names.Add(t.name);
-            return names;
+            Assert.AreEqual(HeroHumanoid.CoreBones, _hero.Rig.Bones.Count, "no hair, cloth or ribbon chains: just the humanoid skeleton");
+            Assert.AreEqual(0, _hero.Chains.ChainCount);
+            var colors = new HashSet<Color32>();
+            foreach (Color32 c in _hero.Renderer.sharedMesh.colors32) colors.Add(new Color32(c.r, c.g, c.b, 255));
+            Assert.AreEqual(1, colors.Count, "one plain colour: no eyes, blush or clothes");
+            Assert.AreEqual(1, _hero.Renderer.sharedMaterials.Length, "one material");
+            Assert.That(_hero.Shape.HeadsTall, Is.InRange(5.9f, 6.6f), "moderate head, readable proportions");
+            Assert.IsTrue(_hero.HumanAvatar.isValid && _hero.HumanAvatar.isHuman);
+            Assert.IsNotNull(_hero.Mecanim);
         }
 
         [Test]

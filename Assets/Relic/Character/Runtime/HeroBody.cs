@@ -180,18 +180,20 @@ namespace Relic.Character
         }
 
         /// <summary>Gauntlets (segmented metal, claw tips), gloves (soft, rounded) or bare hands.</summary>
-        static void Hand(HeroBuild b, int s)
+        internal static void Hand(HeroBuild b, int s, bool forceBare = false)
         {
             OutfitSpec o = b.App.Outfit;
-            bool claws = o.Hands == HandsKind.Gauntlets;
-            Color main = o.Hands == HandsKind.Bare ? b.SkinColor : HeroBuild.C(o.HandsColor);
+            HandsKind kind = forceBare ? HandsKind.Bare : o.Hands;
+            bool claws = kind == HandsKind.Gauntlets;
+            Color main = kind == HandsKind.Bare ? b.SkinColor : HeroBuild.C(o.HandsColor);
             Color tip = claws ? main * 0.62f + Color.black : main;
             float x = HeroRig.ShoulderX * s;
             int hand = HeroRig.Hand(s);
-            void Paint(Color c, float w) { if (o.Hands == HandsKind.Bare) b.Toon(c, w, b.SkinShade, 0.3f); else b.Toon(c, w); }
+            // The blank body keeps one plain toon colour (no warm skin shade).
+            void Paint(Color c, float w) { if (kind == HandsKind.Bare && !forceBare) b.Toon(c, w, b.SkinShade, 0.3f); else b.Toon(c, w); }
 
             Paint(main, 1.2f);
-            if (o.Hands != HandsKind.Bare)
+            if (kind != HandsKind.Bare)
             {
                 b.Arm(s);
                 float r0 = claws ? 0.042f : 0.04f, r1 = claws ? 0.047f : 0.043f;

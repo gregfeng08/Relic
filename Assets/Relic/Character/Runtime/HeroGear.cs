@@ -12,14 +12,10 @@ namespace Relic.Character
     {
         public static void Build(HeroBuild b)
         {
-            if (b.App.Outfit.Pack)
-            {
-                Backpack(b);
-                Waterskin(b);
-                Flasks(b);
-            }
-            // The inherited amulet; someone who carries nothing yet only wears one once a relic is equipped.
-            if (b.App.Outfit.Pack || !string.IsNullOrEmpty(b.Look.Amulet.Name)) Amulet(b, b.Look.Amulet);
+            Backpack(b);
+            Waterskin(b);
+            Flasks(b);
+            Amulet(b, b.Look.Amulet);
             Charm(b, b.Look.Charms[0], new Vector3(0.062f, 0.975f, 0.104f));
             Charm(b, b.Look.Charms[1], new Vector3(0.098f, 0.972f, 0.094f));
         }

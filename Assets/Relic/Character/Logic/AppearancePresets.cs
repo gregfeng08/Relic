@@ -13,44 +13,14 @@ namespace Relic.Character
 
         /// <summary>
         /// The unwritten wayfarer (docs/design/14-character.md, Decision 2026-11-18): the body every
-        /// player starts in, before the Narrator has written them. A blank page: a soft, rounded
-        /// figure in a plain parchment cloak with the hood up, an ink-dark fringe, two ink-dot eyes
-        /// and a blush (no mouth yet), soft mittens and cloth-wrapped boots, no pack. A faded red
-        /// bookmark ribbon trails from the hood's tip, the one mark of the book they belong to.
+        /// player starts in, before the Narrator has written them. A blank, faceless humanoid in one
+        /// plain neutral colour: no face, hair or clothes. Everything else is written later.
         /// </summary>
         public static HeroAppearance Unwritten()
         {
-            var a = new HeroAppearance { Name = "Unwritten" };
-            a.Body.Height = 0.94f;
+            var a = new HeroAppearance { Name = "Unwritten", Blank = true };
             a.Body.Build = 0.6f;
-            a.Body.HeadSize = 1.1f;
-            a.Body.SkinTone = "#F7E1CE";
-            a.Face.Style = FaceStyle.Hint;
-            a.Face.EyeColor = "#3B3848";
-            a.Face.EyeShape = EyeShape.Round;
-            a.Face.EyeSize = 1f;
-            a.Hair.Style = HairStyle.Bob;
-            a.Hair.Length = 0f;
-            a.Hair.Bangs = BangsStyle.Straight;
-            a.Hair.SideLock = false;
-            a.Hair.Cowlick = false;
-            a.Hair.Color = "#4F5368";
-            a.Hair.ShadeTint = "#8C90AC";
-            a.Outfit.Coat.Style = CoatStyle.Cloak;
-            a.Outfit.Coat.HoodUp = true;
-            a.Outfit.Coat.Length = 0.6f;
-            a.Outfit.Coat.Color = "#EAD8B4";
-            a.Outfit.Coat.TrimColor = "#C8A975";
-            a.Outfit.Scarf.On = false;
-            a.Outfit.ShirtColor = "#7F89A3";
-            a.Outfit.Legwear = LegwearKind.Trousers;
-            a.Outfit.LegwearColor = "#8A8FA6";
-            a.Outfit.BootsColor = "#A88D6E";
-            a.Outfit.Hands = HandsKind.Gloves;
-            a.Outfit.HandsColor = "#B59B7C";
-            a.Outfit.BeltColor = "#BCA88A";
-            a.Outfit.Pack = false;
-            a.Accessories.Add(new AccessorySpec { Kind = AccessoryKind.Bookmark, Color = "#C95F4E", Side = Side.Right });
+            a.Body.SkinTone = "#E4DDD3";
             return a;
         }
 
