@@ -100,8 +100,8 @@ namespace Relic.Items
                 ? GenerateAsync(spec).GetAwaiter().GetResult()
                 : Task.Run(() => GenerateAsync(spec)).GetAwaiter().GetResult();
 
-        /// <summary>The Lore Bible the world was built from (or the default one).</summary>
-        public Relic.Lore.LoreBible Bible => _world.Bible ?? LoreSource.Default;
+        /// <summary>The world's lore (its generated cultures and prehistory).</summary>
+        public Relic.Lore.LoreBible Bible => _world.Lore;
 
         public async Task<Item> GenerateAsync(ItemSpec spec, CancellationToken ct = default)
         {

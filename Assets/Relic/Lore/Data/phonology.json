@@ -1,0 +1,142 @@
+[
+  {
+    "id": "hearth",
+    "label": "short, cozy syllables that end in -wick, -ley and -kin; often a family name",
+    "adjectiveEndings": ["", "", "ish"],
+    "phonology": {
+      "starts": ["Bram", "Tam", "Wil", "Pell", "Mer", "Os", "Fen", "Tib", "Cor", "Dab", "Hal", "Mab", "Nel", "Pip", "Rud", "Wen", "Al", "Ed", "Bet", "Gil", "Maud", "Lot", "Jem", "Hod"],
+      "middles": ["ri", "wi", "be", "li", "o", "a", "ne", "ber", "ly", "sel", "ro"],
+      "ends": ["wick", "sin", "ley", "wen", "by", "ric", "ton", "bet", "a", "ie", "win", "dry", "ny", "bel", "kin", "al", "mot", "ett", "row", "ock"],
+      "patterns": [ { "shape": "SE", "weight": 6 }, { "shape": "SME", "weight": 2 }, { "shape": "S", "weight": 1 } ],
+      "surnameChance": 0.5,
+      "surnamePattern": "SE",
+      "minLength": 3,
+      "maxLength": 10,
+      "places": {
+        "suffixes": ["fold", "wick", "ford", "by", "mere", "stead", "dale", "bury", "combe", "ley", "thorpe"],
+        "words": ["Green", "Mill", "Downs", "Crossing", "Hollow", "Common"],
+        "suffixChance": 0.7
+      }
+    }
+  },
+  {
+    "id": "grove",
+    "label": "flowing, vowel-rich names of three syllables; people are known by their grove, not a family",
+    "adjectiveEndings": ["", "i", "an"],
+    "phonology": {
+      "starts": ["A", "I", "O", "Se", "Li", "Te", "Me", "Ru", "Va", "Ne", "Su", "Lo", "Ha", "Yo", "Ki", "Ela"],
+      "middles": ["ru", "la", "vi", "no", "ri", "sa", "lu", "me", "ya", "ve", "ni"],
+      "ends": ["vi", "ai", "ue", "oru", "an", "il", "esa", "ani", "uvi", "eli", "on", "aru", "ira"],
+      "patterns": [ { "shape": "SME", "weight": 4 }, { "shape": "SE", "weight": 3 }, { "shape": "SMME", "weight": 1 } ],
+      "surnameChance": 0,
+      "surnamePattern": "SE",
+      "minLength": 3,
+      "maxLength": 10,
+      "places": {
+        "suffixes": ["ashe", "lun", "avel", "ori", "esse"],
+        "words": ["Grove", "Canopy", "Glade", "Boughs", "Hollow", "Rootway"],
+        "suffixChance": 0.5
+      }
+    }
+  },
+  {
+    "id": "terrace",
+    "label": "crisp two- and three-syllable names; the family name comes as one short root",
+    "adjectiveEndings": ["", "i", "ese"],
+    "phonology": {
+      "starts": ["Tes", "Kar", "Yen", "Sho", "Hal", "Mir", "Os", "Ket", "Ra", "Sen", "Tam", "Ive", "Dor", "Ore", "Ka", "Yu"],
+      "middles": ["ka", "ri", "se", "ya", "ro", "te", "ma", "shi"],
+      "ends": ["i", "an", "ek", "ari", "os", "en", "ira", "un", "esh", "ai", "el", "o"],
+      "patterns": [ { "shape": "SE", "weight": 4 }, { "shape": "SME", "weight": 3 } ],
+      "surnameChance": 0.7,
+      "surnamePattern": "S",
+      "minLength": 3,
+      "maxLength": 10,
+      "places": {
+        "suffixes": ["kel", "orin", "shan", "dar", "yen"],
+        "words": ["Steps", "Terrace", "Spire", "Bridge", "Bellrock", "Pass"],
+        "suffixChance": 0.5
+      }
+    }
+  },
+  {
+    "id": "harbor",
+    "label": "sunny, sing-song names ending in -o, -etta and -ine, nearly always with a family name",
+    "adjectiveEndings": ["ish", "ese", "an"],
+    "phonology": {
+      "starts": ["Cor", "Ama", "Lis", "Bel", "Tes", "Mar", "Vel", "Ser", "Nel", "Ro", "Ces", "Ila", "Ot", "Fio", "Lu", "Ren"],
+      "middles": ["ra", "li", "ve", "sa", "ne", "ri", "lo", "ta"],
+      "ends": ["o", "a", "ello", "ine", "ane", "is", "etta", "ano", "iel", "ina", "ezo", "on"],
+      "patterns": [ { "shape": "SE", "weight": 4 }, { "shape": "SME", "weight": 3 } ],
+      "surnameChance": 0.7,
+      "surnamePattern": "SE",
+      "minLength": 3,
+      "maxLength": 11,
+      "places": {
+        "suffixes": ["port", "mar", "ello", "ara", "esca"],
+        "words": ["Harbor", "Light", "Strand", "Cove", "Quay", "Point"],
+        "suffixChance": 0.5
+      }
+    }
+  },
+  {
+    "id": "mesa",
+    "label": "warm, open names with z, sh and q sounds; a family name about half the time",
+    "adjectiveEndings": ["", "i", "an"],
+    "phonology": {
+      "starts": ["Az", "Ka", "Mir", "Ru", "Sa", "Tel", "Ush", "Dar", "Ir", "Zan", "Nesh", "Ba", "Ha", "Ya", "Om", "Qa"],
+      "middles": ["ra", "ma", "shi", "du", "ka", "ze", "la", "ri"],
+      "ends": ["im", "esh", "ara", "un", "ad", "ir", "ul", "ani", "ez", "oum", "a", "ah"],
+      "patterns": [ { "shape": "SE", "weight": 4 }, { "shape": "SME", "weight": 3 } ],
+      "surnameChance": 0.4,
+      "surnamePattern": "SE",
+      "minLength": 3,
+      "maxLength": 10,
+      "places": {
+        "suffixes": ["kar", "ad", "im", "esh"],
+        "words": ["Mesa", "Kiln", "Wells", "Bluffs", "Spire", "Oasis"],
+        "suffixChance": 0.5
+      }
+    }
+  },
+  {
+    "id": "saga",
+    "label": "sturdy northern names ending in -ild, -rik and -holm, usually with a family name",
+    "adjectiveEndings": ["", "ish", "ic"],
+    "phonology": {
+      "starts": ["Hja", "Os", "Bryn", "Tor", "Sve", "Yr", "Ka", "Li", "Ask", "Ing", "Ha", "Rag", "Sol", "Ey", "Vi", "Ulf"],
+      "middles": ["la", "ve", "ri", "ne", "gu", "da", "ki"],
+      "ends": ["a", "e", "ild", "ven", "ja", "rik", "un", "by", "dis", "holm", "ke", "vi", "ra", "vik"],
+      "patterns": [ { "shape": "SE", "weight": 5 }, { "shape": "SME", "weight": 2 } ],
+      "surnameChance": 0.6,
+      "surnamePattern": "SE",
+      "minLength": 3,
+      "maxLength": 10,
+      "places": {
+        "suffixes": ["holm", "vik", "stad", "fell", "hof"],
+        "words": ["Lodge", "Hall", "Firth", "Ridge", "Hearth", "Floe"],
+        "suffixChance": 0.6
+      }
+    }
+  },
+  {
+    "id": "reed",
+    "label": "bouncy, burbling names (Pib, Wob, Nim) that are hard to say crossly",
+    "adjectiveEndings": ["", "ish", "et"],
+    "phonology": {
+      "starts": ["Pib", "Lul", "Nim", "Tob", "Wob", "Mog", "Pud", "Lil", "Bub", "Rush", "Sib", "Dun", "Fen", "Mim", "Bo", "Wim"],
+      "middles": ["ble", "li", "bo", "wi", "pa", "ne"],
+      "ends": ["et", "ow", "y", "kin", "ling", "le", "o", "ap", "ick", "win", "sy", "mot"],
+      "patterns": [ { "shape": "SE", "weight": 6 }, { "shape": "SME", "weight": 2 } ],
+      "surnameChance": 0.5,
+      "surnamePattern": "SE",
+      "minLength": 3,
+      "maxLength": 10,
+      "places": {
+        "suffixes": ["pond", "reed", "wade", "mire", "fen"],
+        "words": ["Stilts", "Reeds", "Ferry", "Lilypads", "Locks", "Landing"],
+        "suffixChance": 0.6
+      }
+    }
+  }
+]

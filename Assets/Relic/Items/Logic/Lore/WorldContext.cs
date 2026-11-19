@@ -6,13 +6,14 @@ using Relic.Lore;
 namespace Relic.Items
 {
     // World context handed to item and boss generation. Until the world graph exists
-    // (stream W + lead), StubWorld instantiates a small seeded world from the Lore
-    // Bible: regions settled by Bible cultures, factions from faction archetypes,
-    // figures and events from the Bible's templates. The shape is meant to be easy to
+    // (stream W + lead), StubWorld instantiates a small seeded world from the world's
+    // generated lore (LoreBible.ForWorld): regions settled by its procedural cultures and
+    // named after their prehistory places, factions from faction archetypes, figures, and
+    // events from the generated prehistory. The shape is meant to be easy to
     // fill from the real graph later: ids are stable strings, everything serializes.
     //
-    // Besides world entities, the Bible's own famous names can be referenced:
-    // "legend.<id>" (Wren, the Morning Bell...) and "era.<id>" (the Lamplit Age...).
+    // Besides world entities, the prehistory's famous names can be referenced:
+    // "legend.<id>" (founders, figures, artifacts) and "era.<id>" (generated eras).
 
     public sealed class WorldRegion
     {
@@ -73,8 +74,11 @@ namespace Relic.Items
         public List<WorldFigure> Figures = new List<WorldFigure>();
         public List<WorldEvent> Events = new List<WorldEvent>();
 
-        /// <summary>The Lore Bible this world was built from (not serialized; reattach after loading).</summary>
+        /// <summary>The world's lore: the constitution instantiated for <see cref="Seed"/> (generated cultures, eras, founders, artifacts). Not serialized; <see cref="Lore"/> regenerates it after loading.</summary>
         [JsonIgnore] public LoreBible Bible;
+
+        /// <summary><see cref="Bible"/>, regenerated from the seed (deterministically) when a loaded world has none.</summary>
+        [JsonIgnore] public LoreBible Lore => Bible ?? (Bible = LoreSource.ForWorld(Seed));
 
         public const string LegendPrefix = "legend.";
         public const string EraPrefix = "era.";

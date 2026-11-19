@@ -14,7 +14,7 @@ namespace Relic.Items.Samples
         {
             var s = it.Grammar;
             if (s == null) return "";
-            var bible = world?.Bible ?? LoreSource.Default;
+            var bible = world?.Lore ?? LoreSource.Default;
             var arch = Archetypes.ById(s.Archetype);
             var culture = bible.Culture(s.Culture);
             var mat = Materials.Find(s.Material);

@@ -7,14 +7,15 @@ using Relic.Lore;
 namespace Relic.Items
 {
     /// <summary>
-    /// Seeded stand-in for the world graph, instantiated from the Lore Bible (16, layer 3):
-    /// eight regions settled by Bible cultures (names from each culture's NameGenerator),
-    /// five factions from faction archetypes, ten figures and six events from the event
-    /// templates. Vocabulary is bright by default; somber events appear at the Bible's weights.
+    /// Seeded stand-in for the world graph, instantiated from the world's generated lore
+    /// (16, decision 2026-11-18): eight regions settled by its procedural cultures and named
+    /// after their prehistory places, five factions from faction archetypes, ten figures, and
+    /// the prehistory's events (eras, founders and artifacts are referenceable as legends and
+    /// eras). Vocabulary is bright by default; somber events appear at the templates' weights.
     /// </summary>
     public static class StubWorld
     {
-        public const int Version = 2;
+        public const int Version = 3;
         const int RegionCount = 8, FactionCount = 5, FigureCount = 10, EventCount = 6;
 
         static readonly string[] Features = { "orchards", "ferries", "kilns", "markets", "shrines", "quarries", "lamp-towers", "ruins", "bridges", "mills" };
@@ -26,13 +27,16 @@ namespace Relic.Items
             "Weaver", "Brewer", "Shepherd", "Kitemaker", "Potter", "Wayfarer", "Herbalist", "Shipwright",
         };
 
-        /// <summary>A world from the default Lore Bible (<see cref="LoreSource.Default"/>).</summary>
+        /// <summary>A world from the default lore constitution (<see cref="LoreSource.Default"/>), instantiated for the seed.</summary>
         public static WorldContext Create(ulong worldSeed) => FromBible(worldSeed, LoreSource.Default);
 
+        /// <param name="bible">The constitution (instantiated here for the seed) or an already generated world bible.</param>
         public static WorldContext FromBible(ulong worldSeed, LoreBible bible)
         {
             if (bible == null) throw new ArgumentNullException(nameof(bible));
-            var rng = Pcg32.ForPurpose(worldSeed, "items.stubworld.v2");
+            if (!bible.IsWorld) bible = bible.ForWorld(worldSeed);
+            var history = bible.History;
+            var rng = Pcg32.ForPurpose(worldSeed, "items.stubworld.v3");
             var w = new WorldContext { Seed = worldSeed, Bible = bible };
             var names = new Dictionary<string, NameGenerator>();
             NameGenerator Names(CultureDef c) => names.TryGetValue(c.Id, out var n) ? n : names[c.Id] = new NameGenerator(c, bible.Style);
@@ -48,9 +52,13 @@ namespace Relic.Items
                 var fam = families[i];
                 var cultures = bible.CulturesOf(fam);
                 var culture = cultures.Count > 1 && rng.Chance(0.3f) ? cultures[rng.Range(1, cultures.Count)] : cultures[0];
-                string name;
+                // Regions take the names of their culture's prehistory places first, so old events point at real regions.
+                string name = null;
+                foreach (var p in history.PlacesOf(culture.Id))
+                    if (usedNames.Add(p.Name)) { name = p.Name; break; }
                 int guard = 0;
-                do name = Names(culture).Place(ref rng); while (!usedNames.Add(name) && ++guard < 32);
+                if (name == null)
+                    do name = Names(culture).Place(ref rng); while (!usedNames.Add(name) && ++guard < 32);
                 string landmark;
                 do landmark = "the " + Pick(LandmarkAdj, ref rng) + " " + Pick(LandmarkNoun, ref rng);
                 while (!usedLandmarks.Add(landmark));
@@ -116,74 +124,35 @@ namespace Relic.Items
                 });
             }
 
-            AddEvents(w, bible, ref rng);
+            AddEvents(w, history, ref rng);
             foreach (var f in w.Figures) f.Fate = Fate(w, ref rng);
             return w;
         }
 
-        static void AddEvents(WorldContext w, LoreBible bible, ref Pcg32 rng)
+        /// <summary>The prehistory's events, each placed in the region it names (or one of its culture's regions).</summary>
+        static void AddEvents(WorldContext w, WorldPrehistory history, ref Pcg32 rng)
         {
             var usedIds = new HashSet<string>();
-            int total = 0;
-            foreach (var t in bible.Events) total += Math.Max(0, t.Weight);
-            for (int i = 0; i < EventCount * 4 && w.Events.Count < EventCount; i++)
+            foreach (var e in history.Events)
             {
-                int r = rng.Range(0, Math.Max(1, total));
-                EventTemplate t = bible.Events[0];
-                foreach (var e in bible.Events) { r -= Math.Max(0, e.Weight); if (r < 0) { t = e; break; } }
-                if (usedIds.Contains(t.Id)) continue;
-                usedIds.Add(t.Id);
-
-                var region = w.Regions[rng.Range(0, w.Regions.Count)];
-                var culture = bible.Culture(region.Culture);
-                var values = new Dictionary<string, string>();
-                var usedFigures = new HashSet<WorldFigure>();
-                foreach (var s in t.Slots) values[s.Name] = SlotValue(s, w, bible, region, culture, usedFigures, ref rng);
-                string name = TemplateText.Capitalize(TemplateText.Fill(t.NamePatterns[rng.Range(0, t.NamePatterns.Count)], values));
-                var era = bible.Era(t.Eras[rng.Range(0, t.Eras.Count)]);
-                int lo = Math.Max(5, era.EndYearsAgo + 5), hi = Math.Max(lo, era.StartYearsAgo - 5);
+                var region = w.Regions.Find(r => r.Name == e.Place);
+                if (region == null)
+                {
+                    var home = w.Regions.FindAll(r => r.Culture == e.Culture);
+                    region = home.Count > 0 ? home[rng.Range(0, home.Count)] : w.Regions[rng.Range(0, w.Regions.Count)];
+                }
+                string id = "evt." + Slug(e.Name);
+                if (!usedIds.Add(id)) continue;
                 w.Events.Add(new WorldEvent
                 {
-                    Id = "evt." + Slug(name),
-                    Name = LoreSampler.MidSentence(name),
+                    Id = id,
+                    Name = e.Name,
                     RegionId = region.Id,
-                    YearsAgo = 5 * ((lo + rng.Range(0, hi - lo + 1)) / 5),
-                    Template = t.Id,
-                    Tone = t.Tone.ToString(),
-                    Era = era.Id,
+                    YearsAgo = e.YearsAgo,
+                    Template = e.Template,
+                    Tone = e.Tone.ToString(),
+                    Era = e.Era,
                 });
-            }
-        }
-
-        static string SlotValue(TemplateSlot s, WorldContext w, LoreBible bible, WorldRegion region, CultureDef culture, HashSet<WorldFigure> used, ref Pcg32 rng)
-        {
-            switch (s.Kind)
-            {
-                case SlotKind.Place:
-                case SlotKind.Region: return region.Name;
-                case SlotKind.Faction: return w.Factions[rng.Range(0, w.Factions.Count)].Name;
-                case SlotKind.Figure:
-                {
-                    WorldFigure f;
-                    int guard = 0;
-                    do f = w.Figures[rng.Range(0, w.Figures.Count)]; while (!used.Add(f) && ++guard < 16);
-                    return f.Name;
-                }
-                case SlotKind.Artifact:
-                {
-                    var artifacts = bible.Legends.FindAll(l => l.Kind == LegendKind.Artifact && l.Tone == Tone.Bright);
-                    return artifacts.Count > 0 ? artifacts[rng.Range(0, artifacts.Count)].Name : "a lost lantern";
-                }
-                case SlotKind.Culture: return culture.Adjective;
-                case SlotKind.Era: return bible.Eras[rng.Range(0, bible.Eras.Count)].Name;
-                case SlotKind.Legend: return LoreSampler.LegendName(bible.Legends[rng.Range(0, bible.Legends.Count)]);
-                case SlotKind.Number: return (5 * rng.Range(1, 19)).ToString(CultureInfo.InvariantCulture);
-                default:
-                {
-                    if (s.Words.Count > 0) return LoreSampler.Title(s.Words[rng.Range(0, s.Words.Count)]);
-                    var motif = bible.Motif(culture.Motifs[rng.Range(0, culture.Motifs.Count)]);
-                    return LoreSampler.Title(motif.Words[rng.Range(0, motif.Words.Count)]);
-                }
             }
         }
 
@@ -207,9 +176,9 @@ namespace Relic.Items
             switch (rng.Range(0, 5))
             {
                 case 0: return "keeps a workshop at " + region.Landmark + " in " + region.Name;
-                case 1: return "still walks the Long Roads, last seen near " + region.Name;
+                case 1: return "still walks the old roads, last seen near " + region.Name;
                 case 2: return "retired to " + region.Name + " and judges the pie contest every autumn";
-                case 3: return "went looking for the edge of the Wide past " + region.Name;
+                case 3: return "went looking for the edge of the map past " + region.Name;
                 default: return "teaches apprentices at " + region.Landmark + " in " + region.Name;
             }
         }

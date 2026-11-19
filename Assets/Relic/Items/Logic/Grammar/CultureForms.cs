@@ -5,10 +5,11 @@ using Relic.Lore;
 namespace Relic.Items
 {
     /// <summary>
-    /// Maps the Lore Bible's culture item forms ("carved longbow", "hand-bell") onto Items
-    /// base types, and relic forms onto kitbash forms (Forms.RelicForms). A culture's form
-    /// is the noun its items are named with; when a culture makes nothing for a base, the
-    /// archetype's plain noun is used instead ("Sabre"). A test lists any Bible form missing here.
+    /// Maps a culture's item forms ("carved longbow", "hand-bell") onto Items base types, and
+    /// relic forms onto kitbash forms (Forms.RelicForms), using the form tags the lore carries
+    /// (Lore/Data/forms.json, copied onto each generated culture as <see cref="CultureDef.FormTags"/>).
+    /// A culture's form is the noun its items are named with; when a culture makes nothing for
+    /// a base, the archetype's plain noun is used instead ("Sabre"). A test lists any tag Items can't read.
     /// </summary>
     public static class CultureForms
     {
@@ -21,40 +22,13 @@ namespace Relic.Items
             public Entry(string form, BaseType b, string kit = null) { Form = form; Base = b; Kit = kit; }
         }
 
-        static Entry E(string f, BaseType b, string kit = null) => new Entry(f, b, kit);
-
-        public static readonly Entry[] All =
+        /// <summary>The tag as an entry, or null when its base isn't a BaseType or its kit isn't a relic form.</summary>
+        public static Entry Read(FormTag tag)
         {
-            // aruvi
-            E("carved longbow", BaseType.Bow), E("lacquered staff", BaseType.Staff), E("moth-silk cloak", BaseType.LightArmor),
-            E("seed-pouch charm", BaseType.Trinket), E("seed-pouch charm", BaseType.Relic, "charm"), E("bark-bound tome", BaseType.Tome),
-            E("antler knife", BaseType.Sword), E("spirit mask", BaseType.Relic, "mask"), E("wooden flute", BaseType.Relic, "flute"),
-            // eskeln
-            E("bearded axe", BaseType.Greatsword), E("antler-hilted knife", BaseType.Sword), E("sledge-spear", BaseType.Greatsword),
-            E("whalebone bow", BaseType.Bow), E("fur cloak", BaseType.LightArmor), E("horn", BaseType.Relic, "horn"),
-            E("saga-staff", BaseType.Staff), E("round shield", BaseType.Relic, "shield"),
-            // lunnet
-            E("punt-pole staff", BaseType.Staff), E("fishing spear", BaseType.Greatsword), E("reed shield", BaseType.Relic, "shield"),
-            E("gourd lantern", BaseType.Relic, "lantern"), E("herb satchel", BaseType.Trinket), E("trident", BaseType.Greatsword),
-            E("eel-skin boots", BaseType.LightArmor), E("rush-paper scroll", BaseType.Tome),
-            // ochrel
-            E("curved glaive", BaseType.Greatsword), E("sling", BaseType.Bow), E("glass orb", BaseType.Relic, "orb"),
-            E("star-chart tome", BaseType.Tome), E("sun-mirror shield", BaseType.Relic, "shield"), E("clay flask", BaseType.Relic, "flask"),
-            E("desert veil", BaseType.LightArmor), E("copper bracer", BaseType.Trinket),
-            // solanne
-            E("cutlass", BaseType.Sword), E("harpoon", BaseType.Greatsword), E("spyglass", BaseType.Relic, "spyglass"),
-            E("compass", BaseType.Relic, "compass"), E("lighthouse lantern", BaseType.Relic, "lantern"), E("sailcloth coat", BaseType.LightArmor),
-            E("sea-glass charm", BaseType.Trinket), E("sea-glass charm", BaseType.Relic, "charm"), E("oar-staff", BaseType.Staff),
-            // teskari
-            E("bell", BaseType.Relic, "bell"), E("kite-blade", BaseType.Sword), E("cedar staff", BaseType.Staff),
-            E("porcelain mask", BaseType.Relic, "mask"), E("climbing pick", BaseType.Sword), E("war-fan", BaseType.Trinket),
-            E("lacquered lamellar", BaseType.MediumArmor), E("scroll case", BaseType.Relic, "scroll-case"),
-            // wendle
-            E("lantern", BaseType.Relic, "lantern"), E("walking staff", BaseType.Staff), E("shepherd's crook", BaseType.Staff),
-            E("sickle", BaseType.Sword), E("cleaver", BaseType.Sword), E("wool cloak", BaseType.LightArmor),
-            E("quilted coat", BaseType.LightArmor), E("pie-tin buckler", BaseType.Relic, "shield"), E("hand-bell", BaseType.Relic, "bell"),
-            E("longbow", BaseType.Bow),
-        };
+            if (tag == null || string.IsNullOrEmpty(tag.Form) || !Enum.TryParse(tag.Base, out BaseType b) || !Enum.IsDefined(typeof(BaseType), b)) return null;
+            if (b == BaseType.Relic && Forms.FormById(tag.Kit) == null) return null;
+            return new Entry(tag.Form, b, b == BaseType.Relic ? tag.Kit : null);
+        }
 
         /// <summary>The culture's forms that make this base, in data order.</summary>
         public static List<Entry> For(CultureDef culture, BaseType b)
@@ -62,21 +36,27 @@ namespace Relic.Items
             var list = new List<Entry>();
             if (culture == null) return list;
             foreach (var form in culture.ItemForms)
-                foreach (var e in All)
-                    if (e.Base == b && string.Equals(e.Form, form, StringComparison.OrdinalIgnoreCase)) list.Add(e);
+                foreach (var tag in culture.FormTags)
+                {
+                    if (!string.Equals(tag.Form, form, StringComparison.OrdinalIgnoreCase)) continue;
+                    var e = Read(tag);
+                    if (e != null && e.Base == b) list.Add(e);
+                }
             return list;
         }
 
         /// <summary>True when the culture makes at least one form of this base.</summary>
         public static bool Makes(CultureDef culture, BaseType b) => For(culture, b).Count > 0;
 
-        /// <summary>Bible forms with no entry here (for the data test and the report).</summary>
+        /// <summary>Form tags (in the constitution and in any generated cultures) that Items can't read, for the data test.</summary>
         public static List<string> Unmapped(LoreBible bible)
         {
             var missing = new List<string>();
+            foreach (var t in bible.Forms)
+                if (Read(t) == null) missing.Add("form tag: " + t.Form + " (" + t.Base + "/" + t.Kit + ")");
             foreach (var c in bible.Cultures)
                 foreach (var f in c.ItemForms)
-                    if (Array.Find(All, e => string.Equals(e.Form, f, StringComparison.OrdinalIgnoreCase)) == null) missing.Add(c.Id + ": " + f);
+                    if (c.FormTags.Find(x => string.Equals(x.Form, f, StringComparison.OrdinalIgnoreCase) && Read(x) != null) == null) missing.Add(c.Id + ": " + f);
             return missing;
         }
 

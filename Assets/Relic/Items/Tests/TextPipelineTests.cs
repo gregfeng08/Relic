@@ -217,12 +217,12 @@ namespace Relic.Items.Tests
         public void OverusedNameWordsAreRejected()
         {
             var freshness = new NameFreshness();
-            for (int i = 0; i < 30; i++) freshness.Add("Lantern " + i);
-            var fake = new FakeGenerator((req, call) => { var o = GoodObject(req); if (call == 0) o["name"] = "The Lantern of Rue"; return o.ToString(); });
+            for (int i = 0; i < 30; i++) freshness.Add("Kettle " + i);
+            var fake = new FakeGenerator((req, call) => { var o = GoodObject(req); if (call == 0) o["name"] = "The Kettle of Rue"; return o.ToString(); });
             var gen = new ItemGenerator(StubWorld.Create(World), fake, null, freshness);
             gen.Generate(RelicSpec());
-            StringAssert.Contains("\"lantern\"", fake.Requests[1].Messages.Last().Content);
-            StringAssert.Contains("lantern", fake.Requests[0].Messages[1].Content); // overused list is in the prompt
+            StringAssert.Contains("\"kettle\"", fake.Requests[1].Messages.Last().Content);
+            StringAssert.Contains("kettle", fake.Requests[0].Messages[1].Content); // overused list is in the prompt
         }
 
         [Test]

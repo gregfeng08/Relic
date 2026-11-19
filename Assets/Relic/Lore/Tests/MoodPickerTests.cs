@@ -70,7 +70,7 @@ namespace Relic.Lore.Tests
         {
             var picker = new MoodPicker(B.Moods);
             var rng = new Pcg32(99);
-            foreach (var c in B.Cultures)
+            foreach (var c in LoreTestData.World(7).Cultures)
                 for (int i = 0; i < 300; i++)
                 {
                     var mood = picker.Pick(ref rng);

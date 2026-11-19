@@ -97,6 +97,9 @@ namespace Relic.Lore
     public sealed class EraDef
     {
         public string Id;
+        /// <summary>The era template it was generated from (prehistory.json); event templates list these.</summary>
+        public string Template;
+        public Tone Tone;
         public string Name;
         /// <summary>0 = oldest.</summary>
         public int Order;

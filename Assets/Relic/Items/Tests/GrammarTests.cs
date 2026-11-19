@@ -37,7 +37,7 @@ namespace Relic.Items.Tests
             StringAssert.Contains("ITEM SENTENCE", req.Messages[1].Content);
             StringAssert.Contains(item.Grammar.Maker, req.Messages[1].Content);
             StringAssert.Contains(item.Grammar.Material, req.Messages[1].Content);
-            StringAssert.Contains("legend.wren", req.JsonSchema); // Bible names are referenceable
+            StringAssert.Contains("legend.founder-", req.JsonSchema); // the prehistory's founders are referenceable
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace Relic.Items.Tests
         public void BossesBelongToTheirRegionAndMostlyGuardIt()
         {
             var w = StubWorld.Create(12);
-            var bible = LoreSource.Default;
+            var bible = w.Bible;
             int bright = 0, n = 0;
             for (int i = 0; i < 400; i++)
             {
@@ -90,9 +90,13 @@ namespace Relic.Items.Tests
         {
             var bible = LoreSource.Default;
             var missing = new List<string>();
-            foreach (var c in bible.Cultures)
-                foreach (var m in c.Materials)
-                    if (Materials.Find(m) == null) missing.Add(c.Id + " material: " + m);
+            foreach (var t in bible.CultureTemplates)
+            {
+                foreach (var m in t.Materials)
+                    if (Materials.Find(m) == null) missing.Add(t.Id + " material: " + m);
+                foreach (var m in t.Metals)
+                    if (Materials.Find(m)?.Kind != MaterialKind.Metal) missing.Add(t.Id + " metal is not a Metal: " + m);
+            }
             foreach (var mo in bible.Motifs)
             {
                 foreach (var m in mo.Materials)
@@ -100,21 +104,34 @@ namespace Relic.Items.Tests
                 if (!MotifTraits.Has(mo.Id)) missing.Add("motif traits: " + mo.Id);
             }
             missing.AddRange(CultureForms.Unmapped(bible));
-            Assert.IsEmpty(missing, string.Join("\n", missing));
+            for (ulong seed = 1; seed <= 20; seed++) missing.AddRange(CultureForms.Unmapped(LoreSource.ForWorld(seed)));
+            Assert.IsEmpty(missing, string.Join(System.Environment.NewLine, missing));
         }
 
         [Test]
-        public void EveryCultureMakesAtLeastTwoRelicForms()
+        public void EveryGeneratedCultureMakesRelicsAndWorksMetal()
         {
-            foreach (var c in LoreSource.Default.Cultures)
-                Assert.GreaterOrEqual(CultureForms.For(c, BaseType.Relic).Count, 2, c.Id);
+            for (ulong seed = 1; seed <= 40; seed++)
+                foreach (var c in LoreSource.ForWorld(seed).Cultures)
+                {
+                    Assert.GreaterOrEqual(CultureForms.For(c, BaseType.Relic).Count, 2, c.Id);
+                    Assert.IsTrue(c.Materials.Exists(m => Materials.Find(m)?.Kind == MaterialKind.Metal), c.Id + " works no metal");
+                }
+        }
+
+        [Test]
+        public void ShieldsMapToTheShieldKit()
+        {
+            var shields = LoreSource.Default.Forms.FindAll(f => f.Form.EndsWith("shield") || f.Form.EndsWith("buckler"));
+            Assert.GreaterOrEqual(shields.Count, 4);
+            foreach (var f in shields) Assert.AreEqual("shield", CultureForms.Read(f)?.Kit, f.Form);
         }
 
         [Test]
         public void WorldIsBuiltFromTheBible()
         {
             var w = StubWorld.Create(2026);
-            var bible = LoreSource.Default;
+            var bible = w.Bible;
             Assert.AreEqual(8, w.Regions.Count);
             foreach (var r in w.Regions)
             {
@@ -125,6 +142,9 @@ namespace Relic.Items.Tests
             foreach (var f in w.Factions) Assert.IsNotNull(bible.Faction(f.Archetype), f.Name);
             foreach (var e in w.Events) Assert.IsNotNull(bible.Event(e.Template), e.Name);
             foreach (var l in bible.Legends) Assert.AreEqual(l.Name, w.NameOf(WorldContext.LegendId(l)));
+            Assert.AreEqual(bible.History.Events.Count, w.Events.Count, "events come from the prehistory");
+            Assert.IsTrue(w.Regions.Exists(r => bible.History.Places.Exists(p => p.Name == r.Name)), "regions are named after prehistory places");
+            Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(w), Newtonsoft.Json.JsonConvert.SerializeObject(StubWorld.Create(2026)), "same seed, same world");
             foreach (var text in w.Regions.Select(r => r.Name).Concat(w.Factions.Select(f => f.Name)).Concat(w.Figures.Select(p => p.Name + " " + p.Fate)).Concat(w.Events.Select(e => e.Name)))
                 Assert.IsEmpty(TemplateText.BannedIn(text, bible.Style.BannedWords), text);
         }

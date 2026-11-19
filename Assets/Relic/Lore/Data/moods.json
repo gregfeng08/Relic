@@ -53,12 +53,12 @@
     },
     {
       "id": "discovery", "tone": "Bright", "weight": 3,
-      "words": ["Unearthed", "First-Found", "Ledger", "Surveyor's", "Lamplit"],
+      "words": ["Unearthed", "First-Found", "Ledger", "Surveyor's", "Old-Road"],
       "effectLean": ["reveal", "discovery", "insight"],
       "lines": [
         "Dug out of a fallen lamp-tower near {place}, still warm. Nobody at the Ledger recognizes the hand that made it.",
         "The {form} that showed {maker} the way into the old vaults beneath {place}.",
-        "Scholars of {faction} have argued about this {form} for forty years. The {word} on its side might be a glyph."
+        "Scholars of {faction} have argued about this {form} for forty years. The {word} on its side might be a written word."
       ]
     },
     {
@@ -76,7 +76,7 @@
       "words": ["Heirloom", "Elder's", "Handed-Down", "Founder's", "Old-Road"],
       "effectLean": ["stat", "aura", "durability"],
       "lines": [
-        "Made in the Lamplit Age by a {culture} smith whose name has worn off, and still in daily use at {place}.",
+        "Made in {era} by a {culture} smith whose name has worn off, and still in daily use at {place}.",
         "Said to have belonged to someone who knew {legend}. {faction} keep a careful copy, just in case.",
         "{maker} left this {form} to {place} with a note: for whoever needs it next."
       ]
@@ -98,17 +98,17 @@
       "lines": [
         "{maker} made this {form} for someone who did not come home to {place}. It was kept polished anyway.",
         "Found in a waycairn on the road past {place}, with a faded ribbon still tied around it.",
-        "The last thing {maker} mended before the Hush emptied {place}. The stitching is still good."
+        "The last thing {maker} mended before {place} emptied in {era}. The stitching is still good."
       ]
     },
     {
       "id": "old-war", "tone": "Somber", "weight": 3,
-      "words": ["Concord", "Field-Worn", "Mended", "Siege", "Veteran's"],
+      "words": ["Old-Guard", "Field-Worn", "Mended", "Siege", "Veteran's"],
       "effectLean": ["defense", "drawback", "stagger"],
       "lines": [
-        "Carried at the Silent Field by a Concord scribe, who scratched a {word} pattern along its edge for luck.",
-        "Pulled from a broken Imperative construct near {place}. It still tries to give orders.",
-        "A {culture} {form} from the Quarrel, mended many times since. Whoever owned it wanted it to last."
+        "Carried through {era} by a scribe of {faction}, who scratched a {word} pattern along its edge for luck.",
+        "Pulled from a broken old construct near {place}. It still tries to give orders.",
+        "A {culture} {form} from {era}, mended many times since. Whoever owned it wanted it to last."
       ]
     },
     {
@@ -127,7 +127,7 @@
       "effectLean": ["curse", "drawback", "power"],
       "lines": [
         "Nobody in {place} will touch this {form} after dark. It has never actually done anything. Yet.",
-        "A sliver of the Iron Sentence is set into it. It works very well, and it likes being obeyed.",
+        "A sliver of an old commanding incantation is set into it. It works very well, and it likes being obeyed.",
         "{maker} wrote one word too many on this {form}. The {word} never quite settles."
       ]
     }
