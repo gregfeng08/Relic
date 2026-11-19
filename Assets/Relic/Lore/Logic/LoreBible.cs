@@ -27,7 +27,7 @@ namespace Relic.Lore
         public const string StyleFile = "style.json";
 
         /// <summary>Every data file, in the order <see cref="FromJson"/> takes them.</summary>
-        public static readonly string[] Files =
+        public static readonly IReadOnlyList<string> Files = new[]
         {
             PhonologyFile, FormsFile, CultureTemplatesFile, PrehistoryFile, FactionsFile, EventsFile, MotifsFile, MoodsFile, StyleFile,
         };
