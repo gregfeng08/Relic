@@ -189,24 +189,24 @@ namespace Relic.Character.Editor
             hero.Rebuild();
             Settle(hero, Vector3.zero, 120);
             Debug.Log("[Relic.Character] v3 unwritten: " + hero.TriangleCount + " triangles, avatar valid " + hero.HumanAvatar.isValid + " human " + hero.HumanAvatar.isHuman
-                + ", animator " + (hero.Mecanim != null) + " [" + hero.Breakdown + "]");
+                + ", animator " + (hero.Mecanim != null) + ", " + hero.Shape.Height.ToString("0.00") + " m, " + hero.Shape.HeadsTall.ToString("0.0") + " heads [" + hero.Breakdown + "]");
             var views = new (string name, float yaw)[] { ("front", 180f), ("three_quarter", 215f), ("back", 0f) };
             foreach (var v in views)
             {
                 var one = new Texture2D(W, H, TextureFormat.RGB24, false);
-                Orbit(cam, v.yaw, 0.88f, 3.6f, 4f, 30f);
+                Orbit(cam, v.yaw, 0.66f, 2.8f, 4f, 30f);
                 Blit(cam, one, 0);
                 Save(one, Path.Combine(dir, "v3_unwritten_" + v.name + ".png"));
             }
             var head = new Texture2D(W, H, TextureFormat.RGB24, false);
-            Orbit(cam, 190f, 1.5f, 0.85f, 3f, 24f);
+            Orbit(cam, 190f, 0.95f, 1.2f, 3f, 24f);
             Blit(cam, head, 0);
             Save(head, Path.Combine(dir, "v3_unwritten_head.png"));
             // Running (Animator Move state at run speed), three-quarter and side.
             var run = new Texture2D(W * 2, H, TextureFormat.RGB24, false);
             Pose(hero, new HeroAnimInput { Motion = HeroMotion.Run, Speed = 6f }, new Vector3(0f, 0f, 6f), 37);
-            Orbit(cam, 215f, 0.9f, 3.8f, 5f, 30f); Blit(cam, run, 0);
-            Orbit(cam, 270f, 0.9f, 3.8f, 5f, 30f); Blit(cam, run, W);
+            Orbit(cam, 215f, 0.66f, 2.9f, 5f, 30f); Blit(cam, run, 0);
+            Orbit(cam, 270f, 0.66f, 2.9f, 5f, 30f); Blit(cam, run, W);
             Save(run, Path.Combine(dir, "v3_unwritten_running.png"));
             AnimatorSheet(hero, cam, Path.Combine(dir, "v3_unwritten_motion.png"));
 

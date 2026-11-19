@@ -60,7 +60,9 @@ namespace Relic.Character.EditTests
             foreach (Color32 c in _hero.Renderer.sharedMesh.colors32) colors.Add(new Color32(c.r, c.g, c.b, 255));
             Assert.AreEqual(1, colors.Count, "one plain colour: no eyes, blush or clothes");
             Assert.AreEqual(1, _hero.Renderer.sharedMaterials.Length, "one material");
-            Assert.That(_hero.Shape.HeadsTall, Is.InRange(5.9f, 6.6f), "moderate head, readable proportions");
+            Assert.That(_hero.Shape.HeadsTall, Is.InRange(3.2f, 3.9f), "small and soft: a big round head, about 3.5 heads");
+            Assert.That(_hero.Shape.Height, Is.InRange(1.15f, 1.4f));
+            Assert.That(_hero.Rig.Bones[HeroRig.FootL].position.y, Is.InRange(0f, 0.12f), "feet on the ground");
             Assert.IsTrue(_hero.HumanAvatar.isValid && _hero.HumanAvatar.isHuman);
             Assert.IsNotNull(_hero.Mecanim);
         }

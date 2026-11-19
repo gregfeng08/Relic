@@ -61,7 +61,7 @@ namespace Relic.Character
 
             if (Appearance == null) Appearance = AppearancePresets.Default();
             AppearanceRules.Sanitize(Appearance);
-            Shape = new HeroShape(Appearance.Body);
+            Shape = new HeroShape(Appearance.Body, Appearance.Blank);
             Rig = new HeroRig(transform, Shape.Remap);
             _mats = new HeroMaterials(ToonMaterial);
             var b = new HeroBuild(Rig, _mats, Look, Appearance, Shape, WeaponDrawn);

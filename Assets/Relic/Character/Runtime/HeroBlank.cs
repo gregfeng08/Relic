@@ -4,11 +4,14 @@ using UnityEngine;
 namespace Relic.Character
 {
     /// <summary>
-    /// The blank body (HeroAppearance.Blank, the unwritten wayfarer): a smooth, faceless humanoid
-    /// in one plain colour (Body.SkinTone) on the toon material. No face, hair or clothes: an egg
-    /// head, neck, torso with rounded shoulders, arms, simple hands, legs and feet, skinned to the
-    /// same rig as every other look, so the Humanoid avatar and Animator drive it unchanged.
-    /// Part seams sit inside neighbouring parts so the outline reads one clean silhouette.
+    /// The blank body (HeroAppearance.Blank, the unwritten wayfarer): a small, soft, faceless
+    /// figure in one plain colour (Body.SkinTone) on the toon material, on HeroShape's small
+    /// proportions (about 3.5 heads, 1.27 m). A big round head sitting straight on the shoulders,
+    /// a short pear-shaped body, short rounded legs and arms that taper softly into mittens, small
+    /// rounded feet. No face, hair or clothes. Arms run into the mittens and legs into the body in
+    /// single lofts, so there are no wrist or hip seams. Skinned to the same rig as every other
+    /// look, so the Humanoid avatar and the Animator drive it unchanged.
+    /// Shapes are written in final (remapped) heights and converted with HeroShape.AuthorY.
     /// </summary>
     public static class HeroBlank
     {
@@ -20,74 +23,92 @@ namespace Relic.Character
             for (int s = -1; s <= 1; s += 2)
             {
                 Arm(b, c, s);
-                HeroBody.Hand(b, s, true);
                 Leg(b, c, s);
-                Foot(b, c, s);
             }
+        }
+
+        static float A(HeroBuild b, float finalY) => b.Shape.AuthorY(finalY);
+
+        static Ring R(HeroBuild b, float x, float finalY, float z, float rx, float rz) => new Ring(new Vector3(x, A(b, finalY), z), rx, rz);
+
+        /// <summary>
+        /// An ellipsoid (center and radii in final proportions when final, else authoring). The end
+        /// rings are pulled in so the loft's pole caps land on the surface: round, no points.
+        /// </summary>
+        static void Blob(HeroBuild b, Vector3 c, Vector3 r, int sides = 14, int stacks = 10, bool final = true)
+        {
+            var rings = new List<Ring>();
+            for (int i = 1; i < stacks; i++)
+            {
+                float t = Mathf.PI * i / stacks;
+                float k = Mathf.Sin(t);
+                float y = -Mathf.Cos(t);
+                if (i == 1 || i == stacks - 1) y = Mathf.Sign(y) * (1f - 0.35f * k);
+                float fy = c.y + y * r.y;
+                rings.Add(new Ring(new Vector3(c.x, final ? A(b, fy) : fy, c.z), r.x * k, r.z * k));
+            }
+            b.Kit.Loft(rings, sides, true, true);
         }
 
         static void Head(HeroBuild b, Color c)
         {
+            // Round, slightly wider than tall; authored at head scale (HeroShape.SmallHead maps it to ~0.36 m).
             b.Toon(c, 0.9f);
-            b.Kit.NormalBend = 0.5f;
             b.Kit.PaintData.w = 1f; // no cast-shadow streaks on the blank face
             b.Rigid(HeroRig.Head);
-            // A smooth egg, a little narrower toward the chin.
-            var rings = new List<Ring>();
-            const int stacks = 14;
-            for (int i = 1; i < stacks; i++)
-            {
-                float t = (float)i / stacks;
-                float k = Mathf.Sin(Mathf.PI * t);
-                float taper = Mathf.Lerp(0.84f, 1f, Mathf.SmoothStep(0f, 1f, t * 1.6f));
-                float y = HeroRig.HeadCenterY + (-Mathf.Cos(Mathf.PI * t)) * 0.122f;
-                rings.Add(new Ring(new Vector3(0f, y, 0.002f), 0.1f * k * taper, 0.108f * k * taper));
-            }
-            b.Kit.Loft(rings, 20, true, true);
-            b.Toon(c, 1f);
-            b.Kit.Weigh = HeroBuild.TorsoWeight;
-            b.Kit.Tube(new Vector3(0f, 1.39f, -0.005f), new Vector3(0f, 1.53f, -0.002f), 0.047f, 0.043f, 12);
+            Blob(b, new Vector3(0f, 1.602f, 0.006f), new Vector3(0.132f, 0.128f, 0.128f), 24, 18, false);
         }
 
         static void Torso(HeroBuild b, Color c)
         {
+            // A short, soft pear: widest at the hips, sloping into small shoulders under the head.
             b.Toon(c);
-            b.Kit.Weigh = p => MeshKit.W1(HeroRig.Hips);
-            b.Kit.Ellipsoid(new Vector3(0f, 0.895f, -0.004f), new Vector3(0.132f, 0.098f, 0.1f), 18, 10);
             b.Torso();
             var r = new List<Ring>
             {
-                new Ring(new Vector3(0f, 0.91f, -0.004f), 0.118f, 0.088f),
-                new Ring(new Vector3(0f, 0.97f, 0f), 0.124f, 0.092f),
-                new Ring(new Vector3(0f, 1.05f, 0.003f), 0.113f, 0.085f),
-                new Ring(new Vector3(0f, 1.15f, 0.006f), 0.121f, 0.09f),
-                new Ring(new Vector3(0f, 1.25f, 0.008f), 0.137f, 0.096f),
-                new Ring(new Vector3(0f, 1.33f, 0.004f), 0.152f, 0.094f),
-                new Ring(new Vector3(0f, 1.385f, -0.002f), 0.140f, 0.084f),
-                new Ring(new Vector3(0f, 1.42f, -0.004f), 0.09f, 0.066f),
-                new Ring(new Vector3(0f, 1.445f, -0.004f), 0.052f, 0.05f),
+                R(b, 0f, 0.42f, 0f, 0.07f, 0.06f),
+                R(b, 0f, 0.45f, 0f, 0.13f, 0.106f),
+                R(b, 0f, 0.52f, 0.002f, 0.162f, 0.124f),
+                R(b, 0f, 0.61f, 0.004f, 0.15f, 0.117f),
+                R(b, 0f, 0.70f, 0.004f, 0.134f, 0.106f),
+                R(b, 0f, 0.78f, 0.002f, 0.124f, 0.097f),
+                R(b, 0f, 0.845f, 0f, 0.114f, 0.09f),
+                R(b, 0f, 0.885f, 0f, 0.096f, 0.08f),
+                R(b, 0f, 0.915f, 0f, 0.07f, 0.064f),
+                R(b, 0f, 0.94f, 0f, 0.05f, 0.05f),
             };
-            b.Kit.Loft(r, 22, false, false);
+            b.Kit.Loft(r, 22, true, false);
         }
 
         static void Arm(HeroBuild b, Color c, int s)
         {
             float x = HeroRig.ShoulderX * s;
             b.Toon(c);
-            // A rounded shoulder cap that bends between the chest and the upper arm.
             b.Arm(s);
-            b.Kit.Ellipsoid(new Vector3(x - 0.012f * s, 1.37f, -0.008f), new Vector3(0.058f, 0.05f, 0.058f), 14, 8);
+            // A round shoulder riding the upper arm (one bone: it never shears into a point).
+            b.Kit.Weigh = p => MeshKit.W1(HeroRig.UpperArm(s));
+            Blob(b, new Vector3(x * 0.94f, 0.812f, -0.006f), new Vector3(0.056f, 0.056f, 0.056f));
+            b.Arm(s);
+            // Arm and mitten in one loft: tapering softly, then the mitten (thin across the palm).
             var r = new List<Ring>
             {
-                new Ring(new Vector3(x, 1.38f, -0.01f), 0.055f, 0.057f),
-                new Ring(new Vector3(x, 1.29f, -0.01f), 0.052f, 0.054f),
-                new Ring(new Vector3(x, 1.20f, -0.01f), 0.047f, 0.049f),
-                new Ring(new Vector3(x, 1.115f, -0.01f), 0.041f, 0.043f),
-                new Ring(new Vector3(x, 1.03f, -0.01f), 0.042f, 0.043f),
-                new Ring(new Vector3(x, 0.95f, -0.01f), 0.036f, 0.037f),
-                new Ring(new Vector3(x, 0.88f, -0.01f), 0.029f, 0.031f),
+                R(b, x, 0.80f, -0.006f, 0.049f, 0.051f),
+                R(b, x, 0.78f, -0.006f, 0.05f, 0.052f),
+                R(b, x, 0.70f, -0.006f, 0.046f, 0.048f),
+                R(b, x, 0.62f, -0.006f, 0.042f, 0.044f),
+                R(b, x, 0.55f, -0.006f, 0.04f, 0.041f),
+                R(b, x, 0.485f, -0.006f, 0.036f, 0.038f),
+                R(b, x, 0.445f, -0.004f, 0.034f, 0.039f),
+                R(b, x, 0.415f, 0f, 0.033f, 0.046f),
+                R(b, x, 0.385f, 0.002f, 0.033f, 0.048f),
+                R(b, x, 0.355f, 0.002f, 0.029f, 0.043f),
+                R(b, x, 0.333f, 0.001f, 0.02f, 0.03f),
+                R(b, x, 0.322f, 0f, 0.009f, 0.014f),
             };
-            b.Kit.Loft(r, 14, false, false);
+            b.Kit.Loft(r, 14, true, true);
+            // The mitten's thumb, on the front.
+            b.Rigid(HeroRig.Hand(s));
+            Blob(b, new Vector3(x - 0.006f * s, 0.408f, 0.038f), new Vector3(0.017f, 0.024f, 0.018f), 10, 8);
         }
 
         static void Leg(HeroBuild b, Color c, int s)
@@ -95,33 +116,23 @@ namespace Relic.Character
             float x = HeroRig.LegX * s;
             b.Toon(c);
             b.Leg(s);
+            // Short, rounded legs starting inside the body.
             var r = new List<Ring>
             {
-                new Ring(new Vector3(x * 0.9f, 0.91f, -0.004f), 0.074f, 0.08f),
-                new Ring(new Vector3(x, 0.80f, 0f), 0.074f, 0.078f),
-                new Ring(new Vector3(x, 0.64f, 0.004f), 0.061f, 0.065f),
-                new Ring(new Vector3(x, 0.50f, 0.008f), 0.052f, 0.055f),
-                new Ring(new Vector3(x, 0.40f, 0.002f), 0.055f, 0.06f),
-                new Ring(new Vector3(x, 0.26f, -0.004f), 0.043f, 0.046f),
-                new Ring(new Vector3(x, 0.14f, -0.008f), 0.036f, 0.039f),
-                new Ring(new Vector3(x, 0.085f, -0.01f), 0.035f, 0.037f),
+                R(b, x * 0.75f, 0.53f, 0f, 0.066f, 0.07f),
+                R(b, x * 0.9f, 0.45f, 0f, 0.074f, 0.078f),
+                R(b, x, 0.38f, 0.002f, 0.068f, 0.071f),
+                R(b, x, 0.30f, 0.004f, 0.06f, 0.063f),
+                R(b, x, 0.235f, 0.004f, 0.056f, 0.059f),
+                R(b, x, 0.17f, 0.002f, 0.054f, 0.057f),
+                R(b, x, 0.11f, 0f, 0.05f, 0.053f),
+                R(b, x, 0.07f, 0f, 0.047f, 0.05f),
+                R(b, x, 0.05f, 0f, 0.043f, 0.046f),
             };
             b.Kit.Loft(r, 14, false, false);
-        }
-
-        static void Foot(HeroBuild b, Color c, int s)
-        {
-            float x = HeroRig.LegX * s;
-            b.Toon(c);
+            // A small rounded foot.
             b.Kit.Weigh = p => MeshKit.W1(HeroRig.Foot(s));
-            float[] zs = { -0.056f, -0.03f, 0.03f, 0.09f, 0.13f, 0.152f };
-            float[] ws = { 0.036f, 0.045f, 0.047f, 0.045f, 0.037f, 0.024f };
-            float[] hs = { 0.044f, 0.05f, 0.042f, 0.029f, 0.023f, 0.016f };
-            float[] cy = { 0.058f, 0.062f, 0.05f, 0.036f, 0.03f, 0.027f };
-            var foot = new List<Ring>();
-            for (int i = 0; i < zs.Length; i++)
-                foot.Add(new Ring(new Vector3(x, cy[i], zs[i]), Vector3.right, Vector3.up, ws[i], hs[i], 3f));
-            b.Kit.Loft(foot, 12, true, true);
+            Blob(b, new Vector3(x, 0.042f, 0.026f), new Vector3(0.05f, 0.042f, 0.082f), 14, 10);
         }
     }
 }

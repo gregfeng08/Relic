@@ -64,4 +64,6 @@ skirt over tights, boots, gauntlets/gloves/bare hands, belt; accessories: hair p
 - Any humanoid clip retargets onto the hero (e.g. a CC0 library later): swap the motions in the controller.
 - **Unwritten** (`AppearancePresets.Unwritten`, the terrain sandbox default via `TerrainSandbox.HeroLook`): the
   unwritten wayfarer, a blank, faceless body (`HeroAppearance.Blank`, built by `HeroBlank`) in one plain neutral
-  colour: no face, hair or clothes, no kit until F7.
+  colour, no kit until F7. It uses HeroShape's small proportions: about 1.27 m and 3.6 heads, a big round head on the
+  shoulders (no neck), a short pear-shaped body, short soft limbs, mitten hands and small rounded feet. Same rig,
+  avatar and Animator as every other look; the CharacterController capsule is unchanged (1.8 m).
