@@ -80,16 +80,23 @@ namespace Relic.World.Noise
         /// softness &gt; 0 replaces |n| with a smooth abs (sqrt(n² + s²) - s, renormalized), which
         /// rounds the crest over about s noise units instead of a razor V: a razor crest can't be
         /// represented by a 1 m (or coarser) grid and shows as hard triangle ridges.
+        /// softnessGrowth multiplies the softness per octave: 2 keeps every octave's crest rounded
+        /// over the same distance in meters, so fine octaves add bulk to a ridge, not knife edges.
         /// </summary>
-        public double Ridged(double x, double y, int octaves, double lacunarity = 2.0, double gain = 0.5, double softness = 0.0)
+        public double Ridged(double x, double y, int octaves, double lacunarity = 2.0, double gain = 0.5, double softness = 0.0, double softnessGrowth = 1.0)
         {
             double sum = 0.0, amp = 1.0, norm = 0.0, weight = 1.0;
-            double s2 = softness * softness;
-            double softNorm = softness > 0.0 ? 1.0 / (Math.Sqrt(1.0 + s2) - softness) : 1.0;
+            double s = softness;
             for (int o = 0; o < octaves; o++)
             {
                 double n = Sample(x + o * 57.13, y + o * 113.9);
-                double a = softness > 0.0 ? (Math.Sqrt(n * n + s2) - softness) * softNorm : Math.Abs(n);
+                double a;
+                if (s > 0.0)
+                {
+                    double softNorm = 1.0 / (Math.Sqrt(1.0 + s * s) - s);
+                    a = (Math.Sqrt(n * n + s * s) - s) * softNorm;
+                }
+                else a = Math.Abs(n);
                 double r = 1.0 - a;
                 if (r < 0.0) r = 0.0;
                 r *= r;
@@ -100,6 +107,7 @@ namespace Relic.World.Noise
                 amp *= gain;
                 x *= lacunarity;
                 y *= lacunarity;
+                s *= softnessGrowth;
             }
             return WorldMath.Clamp01(sum / norm);
         }
