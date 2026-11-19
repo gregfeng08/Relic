@@ -75,6 +75,58 @@ namespace Relic.World.Tests
         }
 
         [Test]
+        public void SearchBlockHoldsEveryRegionInTheBlendBand()
+        {
+            // Sample blends every region within BorderBand of the nearest, from the 6x6 block only.
+            var f = new WarpedVoronoiRegionField(4243);
+            foreach (var (x, z) in Points(5, 20000, 40000))
+            {
+                var top = f.FindNearest(x, z);
+                long fx = WorldMath.FloorToLong(x / WarpedVoronoiRegionField.CellSize);
+                long fz = WorldMath.FloorToLong(z / WarpedVoronoiRegionField.CellSize);
+                for (long cx = fx - 6; cx <= fx + 6; cx++)
+                for (long cz = fz - 6; cz <= fz + 6; cz++)
+                {
+                    bool inBlock = cx >= fx - WarpedVoronoiRegionField.SearchLow && cx <= fx + WarpedVoronoiRegionField.SearchHigh &&
+                                   cz >= fz - WarpedVoronoiRegionField.SearchLow && cz <= fz + WarpedVoronoiRegionField.SearchHigh;
+                    if (inBlock) continue;
+                    var id = new RegionId(cx, cz);
+                    f.CenterOf(id, out double px, out double pz);
+                    double d = Math.Sqrt((x - px) * (x - px) + (z - pz) * (z - pz)) / f.SizeOf(id);
+                    Assert.That(d - top.D0, Is.GreaterThan(WarpedVoronoiRegionField.BorderBand), "region " + id + " in the band but outside the search block at " + x + "," + z);
+                }
+            }
+        }
+
+        [Test]
+        public void BlendedHeightScaleChangesGradually()
+        {
+            // Walls at region junctions (RLC-069): the blended mountain scale must not swing within
+            // a few meters. Worst case is a ~380 m HeightScale difference across the narrowest band
+            // (~60 m once warp and size weighting squeeze it): about 10 m of HeightScale per meter.
+            foreach (ulong seed in new ulong[] { 2024, 31337, 1338 })
+            {
+                var f = new WarpedVoronoiRegionField(seed);
+                var rng = new Pcg32(seed);
+                double worst = 0, wx = 0, wz = 0;
+                for (int line = 0; line < 60; line++)
+                {
+                    double ox = (rng.NextDouble() * 2.0 - 1.0) * 8000.0, oz = (rng.NextDouble() * 2.0 - 1.0) * 8000.0;
+                    double a = rng.NextDouble() * Math.PI, dx = Math.Cos(a), dz = Math.Sin(a);
+                    double prev = f.Sample(ox, oz).Blended.HeightScale;
+                    for (int i = 1; i < 2000; i++)
+                    {
+                        double x = ox + dx * i, z = oz + dz * i;
+                        double hs = f.Sample(x, z).Blended.HeightScale;
+                        if (Math.Abs(hs - prev) > worst) { worst = Math.Abs(hs - prev); wx = x; wz = z; }
+                        prev = hs;
+                    }
+                }
+                Assert.That(worst, Is.LessThan(12.0), "seed " + seed + ": HeightScale changed " + worst.ToString("0.0") + " in 1 m at " + wx.ToString("0") + "," + wz.ToString("0"));
+            }
+        }
+
+        [Test]
         public void BlendedParametersAreContinuousAcrossBorders()
         {
             // Walk long lines through many regions in small steps; blended parameters must never jump.

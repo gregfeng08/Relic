@@ -42,7 +42,7 @@ namespace Relic.World.Terrain
     public sealed partial class TerrainGenerator
     {
         /// <summary>Bump when the height function changes, so saves can tell old terrain from new.</summary>
-        public const int Version = 2;
+        public const int Version = 3;
         public const float SeaLevel = 0f;
 
         // Wavelengths in meters.
