@@ -25,6 +25,7 @@ namespace Relic.Character.Tests
             Assert.AreEqual(FaceStyle.Hint, u.Face.Style);
             Assert.AreEqual(CoatStyle.Cloak, u.Outfit.Coat.Style);
             Assert.IsTrue(u.Outfit.Coat.HoodUp);
+            Assert.Greater(u.Body.HeadSize, 1f, "a bigger, younger head");
             Assert.IsFalse(u.Outfit.Pack);
             Assert.IsFalse(u.Outfit.Scarf.On);
             Assert.AreEqual(AccessoryKind.Bookmark, u.Accessories[0].Kind);
@@ -55,6 +56,7 @@ namespace Relic.Character.Tests
             var a = new HeroAppearance();
             a.Body.Height = 3f;
             a.Body.Build = -1f;
+            a.Body.HeadSize = 2f;
             a.Face.EyeSize = float.NaN;
             a.Hair.Length = 7f;
             a.Hair.Color = "white";
@@ -64,6 +66,7 @@ namespace Relic.Character.Tests
             var fixes = AppearanceRules.Sanitize(a);
             Assert.AreEqual(AppearanceRules.MaxHeight, a.Body.Height);
             Assert.AreEqual(0f, a.Body.Build);
+            Assert.AreEqual(AppearanceRules.MaxHeadSize, a.Body.HeadSize);
             Assert.That(a.Face.EyeSize, Is.InRange(AppearanceRules.MinEyeSize, AppearanceRules.MaxEyeSize));
             Assert.AreEqual(1f, a.Hair.Length);
             Assert.AreEqual(new HairSpec().Color, a.Hair.Color);

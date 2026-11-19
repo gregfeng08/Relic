@@ -63,8 +63,8 @@ namespace Relic.Character.EditTests
             _hero.Appearance = AppearancePresets.Unwritten();
             _hero.Rebuild();
             Assert.That(_hero.Chains.ChainCount, Is.GreaterThan(4), "cloak panels and the bookmark swing");
-            // A rounder, smaller body than the default look, still Genshin-medium proportions.
-            Assert.That(_hero.Shape.HeadsTall, Is.InRange(5.9f, 6.6f));
+            // A bigger head on a smaller, rounder body: younger and cuter than the written looks.
+            Assert.That(_hero.Shape.HeadsTall, Is.InRange(5.4f, 6.0f));
         }
 
         List<string> BoneNames()

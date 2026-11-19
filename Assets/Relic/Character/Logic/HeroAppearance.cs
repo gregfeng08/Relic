@@ -25,6 +25,8 @@ namespace Relic.Character
         public float Height = 1f;
         /// <summary>0 = very slender .. 1 = sturdier. Stays in the cute range.</summary>
         public float Build = 0.35f;
+        /// <summary>Head size relative to the body, 0.95..1.12 (bigger reads younger and cuter).</summary>
+        public float HeadSize = 1f;
         public string SkinTone = "#FCE0CC";
     }
 

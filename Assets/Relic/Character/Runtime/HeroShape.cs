@@ -24,7 +24,7 @@ namespace Relic.Character
             BodyHeight = 0.96f;
             BodyWidth = Mathf.Lerp(0.84f, 0.96f, build);
             BodyDepth = Mathf.Lerp(0.90f, 0.98f, build);
-            HeadScale = 1.06f;
+            HeadScale = 1.06f * Mathf.Clamp(body.HeadSize, AppearanceRules.MinHeadSize, AppearanceRules.MaxHeadSize);
         }
 
         public Vector3 Body(Vector3 p) => new Vector3(p.x * BodyWidth, p.y * BodyHeight, p.z * BodyDepth) * Scale;

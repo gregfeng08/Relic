@@ -17,8 +17,8 @@ namespace Relic.Character
             Cap(b);
             if (b.HoodUp)
             {
-                // Under a raised hood only the fringe and the cheek locks show.
-                Bangs(b, h.Bangs);
+                // Under a raised hood only the fringe shows.
+                Bangs(b, h.Bangs, false);
                 return;
             }
             AngelRing(b);
@@ -126,7 +126,7 @@ namespace Relic.Character
             return c;
         }
 
-        static void Bangs(HeroBuild b, BangsStyle style)
+        static void Bangs(HeroBuild b, BangsStyle style, bool cheekLocks = true)
         {
             b.Hair(1.3f);
             b.Rigid(HeroRig.Head);
@@ -162,7 +162,8 @@ namespace Relic.Character
                 };
                 Lock(b, j, 0.034f, 0.004f, Vector3.forward, 0.38f, 5, 2);
             }
-            // Cheek locks framing the face.
+            // Cheek locks framing the face (a raised hood frames it instead).
+            if (!cheekLocks) return;
             for (int s = -1; s <= 1; s += 2)
             {
                 var cheek = new List<Vector3>

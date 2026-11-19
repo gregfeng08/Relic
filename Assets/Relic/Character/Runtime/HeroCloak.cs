@@ -126,7 +126,7 @@ namespace Relic.Character
         static readonly Vector3 HoodC = new Vector3(0f, HeroRig.HeadCenterY + 0.008f, -0.014f);
         static readonly Vector3 HoodR = new Vector3(0.152f, 0.174f, 0.16f);
         const float Tilt = 10f * Mathf.Deg2Rad;          // the face opening looks slightly down
-        const float OpenTop = 63f, OpenSide = 50f;       // opening half-angles (degrees)
+        const float OpenTop = 62f, OpenSide = 50f, OpenBottom = 40f; // opening half-angles (degrees); the bottom closes under the chin
         static readonly Vector3 TipPull = new Vector3(0f, 0.04f, -0.085f);
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Relic.Character
         public static Vector3 HoodPoint(float u, float phi, float shrink = 0f)
         {
             float sp = Mathf.Sin(phi);
-            float th0 = Mathf.Lerp(OpenTop, OpenSide, sp * sp) * Mathf.Deg2Rad;
+            float th0 = Mathf.Lerp(Mathf.Cos(phi) >= 0f ? OpenTop : OpenBottom, OpenSide, sp * sp) * Mathf.Deg2Rad;
             float th = Mathf.Lerp(th0, Mathf.PI, u);
             var f = new Vector3(0f, -Mathf.Sin(Tilt), Mathf.Cos(Tilt));
             var up = new Vector3(0f, Mathf.Cos(Tilt), Mathf.Sin(Tilt));
@@ -190,6 +190,18 @@ namespace Relic.Character
                 int j1 = (j + 1) % cols;
                 b.Kit.Quad(first[0] + j, first[0] + j1, first[1] + j1, first[1] + j, face);
             }
+            // A soft cowl around the throat, so no neck shows under the chin inside the opening.
+            b.Toon(lining, 0.6f);
+            b.Kit.Weigh = HeroBuild.TorsoWeight;
+            var cowl = new List<Ring>
+            {
+                new Ring(new Vector3(0f, 1.425f, 0.0f), 0.088f, 0.084f),
+                new Ring(new Vector3(0f, 1.448f, 0.0f), 0.066f, 0.062f),
+                new Ring(new Vector3(0f, 1.472f, -0.004f), 0.05f, 0.048f),
+                new Ring(new Vector3(0f, 1.50f, -0.005f), 0.042f, 0.041f),
+                new Ring(new Vector3(0f, 1.525f, -0.004f), 0.038f, 0.037f),
+            };
+            b.Kit.Loft(cowl, 14, false, false);
             // A rolled edge around the face.
             b.Toon(trim, 0.9f);
             var rim = new List<Vector3>();

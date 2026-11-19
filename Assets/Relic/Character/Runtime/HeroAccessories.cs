@@ -33,10 +33,10 @@ namespace Relic.Character
             var joints = new[]
             {
                 top,
-                top + new Vector3(0.008f * s, -0.065f, -0.012f),
-                top + new Vector3(0.014f * s, -0.135f, -0.018f),
-                top + new Vector3(0.018f * s, -0.205f, -0.016f),
-                top + new Vector3(0.02f * s, -0.27f, -0.01f),
+                top + new Vector3(0.022f * s, -0.06f, -0.02f),
+                top + new Vector3(0.045f * s, -0.125f, -0.028f),
+                top + new Vector3(0.058f * s, -0.18f, -0.026f),
+                top + new Vector3(0.064f * s, -0.225f, -0.02f),
             };
             Color c = HeroBuild.C(a.Color);
             b.Toon(c, 1f);
@@ -51,7 +51,7 @@ namespace Relic.Character
             b.Kit.Weigh = p => b.ChainWeight(chain, HeroRig.Head, p);
             var pts = MeshKit.Spline(joints, 3);
             var rad = new System.Collections.Generic.List<float>();
-            for (int i = 0; i < pts.Count; i++) rad.Add(0.0105f);
+            for (int i = 0; i < pts.Count; i++) rad.Add(0.012f);
             b.Kit.Path(pts, rad, 4, 0.22f, Vector3.back);
             // The cut end: a small swallowtail notch.
             Vector3 end = joints[joints.Length - 1];
