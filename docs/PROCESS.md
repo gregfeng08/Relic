@@ -46,7 +46,9 @@ Three systems are built in parallel by separate agents, each on its own git bran
 4. Before stopping, update the board and add a session log entry: what changed, what's next, where it stopped.
 5. Never push, publish, or change anything outside the repo without Greg's go-ahead on the board or in chat.
 
-## Autonomous runs (hourly since 2026-11-18; Greg)
+## Autonomous runs (STOPPED 2026-11-19; Greg)
+**Stopped.** Greg removed the hourly scheduled task on 2026-11-19: it kept asking him to approve actions by hand (the permission mode fell back from auto to manual), and its lock kept blocking work. Work now happens in interactive sessions, with agents in worktrees. The rules below are kept for reference, and still apply to agents: commit on stream branches only, never merge or push, one writer per interface. The task's prompt is kept at `~/.claude/scheduled-tasks/relic-autonomous-run/SKILL.md` in case it's ever revived.
+
 A scheduled task in the Claude desktop app starts a fresh session every hour. It **builds, tests and commits on stream branches only**, and **never merges or pushes**. Greg reviews ready-to-merge cards on the board; merging and pushing happen only in an interactive session with Greg.
 
 **Every run:**
