@@ -42,7 +42,7 @@ namespace Relic.Lore
         public Tone Tone;
         /// <summary>Relative pick weight; disasters and wars are low.</summary>
         public int Weight = 1;
-        /// <summary>Era ids where it can happen (eras.json).</summary>
+        /// <summary>Era template ids where it can happen (prehistory.json).</summary>
         public List<string> Eras = new List<string>();
         public List<TemplateSlot> Slots = new List<TemplateSlot>();
         /// <summary>Event names, e.g. "The Founding of {place}". Only declared slots may appear.</summary>
@@ -110,7 +110,7 @@ namespace Relic.Lore
         public List<string> Echoes = new List<string>();
     }
 
-    /// <summary>A famous name that may be referenced anywhere (legends.json).</summary>
+    /// <summary>A famous name from a world's prehistory (a founder, figure or artifact) that may be referenced anywhere in that world.</summary>
     public sealed class LegendDef
     {
         public string Id;

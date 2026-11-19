@@ -25,7 +25,7 @@ namespace Relic.Lore.Tests
             TestContext.WriteLine("wrote " + path);
         }
 
-        /// <summary>Prints example names per culture (seeds 1-6 people, 1-4 places), as listed in docs/lore/cultures.md.</summary>
+        /// <summary>Prints example names per culture (seeds 1-6 people, 1-4 places), for one generated world.</summary>
         [Test, Explicit("prints example names; run on demand")]
         public void PrintExampleNames()
         {
