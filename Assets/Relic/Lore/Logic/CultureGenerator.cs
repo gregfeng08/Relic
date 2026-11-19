@@ -150,7 +150,7 @@ namespace Relic.Lore
         static readonly string[] TradeNotes =
         {
             "{our} {craft} for the {their} {food}, and both sides think they got the better deal.",
-            "Their {food} comes to market every week; {our} {craft} goes back the other way.",
+            "Every market day the {their} bring {food}; {our} {craft} goes back the other way.",
         };
         static readonly string[] RivalNotes =
         {

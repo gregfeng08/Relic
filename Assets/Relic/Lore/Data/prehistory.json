@@ -3,7 +3,7 @@
     {
       "id": "dawn", "position": "First", "tone": "Bright", "weight": 1,
       "namePatterns": ["the Age of First Hearths", "the {word} Dawn", "the Founding Years"],
-      "words": ["Lantern", "Hearth", "Green", "Morning", "Kindling"],
+      "words": ["Lantern", "Hearth", "Green", "Kindling", "First-Light"],
       "summaries": [
         "The first {culture} families lit their hearths at {place}, and {founder} taught them to listen to the things they loved.",
         "{founder} led the first {culture} families to {place}, and the world began to hear them."

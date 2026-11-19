@@ -236,6 +236,12 @@ namespace Relic.Lore
                         H.Events.Add(Event(tpl, era));
                     }
                 }
+                // Oldest first, as a chronicle reads (stable: ties keep generation order).
+                var ordered = new List<PrehistoryEvent>(H.Events);
+                var index = new Dictionary<PrehistoryEvent, int>();
+                for (int i = 0; i < ordered.Count; i++) index[ordered[i]] = i;
+                ordered.Sort((a, b) => a.YearsAgo != b.YearsAgo ? b.YearsAgo.CompareTo(a.YearsAgo) : index[a].CompareTo(index[b]));
+                H.Events = ordered;
             }
 
             EventTemplate PickTemplate(EraDef era, HashSet<string> used, bool needArtifact)
@@ -267,7 +273,14 @@ namespace Relic.Lore
                     switch (s.Kind)
                     {
                         case SlotKind.Place:
-                            ev.Place = Pick(places).Name;
+                            if ((t.Kind == EventKind.Founding || t.Kind == EventKind.Migration) && !(era.Order == 0 && ev.Legends.Count > 0))
+                            {
+                                // A later founding or settling makes a new place; the first era's founders found their homes.
+                                var fresh = new PrehistoryPlace { Name = Unique(() => _names[c.Id].Place(ref _rng)), Culture = c.Id, Family = Pick(c.Families) };
+                                H.Places.Add(fresh);
+                                ev.Place = fresh.Name;
+                            }
+                            else ev.Place = era.Order == 0 && ev.Legends.Count > 0 && t.Kind == EventKind.Founding ? places[0].Name : Pick(places).Name;
                             values[s.Name] = ev.Place;
                             break;
                         case SlotKind.Region:
@@ -308,7 +321,9 @@ namespace Relic.Lore
                         }
                         case SlotKind.Artifact:
                         {
-                            var a = Artifact(c, era, t.Tone, maker ?? UniquePerson(c), ev.Place ?? places[0].Name);
+                            // Inventors made their artifact; finders and lost expeditions found someone else's.
+                            string artifactMaker = t.Kind == EventKind.Invention && maker != null ? maker : UniquePerson(c);
+                            var a = Artifact(c, era, t.Tone, artifactMaker, ev.Place ?? places[0].Name);
                             H.Artifacts.Add(a);
                             ev.Legends.Add(a.Id);
                             values[s.Name] = a.Name;
