@@ -45,9 +45,22 @@ namespace Relic.Character.PlayTests
             Assert.IsNotNull(hero, "the Game layer should register the Character avatar factory");
             Assert.IsNull(_sandbox.Player.GetComponent<PlayerAvatar>(), "placeholder should not be built too");
             Assert.IsNotNull(hero.Renderer);
+            Assert.AreEqual("Unwritten", hero.Appearance.Name, "the sandbox starts as the unwritten wayfarer");
+            Assert.AreEqual(0, hero.Look.ItemNames.Count, "who carries nothing yet");
+            Assert.IsNotNull(hero.Mecanim, "driven by the hero Animator");
+            Assert.IsTrue(hero.HumanAvatar.isValid && hero.HumanAvatar.isHuman);
             for (int i = 0; i < 30; i++) yield return null;
+            Assert.IsTrue(hero.Mecanim.GetCurrentAnimatorStateInfo(0).IsName(HeroMecanim.SIdle)
+                || hero.Mecanim.GetCurrentAnimatorStateInfo(0).IsName(HeroMecanim.SFall)
+                || hero.Mecanim.GetCurrentAnimatorStateInfo(0).IsName(HeroMecanim.SLand), "standing (or settling) at spawn");
 
             var driver = _sandbox.Player.GetComponent<HeroPlayerDriver>();
+            driver.CyclePreset();
+            yield return null;
+            Assert.AreEqual("Wanderer", hero.Appearance.Name, "F11 cycles to the written looks");
+            Assert.IsNotNull(hero.Look.Weapon, "a written look starts with the starter kit");
+            Assert.IsNotNull(hero.Mecanim);
+
             driver.RollRandomKit();
             yield return null;
             Assert.IsNotNull(hero.Look.Weapon);

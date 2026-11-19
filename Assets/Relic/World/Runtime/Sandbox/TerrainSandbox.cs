@@ -27,6 +27,10 @@ namespace Relic.World.Runtime
         /// </summary>
         public static System.Func<GameObject, PlayerController, Material, Component> AvatarFactory;
 
+        [Header("Hero")]
+        [Tooltip("Starting appearance preset for the registered hero (Unwritten = the unwritten wayfarer; F11 cycles the others). Ignored by the placeholder avatar.")]
+        public string HeroLook = "Unwritten";
+
         [Header("Assets (created by Relic > World > Build Terrain Sandbox)")]
         public Material TerrainMaterial;
         public Material WaterMaterial;

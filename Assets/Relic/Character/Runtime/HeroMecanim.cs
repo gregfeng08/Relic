@@ -65,7 +65,10 @@ namespace Relic.Character
         public void Push(HeroAnimInput a, float dt)
         {
             float speed = a.Motion == HeroMotion.Idle ? Mathf.Min(a.Speed, 0.2f) : a.Speed;
-            Animator.SetFloat(SpeedId, speed, 0.06f, Mathf.Max(dt, 1e-4f));
+            // Damped while moving (smooth blends); snapped when the controller says the hero stopped,
+            // so a landing or a stop never hands off to the run on a lagging value.
+            if (a.Motion == HeroMotion.Idle) Animator.SetFloat(SpeedId, speed);
+            else Animator.SetFloat(SpeedId, speed, 0.06f, Mathf.Max(dt, 1e-4f));
             Animator.SetFloat(VSpeedId, a.VerticalSpeed);
             Animator.SetInteger(ModeId, ModeOf(a.Motion));
             Animator.SetBool(DashId, a.Dash);
