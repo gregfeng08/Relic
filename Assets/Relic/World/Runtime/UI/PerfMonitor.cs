@@ -35,6 +35,8 @@ namespace Relic.World.Runtime
         string _benchLabel;
         Action _benchDone;
         Stats _bench;
+        int _skipFrames;
+        const int SkipAfterStall = 2;
 
 
         /// <summary>Start counting frames (call once the world has loaded, so the load spike isn't counted).</summary>
@@ -61,11 +63,34 @@ namespace Relic.World.Runtime
             Debug.Log("[Relic.Perf] Benchmark cancelled.\n" + Format("benchmark (partial)", _bench));
         }
 
+        void OnApplicationFocus(bool focus)
+        {
+            if (focus) _skipFrames = SkipAfterStall;
+        }
+
+        void OnApplicationPause(bool paused)
+        {
+            if (!paused) _skipFrames = SkipAfterStall;
+        }
+
+        /// <summary>
+        /// Frames that measure the editor, not the game: while the editor (or player) is out of
+        /// focus it throttles or stops, and the first frames back carry the whole stall (a screenshot
+        /// tool or alt-tab gave 2.7-23 s "frames" in playtests, logged next to "Asset Pipeline
+        /// Refresh" lines). They are left out of the stats and the HUD (RLC-069).
+        /// </summary>
+        bool IsStallFrame()
+        {
+            if (Application.isBatchMode) return false;
+            if (!Application.isFocused) { _skipFrames = SkipAfterStall; return true; }
+            if (_skipFrames > 0) { _skipFrames--; return true; }
+            return false;
+        }
+
         void Update()
         {
             float ms = Time.unscaledDeltaTime * 1000f;
             LastMs = ms;
-            SmoothedMs = Mathf.Lerp(SmoothedMs, ms, 0.05f);
 
             double moved = 0;
             if (Player != null && Origin != null)
@@ -79,6 +104,13 @@ namespace Relic.World.Runtime
                 }
                 _lastX = x; _lastZ = z; _hasLast = true;
             }
+
+            if (IsStallFrame())
+            {
+                if (Recording) { Session.AddExcluded(moved); _window.AddExcluded(moved); if (_benchTarget > 0) _bench.AddExcluded(moved); }
+                return;
+            }
+            SmoothedMs = Mathf.Lerp(SmoothedMs, ms, 0.05f);
 
             if (!Recording) return;
             Session.Add(ms, moved, HitchMs, BudgetMs);
@@ -108,7 +140,7 @@ namespace Relic.World.Runtime
         {
             return "[Relic.Perf] " + WindowSeconds.ToString("0") + "s: avg " + s.AverageMs.ToString("0.0") + " ms (" + (1000.0 / Math.Max(0.01, s.AverageMs)).ToString("0") +
                    " fps), p99 " + s.Percentile(0.99).ToString("0.0") + " ms, max " + s.MaxMs.ToString("0.0") + " ms, hitches>" + HitchMs + "ms " + s.Hitches +
-                   ", moved " + s.Distance.ToString("0") + " m" + StreamerLine();
+                   ", moved " + s.Distance.ToString("0") + " m" + (s.Excluded > 0 ? ", " + s.Excluded + " unfocused frames left out" : "") + StreamerLine();
         }
 
         string StreamerLine()
@@ -124,7 +156,9 @@ namespace Relic.World.Runtime
             bool pass = s.Frames > 0 && s.AverageMs <= BudgetMs && s.Hitches == 0;
             var sb = new StringBuilder();
             sb.Append("[Relic.Perf] SUMMARY ").Append(label).Append(pass ? "  PASS" : "  FAIL").Append('\n');
-            sb.Append("  frames ").Append(s.Frames).Append(" over ").Append((s.TotalMs / 1000.0).ToString("0.0")).Append(" s\n");
+            sb.Append("  frames ").Append(s.Frames).Append(" over ").Append((s.TotalMs / 1000.0).ToString("0.0")).Append(" s");
+            if (s.Excluded > 0) sb.Append(" (").Append(s.Excluded).Append(" unfocused/paused frames left out)");
+            sb.Append('\n');
             sb.Append("  avg ").Append(s.AverageMs.ToString("0.00")).Append(" ms (").Append((1000.0 / Math.Max(0.01, s.AverageMs)).ToString("0")).Append(" fps)")
               .Append(", p50 ").Append(s.Percentile(0.5).ToString("0.0"))
               .Append(", p95 ").Append(s.Percentile(0.95).ToString("0.0"))
@@ -155,6 +189,10 @@ namespace Relic.World.Runtime
             public int Hitches;
             public int OverBudget;
             public double Distance;
+            /// <summary>Frames left out because the editor was unfocused or paused (see IsStallFrame).</summary>
+            public int Excluded;
+
+            public void AddExcluded(double moved) { Excluded++; Distance += moved; }
 
             public double AverageMs => Frames > 0 ? TotalMs / Frames : 0;
 
