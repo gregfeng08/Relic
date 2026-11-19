@@ -15,6 +15,9 @@ namespace Relic.Character
     /// </summary>
     public static class HeroBlank
     {
+        /// <summary>The head's radius in authoring space (times HeroShape.HeadScale in the final body).</summary>
+        public const float HeadRadius = 0.132f;
+
         public static void Build(HeroBuild b)
         {
             Color c = b.SkinColor;
@@ -56,7 +59,29 @@ namespace Relic.Character
             b.Toon(c, 0.9f);
             b.Kit.PaintData.w = 1f; // no cast-shadow streaks on the blank face
             b.Rigid(HeroRig.Head);
-            Blob(b, new Vector3(0f, 1.602f, 0.006f), new Vector3(0.132f, 0.128f, 0.128f), 24, 18, false);
+            // A true UV sphere with exact pole vertices at the sides (a loft's caps would bump or flatten).
+            const int stacks = 18, sides = 24;
+            var center = new Vector3(0f, 1.602f, 0.006f);
+            Vector3 P(float t, float a) => center + new Vector3(-Mathf.Cos(t) * HeadRadius, Mathf.Sin(t) * Mathf.Cos(a) * 0.128f, Mathf.Sin(t) * Mathf.Sin(a) * 0.128f);
+            int first = b.Kit.VertexCount;
+            for (int i = 1; i < stacks; i++)
+                for (int j = 0; j < sides; j++)
+                    b.Kit.Vert(P(Mathf.PI * i / stacks, Mathf.PI * 2f * j / sides));
+            int left = b.Kit.Vert(P(0f, 0f)), right = b.Kit.Vert(P(Mathf.PI, 0f));
+            for (int i = 0; i < stacks - 2; i++)
+                for (int j = 0; j < sides; j++)
+                {
+                    int j1 = (j + 1) % sides;
+                    Vector3 o = P(Mathf.PI * (i + 1.5f) / stacks, Mathf.PI * 2f * (j + 0.5f) / sides) - center;
+                    b.Kit.Quad(first + i * sides + j, first + i * sides + j1, first + (i + 1) * sides + j1, first + (i + 1) * sides + j, o);
+                }
+            int last = first + (stacks - 2) * sides;
+            for (int j = 0; j < sides; j++)
+            {
+                int j1 = (j + 1) % sides;
+                b.Kit.Tri(first + j, first + j1, left, Vector3.left);
+                b.Kit.Tri(last + j, last + j1, right, Vector3.right);
+            }
         }
 
         static void Torso(HeroBuild b, Color c)

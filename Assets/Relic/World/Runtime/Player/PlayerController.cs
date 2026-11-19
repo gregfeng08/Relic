@@ -74,9 +74,20 @@ namespace Relic.World.Runtime
             Stamina = Config.MaxStamina;
             Breath = Config.BreathMax;
             _cc.slopeLimit = Config.SlopeLimit + 2f;
-            _cc.stepOffset = 0.35f;
+            ApplyBody();
             _cc.skinWidth = 0.04f;
             _cc.minMoveDistance = 0f;
+        }
+
+        /// <summary>Sizes the CharacterController to the body in the config (capsule on the feet).</summary>
+        public void ApplyBody()
+        {
+            if (_cc == null) _cc = GetComponent<CharacterController>();
+            float r = Mathf.Min(Config.BodyRadius, Config.BodyHeight * 0.5f);
+            _cc.height = Config.BodyHeight;
+            _cc.radius = r;
+            _cc.center = new Vector3(0f, Config.BodyHeight * 0.5f, 0f);
+            _cc.stepOffset = Mathf.Min(Config.StepOffset, Config.BodyHeight - 2f * r);
         }
 
         /// <summary>Places the player (used at spawn and by tools); clears velocity.</summary>

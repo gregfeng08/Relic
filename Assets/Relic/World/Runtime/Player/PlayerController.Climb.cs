@@ -18,13 +18,13 @@ namespace Relic.World.Runtime
         {
             if (Stamina <= 0f || Exhausted) { _climbPushTime = 0f; return false; }
             Vector3 dir = moveWorld.normalized;
-            Vector3 chest = transform.position + Vector3.up * 1.1f;
+            Vector3 chest = transform.position + Vector3.up * Config.ClimbGrabHeight;
             float reach = _cc.radius + 0.35f;
             float wallCos = Mathf.Cos(Config.ClimbMinAngle * Mathf.Deg2Rad);
             if (!Physics.SphereCast(chest, 0.2f, dir, out RaycastHit hit, reach, TerrainMask, QueryTriggerInteraction.Ignore)
                 || hit.normal.y > wallCos                                             // not steep enough to be a wall
                 || Vector3.Dot(dir, -FlatNormal(hit.normal)) < 0.5f                    // not pushing into it
-                || !Physics.Raycast(transform.position + Vector3.up * 1.75f, dir, reach + 0.3f, TerrainMask, QueryTriggerInteraction.Ignore)) // shorter than us: step/slide, don't grab
+                || !Physics.Raycast(transform.position + Vector3.up * Config.ClimbWallMinHeight, dir, reach + 0.3f, TerrainMask, QueryTriggerInteraction.Ignore)) // shorter than us: step/slide, don't grab
             {
                 _climbPushTime = 0f;
                 return false;
@@ -51,7 +51,7 @@ namespace Relic.World.Runtime
         {
             Vector3 pos = transform.position;
             Vector3 n = _wallNormal;
-            bool chestHit = Physics.Raycast(pos + Vector3.up * 1.2f, -n, out RaycastHit chest, _cc.radius + 0.9f, TerrainMask, QueryTriggerInteraction.Ignore);
+            bool chestHit = Physics.Raycast(pos + Vector3.up * Config.ClimbHoldHeight, -n, out RaycastHit chest, _cc.radius + 0.9f, TerrainMask, QueryTriggerInteraction.Ignore);
             bool feetHit = Physics.Raycast(pos + Vector3.up * 0.25f, -n, out RaycastHit feet, _cc.radius + 0.9f, TerrainMask, QueryTriggerInteraction.Ignore);
 
             if (!chestHit)

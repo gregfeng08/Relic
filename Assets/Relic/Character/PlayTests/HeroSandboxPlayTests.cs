@@ -85,5 +85,81 @@ namespace Relic.Character.PlayTests
             foreach (Transform t in hero.Rig.Bones)
                 Assert.Less((t.position - root).magnitude, 2.5f, t.name + " was flung by the origin shift");
         }
+
+        /// <summary>
+        /// The CharacterController capsule is sized to the unwritten wayfarer (PlayerConfig body
+        /// numbers): standing at spawn, the feet are on the capsule's bottom and the round head is
+        /// inside it, top and sides.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator CapsuleFitsTheHero()
+        {
+            var hero = _sandbox.Player.GetComponent<HeroAvatar>();
+            var cc = _sandbox.Player.GetComponent<CharacterController>();
+            PlayerConfig config = _sandbox.Player.Config;
+            Assert.AreEqual(config.BodyHeight, cc.height, 1e-4f);
+            Assert.AreEqual(config.BodyRadius, cc.radius, 1e-4f);
+            Assert.AreEqual(config.BodyHeight * 0.5f, cc.center.y, 1e-4f);
+            float t = 0f;
+            while (t < 2f || _sandbox.Player.State != MoveState.Grounded)
+            {
+                t += Time.deltaTime;
+                if (t > 20f) Assert.Fail("never landed at spawn");
+                yield return null;
+            }
+            for (int i = 0; i < 30; i++) yield return null;
+
+            Vector3 feet = _sandbox.Player.transform.position;
+            Transform head = hero.Rig.Bones[HeroRig.Head];
+            float headRadius = HeroBlank.HeadRadius * hero.Shape.HeadScale * hero.Shape.Scale;
+            foreach (int f in new[] { HeroRig.FootL, HeroRig.FootR })
+                Assert.That(hero.Rig.Bones[f].position.y - feet.y, Is.InRange(-0.03f, 0.15f), "feet on the ground");
+            float crown = hero.Shape.Height + hero.Rig.RootTransform.localPosition.y;
+            Assert.LessOrEqual(crown, cc.height + 0.02f, "the head fits under the capsule top");
+            Assert.Greater(crown, cc.height - 0.15f, "the capsule isn't much taller than the hero");
+            Vector3 flat = head.position - feet;
+            flat.y = 0f;
+            Assert.LessOrEqual(flat.magnitude + headRadius, cc.radius + 0.06f, "the head fits inside the capsule's width");
+            Assert.Less(config.HeadHeight, cc.height, "the underwater check uses a point inside the body");
+            Assert.Greater(config.HeadHeight, hero.Rig.Bones[HeroRig.Neck].position.y - feet.y, "and it is at the head, not the chest");
+        }
+
+        /// <summary>
+        /// On demand: renders the sandbox from the default follow camera with the hero at spawn
+        /// (art-ref/renders/v3/v3_unwritten_sandbox.png next to the main checkout).
+        /// Run with -testFilter Relic.Character.PlayTests.HeroSandboxPlayTests.CaptureFromTheDefaultCamera
+        /// </summary>
+        [UnityTest, Explicit("writes a review capture")]
+        public IEnumerator CaptureFromTheDefaultCamera()
+        {
+            float t = 0f;
+            while (t < 4f)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
+            Camera cam = _sandbox.OrbitCam.GetComponent<Camera>();
+            const int w = 1280, h = 720;
+            var rt = new RenderTexture(w, h, 24);
+            cam.targetTexture = rt;
+            cam.Render();
+            cam.Render();
+            RenderTexture.active = rt;
+            var tex = new Texture2D(w, h, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+            tex.Apply();
+            cam.targetTexture = null;
+            RenderTexture.active = null;
+            string project = System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, ".."));
+            string repo = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(project)) == ".wt" ? System.IO.Path.GetFullPath(System.IO.Path.Combine(project, "../..")) : project;
+            string dir = System.IO.Path.Combine(repo, "art-ref", "renders", "v3");
+            System.IO.Directory.CreateDirectory(dir);
+            string file = System.IO.Path.Combine(dir, "v3_unwritten_sandbox.png");
+            System.IO.File.WriteAllBytes(file, tex.EncodeToPNG());
+            Debug.Log("[Relic.Character] Wrote " + file);
+            Object.Destroy(tex);
+            rt.Release();
+            Object.Destroy(rt);
+        }
     }
 }

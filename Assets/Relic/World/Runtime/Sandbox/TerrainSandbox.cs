@@ -109,9 +109,9 @@ namespace Relic.World.Runtime
             var playerGo = Track(new GameObject("Player"));
             playerGo.layer = 2;
             var cc = playerGo.AddComponent<CharacterController>();
-            cc.height = 1.8f;
-            cc.radius = 0.35f;
-            cc.center = new Vector3(0f, 0.9f, 0f);
+            cc.height = PlayerConfig.BodyHeight;
+            cc.radius = PlayerConfig.BodyRadius;
+            cc.center = new Vector3(0f, PlayerConfig.BodyHeight * 0.5f, 0f);
             Player = playerGo.AddComponent<PlayerController>();
             Player.Config = PlayerConfig;
             Player.Probe = Probe;
