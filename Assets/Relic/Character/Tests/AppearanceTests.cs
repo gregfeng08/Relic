@@ -18,6 +18,23 @@ namespace Relic.Character.Tests
         }
 
         [Test]
+        public void UnwrittenIsTheStartingBody()
+        {
+            HeroAppearance u = AppearancePresets.Unwritten();
+            Assert.AreEqual("Unwritten", AppearancePresets.All()[0].Name, "F11 starts from the unwritten body");
+            Assert.IsTrue(u.Blank, "a blank, faceless body");
+            Assert.AreEqual(1f, u.Body.HeadSize, "moderate head, not chibi");
+            Assert.AreEqual(0, u.Accessories.Count);
+            Assert.IsFalse(AppearancePresets.Default().Blank, "the written looks are not blank");
+            Assert.AreEqual("Unwritten", AppearancePresets.ByName(" unwritten ").Name);
+            Assert.AreEqual("Mira", AppearancePresets.ByName("MIRA").Name);
+            Assert.IsNull(AppearancePresets.ByName("Nobody"));
+            Assert.IsNull(AppearancePresets.ByName(null));
+            // Older documents (no blank field) read as written looks.
+            Assert.IsFalse(AppearanceJson.Deserialize("{\"name\":\"Old\"}").Blank);
+        }
+
+        [Test]
         public void JsonIsCamelCaseWithStringEnums()
         {
             string json = AppearanceJson.Serialize(AppearancePresets.Mira());
@@ -31,6 +48,7 @@ namespace Relic.Character.Tests
             var a = new HeroAppearance();
             a.Body.Height = 3f;
             a.Body.Build = -1f;
+            a.Body.HeadSize = 2f;
             a.Face.EyeSize = float.NaN;
             a.Hair.Length = 7f;
             a.Hair.Color = "white";
@@ -40,6 +58,7 @@ namespace Relic.Character.Tests
             var fixes = AppearanceRules.Sanitize(a);
             Assert.AreEqual(AppearanceRules.MaxHeight, a.Body.Height);
             Assert.AreEqual(0f, a.Body.Build);
+            Assert.AreEqual(AppearanceRules.MaxHeadSize, a.Body.HeadSize);
             Assert.That(a.Face.EyeSize, Is.InRange(AppearanceRules.MinEyeSize, AppearanceRules.MaxEyeSize));
             Assert.AreEqual(1f, a.Hair.Length);
             Assert.AreEqual(new HairSpec().Color, a.Hair.Color);

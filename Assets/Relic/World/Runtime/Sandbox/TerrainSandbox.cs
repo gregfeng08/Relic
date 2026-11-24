@@ -27,6 +27,10 @@ namespace Relic.World.Runtime
         /// </summary>
         public static System.Func<GameObject, PlayerController, Material, Component> AvatarFactory;
 
+        [Header("Hero")]
+        [Tooltip("Starting appearance preset for the registered hero (Unwritten = the unwritten wayfarer; F11 cycles the others). Ignored by the placeholder avatar.")]
+        public string HeroLook = "Unwritten";
+
         [Header("Assets (created by Relic > World > Build Terrain Sandbox)")]
         public Material TerrainMaterial;
         public Material WaterMaterial;
@@ -105,9 +109,9 @@ namespace Relic.World.Runtime
             var playerGo = Track(new GameObject("Player"));
             playerGo.layer = 2;
             var cc = playerGo.AddComponent<CharacterController>();
-            cc.height = 1.8f;
-            cc.radius = 0.35f;
-            cc.center = new Vector3(0f, 0.9f, 0f);
+            cc.height = PlayerConfig.BodyHeight;
+            cc.radius = PlayerConfig.BodyRadius;
+            cc.center = new Vector3(0f, PlayerConfig.BodyHeight * 0.5f, 0f);
             Player = playerGo.AddComponent<PlayerController>();
             Player.Config = PlayerConfig;
             Player.Probe = Probe;

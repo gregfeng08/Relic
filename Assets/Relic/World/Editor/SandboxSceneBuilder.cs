@@ -53,6 +53,8 @@ namespace Relic.World.Editor
             sandbox.SkyMaterial = sky;
             sandbox.ToonMaterial = toon;
             sandbox.PlayerConfig = config;
+            // The starting body: the unwritten wayfarer (Relic.Character preset; F11 cycles the others).
+            sandbox.HeroLook = "Unwritten";
 
             // Scene-level lighting defaults that match the runtime sky (no baking, no probes needed).
             RenderSettings.skybox = sky;

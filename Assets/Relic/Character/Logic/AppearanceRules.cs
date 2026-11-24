@@ -50,6 +50,7 @@ namespace Relic.Character
         public const int MaxAccessories = 3;
         public const float MinHeight = 0.92f, MaxHeight = 1.05f;
         public const float MinEyeSize = 0.85f, MaxEyeSize = 1.2f;
+        public const float MinHeadSize = 0.95f, MaxHeadSize = 1.12f;
 
         /// <summary>Clamps ranges, fills missing parts, fixes bad colors and enums. Returns a list of what was changed.</summary>
         public static List<string> Sanitize(HeroAppearance a)
@@ -69,6 +70,7 @@ namespace Relic.Character
 
             a.Body.Height = Clamp(a.Body.Height, MinHeight, MaxHeight, "body.height", fixes);
             a.Body.Build = Clamp(a.Body.Build, 0f, 1f, "body.build", fixes);
+            a.Body.HeadSize = Clamp(a.Body.HeadSize, MinHeadSize, MaxHeadSize, "body.headSize", fixes);
             a.Body.SkinTone = Hex(a.Body.SkinTone, d.Body.SkinTone, "body.skinTone", fixes);
             a.Face.EyeSize = Clamp(a.Face.EyeSize, MinEyeSize, MaxEyeSize, "face.eyeSize", fixes);
             a.Face.EyeColor = Hex(a.Face.EyeColor, d.Face.EyeColor, "face.eyeColor", fixes);

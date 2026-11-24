@@ -30,7 +30,7 @@ namespace Relic.World.Runtime
         /// </summary>
         public event Action<float> Suffocating;
 
-        const float HeadHeight = 1.55f;
+        float HeadHeight => Config.HeadHeight;
         Vector3 _diveAccel;
 
         bool TryEnterSwim()

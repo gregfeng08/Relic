@@ -7,13 +7,18 @@ using Key = UnityEngine.InputSystem.Key;
 namespace Relic.Character
 {
     /// <summary>
-    /// Connects the hero to the World PlayerController: feeds movement state to the animator each
-    /// frame, plus the debug keys. F7: roll and equip a random kit for the current tier. F9: cycle
-    /// the armor weight. A HUD line lists the equipped items.
+    /// Connects the hero to the World PlayerController: turns movement state into HeroAnimInput
+    /// (Animator parameters in Update, so Unity evaluates the Animator with them the same frame;
+    /// spring chains in LateUpdate, after the Animator has posed the bones), plus the debug keys.
+    /// F7: roll and equip a random kit for the current tier. F9: cycle the armor weight. F11:
+    /// cycle the appearance presets. A HUD line lists the equipped items.
     /// </summary>
     [DefaultExecutionOrder(50)]
     public sealed class HeroPlayerDriver : MonoBehaviour
     {
+        /// <summary>Airborne this long (or rising) before the hero leaves its ground pose (no flicker off small steps).</summary>
+        public const float AirDelay = 0.1f;
+
         public PlayerController Player;
         public HeroAvatar Hero;
         public bool ShowHud = true;
@@ -22,7 +27,7 @@ namespace Relic.Character
         ulong _rollerSeed;
         int _roll;
         int _tier;
-        int _preset;
+        float _airTime;
         GUIStyle _style;
 
         /// <summary>World avatar factory: builds the hero on the player object (registered by the Game layer).</summary>
@@ -33,9 +38,28 @@ namespace Relic.Character
             var driver = player.AddComponent<HeroPlayerDriver>();
             driver.Player = controller;
             driver.Hero = hero;
-            driver.EquipStarter();
+            // The scene picks the starting look (the terrain sandbox: the unwritten wayfarer).
+            var sandbox = FindAnyObjectByType<TerrainSandbox>();
+            HeroAppearance look = AppearancePresets.ByName(sandbox != null ? sandbox.HeroLook : null) ?? AppearancePresets.Unwritten();
+            driver.Wear(look);
             return hero;
         }
+
+        /// <summary>
+        /// Puts on a look. The unwritten wayfarer carries nothing yet (no kit until F7); a written
+        /// look starts with the reference-sheet kit if nothing is equipped.
+        /// </summary>
+        public void Wear(HeroAppearance look)
+        {
+            Hero.Appearance = look;
+            if (IsUnwritten(look)) Hero.Kit = new HeroKit();
+            else if (IsEmpty(Hero.Kit)) Hero.Kit = Roller().Roll(0, 0, BaseType.Staff, BaseType.LightArmor);
+            Hero.ArmorOverride = null;
+            Hero.Rebuild();
+        }
+
+        static bool IsUnwritten(HeroAppearance a) => a != null && a.Name == "Unwritten";
+        static bool IsEmpty(HeroKit k) => k == null || k.Weapon == null && k.Armor == null && k.Relic == null && k.Trinket1 == null && k.Trinket2 == null;
 
         /// <summary>The reference-sheet look: light coat, the spiral staff on the back.</summary>
         public void EquipStarter()
@@ -68,6 +92,7 @@ namespace Relic.Character
             if (PlayerInput.KeyDown(Key.F7)) RollRandomKit();
             if (PlayerInput.KeyDown(Key.F9)) CycleArmor();
             if (PlayerInput.KeyDown(Key.F11)) CyclePreset(); // F10 is the sandbox props toggle
+            if (Player != null) Hero.SetInput(BuildInput(Time.deltaTime), Time.deltaTime);
         }
 
         /// <summary>F7: a random kit for the tier at the player's world position.</summary>
@@ -80,13 +105,14 @@ namespace Relic.Character
             Debug.Log("[Relic.Character] Kit " + _roll + " (tier " + _tier + "): " + string.Join(" | ", Hero.Look.ItemNames) + " (" + Hero.TriangleCount + " tris)");
         }
 
-        /// <summary>F11: the next built-in appearance preset (Wanderer, Mira, Rowan, Ash).</summary>
+        /// <summary>F11: the next built-in appearance preset (Unwritten, Wanderer, Mira, Rowan, Ash).</summary>
         public void CyclePreset()
         {
             var all = AppearancePresets.All();
-            _preset = (_preset + 1) % all.Count;
-            Hero.Appearance = all[_preset];
-            Hero.Rebuild();
+            int current = 0;
+            for (int i = 0; i < all.Count; i++)
+                if (Hero.Appearance != null && all[i].Name == Hero.Appearance.Name) current = i;
+            Wear(all[(current + 1) % all.Count]);
         }
 
         /// <summary>F9: Light → Medium → Heavy → Light (overrides the equipped armor's weight).</summary>
@@ -97,9 +123,9 @@ namespace Relic.Character
             Hero.Rebuild();
         }
 
-        void LateUpdate()
+        /// <summary>PlayerController state → animation input (the PlayerController-to-Animator wiring).</summary>
+        HeroAnimInput BuildInput(float dt)
         {
-            if (Hero == null || Player == null) return;
             var a = new HeroAnimInput
             {
                 Speed = Player.HorizontalSpeed,
@@ -112,10 +138,15 @@ namespace Relic.Character
                 DivePitch = Player.DivePitch,
                 Underwater = Player.HeadUnderwater,
             };
+            HeroMotion ground = Player.HorizontalSpeed > 0.25f || Player.IsDashing ? HeroMotion.Run : HeroMotion.Idle;
+            _airTime = Player.State == MoveState.Airborne ? _airTime + dt : 0f;
             switch (Player.State)
             {
-                case MoveState.Grounded: a.Motion = Player.HorizontalSpeed > 0.25f || Player.IsDashing ? HeroMotion.Run : HeroMotion.Idle; break;
-                case MoveState.Airborne: a.Motion = HeroMotion.Air; break;
+                case MoveState.Grounded: a.Motion = ground; break;
+                case MoveState.Airborne:
+                    // Stepping off a small ledge keeps the ground pose; a jump or a real fall doesn't.
+                    a.Motion = _airTime >= AirDelay || Player.Velocity.y > 1f ? HeroMotion.Air : ground;
+                    break;
                 case MoveState.Climbing: a.Motion = HeroMotion.Climb; a.ClimbSpeed = Player.Velocity.magnitude; break;
                 case MoveState.Swimming: a.Motion = HeroMotion.Swim; break;
                 case MoveState.Flying: a.Motion = HeroMotion.Fly; break;
@@ -127,7 +158,13 @@ namespace Relic.Character
                         ? HeroMotion.Dive : HeroMotion.Swim;
                     break;
             }
-            Hero.Input = a;
+            return a;
+        }
+
+        void LateUpdate()
+        {
+            if (Hero == null || Player == null) return;
+            // The Animator has posed the bones by now; step smoothing and spring chains go on top.
             Hero.Animate(Time.deltaTime, Player.Velocity);
         }
 
@@ -140,7 +177,8 @@ namespace Relic.Character
                 _style.normal.textColor = Color.white;
             }
             string items = Hero.Look.ItemNames.Count > 0 ? string.Join("  ·  ", Hero.Look.ItemNames) : "(no items)";
-            string line = "<b>Kit</b> " + items + "   <color=#bbbbbb>[" + Hero.Look.Armor.Weight + " · F7 new kit · F9 armor · F11 look]</color>";
+            string who = Hero.Appearance != null ? Hero.Appearance.Name : "";
+            string line = "<b>" + who + "</b>  <b>Kit</b> " + items + "   <color=#bbbbbb>[" + Hero.Look.Armor.Weight + " · F7 new kit · F9 armor · F11 look]</color>";
             var r = new Rect(12, Screen.height - 30, Screen.width - 24, 24);
             GUI.color = new Color(0f, 0f, 0f, 0.6f);
             GUI.Label(new Rect(r.x + 1, r.y + 1, r.width, r.height), StripColor(line), _style);

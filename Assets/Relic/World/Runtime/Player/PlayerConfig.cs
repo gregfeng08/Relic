@@ -9,6 +9,16 @@ namespace Relic.World.Runtime
     [CreateAssetMenu(menuName = "Relic/World/Player Config", fileName = "PlayerConfig")]
     public sealed class PlayerConfig : ScriptableObject
     {
+        [Header("Body (sized to the hero: the unwritten wayfarer stands about 1.27 m)")]
+        [Tooltip("CharacterController height (m); the capsule sits on the feet, centered at half this.")]
+        public float BodyHeight = 1.3f;
+        [Tooltip("CharacterController radius (m).")]
+        public float BodyRadius = 0.28f;
+        [Tooltip("Steps up to this height are walked over (m).")]
+        public float StepOffset = 0.3f;
+        [Tooltip("Eye height above the feet (m): the head counts as underwater when this point is.")]
+        public float HeadHeight = 1.1f;
+
         [Header("Ground")]
         public float RunSpeed = 6.0f;
         public float SprintSpeed = 9.5f;
@@ -67,12 +77,18 @@ namespace Relic.World.Runtime
         public float ClimbMinAngle = 65f;
         [Tooltip("Seconds of pushing into a wall on foot before grabbing it (airborne grabs are immediate).")]
         public float ClimbGrabDelay = 0.2f;
+        [Tooltip("Height (m) of the probe that looks for a wall to grab.")]
+        public float ClimbGrabHeight = 0.8f;
+        [Tooltip("A wall must still be there at this height (m) to be grabbed: shorter bands are stepped or slid.")]
+        public float ClimbWallMinHeight = 1.25f;
+        [Tooltip("Height (m) of the probe that keeps hold of the wall while climbing; no wall there = top out.")]
+        public float ClimbHoldHeight = 0.87f;
 
 
         [Header("Swim")]
         public float SwimSpeed = 3.6f;
-        [Tooltip("Depth of the body's center below the water surface while swimming.")]
-        public float SwimDepth = 1.15f;
+        [Tooltip("Depth of the feet (the player origin) below the water surface while swimming (m).")]
+        public float SwimDepth = 0.83f;
 
         [Header("Dive (Ctrl/C down, Space up)")]
         public float DiveSpeed = 3.2f;
@@ -98,14 +114,14 @@ namespace Relic.World.Runtime
         public float CameraVerticalTime = 0.11f;
         [Tooltip("Smoothing (s) of the camera's vertical follow in the air (keeps jumps calm).")]
         public float CameraAirVerticalTime = 0.24f;
-        public float CameraDistance = 5.5f;
-        public float CameraMinDistance = 1.5f;
+        public float CameraDistance = 3.6f;
+        public float CameraMinDistance = 1.2f;
         public float CameraMaxDistance = 12f;
         public float CameraPitchMin = -40f;
         public float CameraPitchMax = 75f;
         public float CameraFov = 55f;
-        public Vector3 CameraPivotOffset = new Vector3(0f, 1.55f, 0f);
+        public Vector3 CameraPivotOffset = new Vector3(0f, 1.0f, 0f);
         [Tooltip("Sideways shoulder offset, meters.")]
-        public float CameraShoulder = 0.35f;
+        public float CameraShoulder = 0.28f;
     }
 }

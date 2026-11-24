@@ -21,6 +21,8 @@ namespace Relic.Character
         public float Height = 1f;
         /// <summary>0 = very slender .. 1 = sturdier. Stays in the cute range.</summary>
         public float Build = 0.35f;
+        /// <summary>Head size relative to the body, 0.95..1.12.</summary>
+        public float HeadSize = 1f;
         public string SkinTone = "#FCE0CC";
     }
 
@@ -87,6 +89,11 @@ namespace Relic.Character
     {
         public int Version = 1;
         public string Name = "Wanderer";
+        /// <summary>
+        /// The blank, faceless body (the unwritten wayfarer): no face, hair or clothes, one plain colour
+        /// (Body.SkinTone). Face, hair, outfit and accessories are ignored; an equipped weapon still shows.
+        /// </summary>
+        public bool Blank;
         public BodySpec Body = new BodySpec();
         public FaceSpec Face = new FaceSpec();
         public HairSpec Hair = new HairSpec();

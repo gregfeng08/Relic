@@ -1,7 +1,7 @@
 {
     "name": "Relic.Character.EditTests",
     "rootNamespace": "Relic.Character.EditTests",
-    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Items.Logic", "Relic.Character.Logic", "Relic.Character", "Relic.World"],
+    "references": ["UnityEngine.TestRunner", "UnityEditor.TestRunner", "Relic.Core", "Relic.Items.Logic", "Relic.Character.Logic", "Relic.Character", "Relic.Character.Editor", "Relic.World"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

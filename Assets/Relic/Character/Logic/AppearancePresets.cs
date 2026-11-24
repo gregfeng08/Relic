@@ -4,11 +4,34 @@ namespace Relic.Character
 {
     /// <summary>
     /// Built-in looks. Default is Greg's hero (white hair, red scarf, brown trench coat, olive
-    /// trousers, gauntlets); the others prove the parameters really change the character.
+    /// trousers, gauntlets); Unwritten is the starting body (and the sandbox default); the others
+    /// prove the parameters really change the character.
     /// </summary>
     public static class AppearancePresets
     {
         public static HeroAppearance Default() => new HeroAppearance { Name = "Wanderer" };
+
+        /// <summary>
+        /// The unwritten wayfarer (docs/design/14-character.md, Decision 2026-11-18): the body every
+        /// player starts in, before the Narrator has written them. A blank, faceless humanoid in one
+        /// plain neutral colour: no face, hair or clothes. Everything else is written later.
+        /// </summary>
+        public static HeroAppearance Unwritten()
+        {
+            var a = new HeroAppearance { Name = "Unwritten", Blank = true };
+            a.Body.Build = 0.6f;
+            a.Body.SkinTone = "#E4DDD3";
+            return a;
+        }
+
+        /// <summary>A preset by name (case-insensitive), or null.</summary>
+        public static HeroAppearance ByName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            foreach (HeroAppearance a in All())
+                if (string.Equals(a.Name, name.Trim(), System.StringComparison.OrdinalIgnoreCase)) return a;
+            return null;
+        }
 
         /// <summary>Black twin tails, short blue jacket, skirt, gloves, a flower pin, no scarf.</summary>
         public static HeroAppearance Mira()
@@ -92,6 +115,7 @@ namespace Relic.Character
             return a;
         }
 
-        public static IReadOnlyList<HeroAppearance> All() => new[] { Default(), Mira(), Rowan(), Ash() };
+        /// <summary>F11 order: the unwritten starting body first, then the written looks.</summary>
+        public static IReadOnlyList<HeroAppearance> All() => new[] { Unwritten(), Default(), Mira(), Rowan(), Ash() };
     }
 }

@@ -41,13 +41,13 @@ MonoBehaviour:
   ClimbMinAngle: 65
   ClimbGrabDelay: 0.2
   SwimSpeed: 3.6
-  SwimDepth: 1.15
+  SwimDepth: 0.83
   MouseSensitivity: 0.12
-  CameraDistance: 5.5
-  CameraMinDistance: 1.5
+  CameraDistance: 3.6
+  CameraMinDistance: 1.2
   CameraMaxDistance: 12
   CameraPitchMin: -40
   CameraPitchMax: 75
   CameraFov: 55
-  CameraPivotOffset: {x: 0, y: 1.55, z: 0}
-  CameraShoulder: 0.35
+  CameraPivotOffset: {x: 0, y: 1, z: 0}
+  CameraShoulder: 0.28
