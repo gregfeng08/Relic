@@ -119,6 +119,14 @@ namespace Relic.Lore
         Wave,
     }
 
+    /// <summary>Where an era template can sit in a generated prehistory.</summary>
+    public enum EraPosition
+    {
+        First,
+        Middle,
+        Last,
+    }
+
     /// <summary>Why monsters keep out of a sanctuary (canon section 6). Recorded per sanctuary.</summary>
     public enum SanctuaryWard
     {

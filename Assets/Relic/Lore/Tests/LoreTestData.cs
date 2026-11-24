@@ -4,10 +4,13 @@ using NUnit.Framework;
 
 namespace Relic.Lore.Tests
 {
-    /// <summary>Finds the repo (the folder with Assets/) and loads the real Bible once per run.</summary>
+    /// <summary>Finds the repo (the folder with Assets/) and loads the real constitution once per run.</summary>
     public static class LoreTestData
     {
         static LoreBible _bible;
+
+        /// <summary>World seeds most tests sweep.</summary>
+        public static readonly ulong[] Seeds = { 1, 2, 3, 7, 42, 2026, 31337, 900001 };
 
         public static string RepoRoot()
         {
@@ -25,32 +28,26 @@ namespace Relic.Lore.Tests
 
         public static string DataDir() => Path.Combine(RepoRoot(), "Assets", "Relic", "Lore", "Data");
 
+        /// <summary>The constitution: rules and templates, no cultures or prehistory.</summary>
         public static LoreBible Bible => _bible ?? (_bible = LoreBible.LoadDirectory(DataDir()));
 
-        /// <summary>Raw documents, for tests that corrupt one file and expect the loader to refuse it.</summary>
-        public sealed class RawDocs
-        {
-            public List<KeyValuePair<string, string>> Cultures = new List<KeyValuePair<string, string>>();
-            public string Factions, Events, Motifs, Moods, Eras, Legends, Style;
+        /// <summary>One generated world.</summary>
+        public static LoreBible World(ulong seed) => Bible.ForWorld(seed);
 
-            public LoreBible Load() => LoreBible.FromJson(Cultures, Factions, Events, Motifs, Moods, Eras, Legends, Style);
+        /// <summary>Every culture from the sweep worlds.</summary>
+        public static List<CultureDef> SweepCultures()
+        {
+            var all = new List<CultureDef>();
+            foreach (var s in Seeds) all.AddRange(World(s).Cultures);
+            return all;
         }
 
-        public static RawDocs Raw()
+        /// <summary>Raw documents keyed by file name, for tests that corrupt one and expect the loader to refuse it.</summary>
+        public static Dictionary<string, string> Raw()
         {
-            string dir = DataDir();
-            var raw = new RawDocs();
-            var files = Directory.GetFiles(Path.Combine(dir, LoreBible.CulturesFolder), "*.json");
-            System.Array.Sort(files, System.StringComparer.Ordinal);
-            foreach (var f in files) raw.Cultures.Add(new KeyValuePair<string, string>(Path.GetFileName(f), File.ReadAllText(f)));
-            raw.Factions = File.ReadAllText(Path.Combine(dir, LoreBible.FactionsFile));
-            raw.Events = File.ReadAllText(Path.Combine(dir, LoreBible.EventsFile));
-            raw.Motifs = File.ReadAllText(Path.Combine(dir, LoreBible.MotifsFile));
-            raw.Moods = File.ReadAllText(Path.Combine(dir, LoreBible.MoodsFile));
-            raw.Eras = File.ReadAllText(Path.Combine(dir, LoreBible.ErasFile));
-            raw.Legends = File.ReadAllText(Path.Combine(dir, LoreBible.LegendsFile));
-            raw.Style = File.ReadAllText(Path.Combine(dir, LoreBible.StyleFile));
-            return raw;
+            var docs = new Dictionary<string, string>();
+            foreach (var f in LoreBible.Files) docs[f] = File.ReadAllText(Path.Combine(DataDir(), f));
+            return docs;
         }
     }
 }

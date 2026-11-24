@@ -24,7 +24,7 @@ namespace Relic.Items
         /// <summary>Relative path of the narration style guide (docs/lore/style-guide.md).</summary>
         public static readonly string StyleGuidePath = Path.Combine("docs", "lore", "style-guide.md");
 
-        /// <summary>The Bible every generator uses unless one is passed explicitly.</summary>
+        /// <summary>The lore constitution (rules and templates; no cultures). Worlds come from <see cref="ForWorld"/>.</summary>
         public static LoreBible Default
         {
             get
@@ -40,6 +40,9 @@ namespace Relic.Items
                 }
             }
         }
+
+        /// <summary>The default constitution instantiated for one world seed (its cultures and prehistory).</summary>
+        public static LoreBible ForWorld(ulong worldSeed) => Default.ForWorld(worldSeed);
 
         /// <summary>The default Bible, or null when none can be found (style checks then use the Items lists only).</summary>
         public static LoreBible TryDefault()

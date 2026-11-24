@@ -8,6 +8,8 @@ namespace Relic.Lore.Tests
     public class NameGeneratorTests
     {
         static LoreBible B => LoreTestData.Bible;
+        static List<CultureDef> Cultures => _cultures ?? (_cultures = LoreTestData.SweepCultures());
+        static List<CultureDef> _cultures;
         static readonly Regex Letters = new Regex("^[A-Za-z]+$");
 
         static NameGenerator Gen(CultureDef c) => new NameGenerator(c, B.Style);
@@ -15,7 +17,7 @@ namespace Relic.Lore.Tests
         [Test]
         public void NamesAreDeterministicPerSeed()
         {
-            foreach (var c in B.Cultures)
+            foreach (var c in Cultures)
             {
                 var a = Gen(c);
                 var b = Gen(c);
@@ -33,9 +35,10 @@ namespace Relic.Lore.Tests
         [Test]
         public void CulturesSoundDifferentFromEachOther()
         {
-            foreach (var c in B.Cultures)
+            foreach (var world in LoreTestData.Seeds)
+            foreach (var c in LoreTestData.World(world).Cultures)
             {
-                var others = B.Cultures.FindAll(o => o != c);
+                var others = LoreTestData.World(world).Cultures.FindAll(o => o.Id != c.Id);
                 int same = 0;
                 for (ulong seed = 0; seed < 100; seed++)
                     foreach (var o in others) if (Gen(c).Person(seed) == Gen(o).Person(seed)) same++;
@@ -46,7 +49,7 @@ namespace Relic.Lore.Tests
         [Test]
         public void NamesVary()
         {
-            foreach (var c in B.Cultures)
+            foreach (var c in Cultures)
             {
                 var g = Gen(c);
                 var people = new HashSet<string>();
@@ -60,7 +63,7 @@ namespace Relic.Lore.Tests
         [Test]
         public void NamesArePlausible()
         {
-            foreach (var c in B.Cultures)
+            foreach (var c in Cultures)
             {
                 var g = Gen(c);
                 var p = c.Phonology;
@@ -100,11 +103,36 @@ namespace Relic.Lore.Tests
         [Test]
         public void FallbackNamesArePlausible()
         {
-            foreach (var c in B.Cultures)
+            foreach (var c in Cultures)
             {
                 var g = Gen(c);
                 Assert.IsTrue(g.IsPlausible(g.Fallback()), c.Id + " fallback '" + g.Fallback() + "'");
             }
+        }
+
+        [Test]
+        public void PhonologyFamiliesSoundDistinct()
+        {
+            // Whole families: across 300 seeds, two families almost never produce the same name.
+            var fams = B.Phonologies;
+            Assert.That(fams.Count, Is.GreaterThanOrEqualTo(5), "phonology families");
+            var sets = new List<HashSet<string>>();
+            foreach (var f in fams)
+            {
+                var g = Gen(new CultureDef { Id = "fam-" + f.Id, Phonology = f.Phonology });
+                var set = new HashSet<string>();
+                for (ulong seed = 0; seed < 300; seed++) set.Add(g.Person(seed).Split(' ')[0]);
+                Assert.Greater(set.Count, 150, f.Id + " names vary");
+                foreach (var n in set) Assert.IsTrue(g.IsPlausible(n), f.Id + ": " + n);
+                sets.Add(set);
+            }
+            for (int i = 0; i < sets.Count; i++)
+                for (int j = i + 1; j < sets.Count; j++)
+                {
+                    var shared = new HashSet<string>(sets[i]);
+                    shared.IntersectWith(sets[j]);
+                    Assert.Less(shared.Count, sets[i].Count / 10, fams[i].Id + " and " + fams[j].Id + " share too many names");
+                }
         }
 
         [Test]

@@ -3,17 +3,23 @@ using System.Collections.Generic;
 namespace Relic.Lore
 {
     /// <summary>
-    /// One culture of the Wide (docs/lore/cultures.md). Loaded from Data/Cultures/&lt;id&gt;.json.
+    /// One culture of a world, generated per world seed by <see cref="CultureGenerator"/> from a culture template.
     /// Generators read the structured lists; the LLM gets the short prose fields as context.
     /// </summary>
     public sealed class CultureDef
     {
         public string Id;
         public string Name;
-        /// <summary>Adjective form: "Wendle bread", "Solannish glass".</summary>
+        /// <summary>Adjective form: "Bramwen bread", "Corellish glass".</summary>
         public string Adjective;
         /// <summary>One line: who they are.</summary>
         public string Identity;
+        /// <summary>The culture template it was generated from.</summary>
+        public string Template;
+        /// <summary>The phonology family its names come from.</summary>
+        public string PhonologyFamily;
+        /// <summary>Two sentences on how the culture feels, for prompts and docs.</summary>
+        public string Mood;
 
         /// <summary>Region families this culture settles, strongest first. Never empty.</summary>
         public List<LoreFamily> Families = new List<LoreFamily>();
@@ -34,6 +40,8 @@ namespace Relic.Lore
 
         /// <summary>Item forms this culture makes ("bell", "kite-blade"); Items maps them to bases.</summary>
         public List<string> ItemForms = new List<string>();
+        /// <summary>What each item form is (base type and relic kit), so Items can map it.</summary>
+        public List<FormTag> FormTags = new List<FormTag>();
         /// <summary>Motif ids (motifs.json) this culture favors.</summary>
         public List<string> Motifs = new List<string>();
         public ItemNaming ItemNaming = new ItemNaming();

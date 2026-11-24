@@ -178,8 +178,8 @@ namespace Relic.Items.Tests
         [Test]
         public void ThemePickerUsesCultureMotifsAndBrightMoods()
         {
-            var bible = LoreSource.Default;
-            var culture = bible.Culture("solanne");
+            var bible = StubWorld.Create(2026).Bible;
+            var culture = bible.Cultures.Find(c => c.Motifs.Contains("tide")) ?? bible.Cultures[0];
             int bright = 0, inCulture = 0;
             for (ulong s = 0; s < 4000; s++)
             {

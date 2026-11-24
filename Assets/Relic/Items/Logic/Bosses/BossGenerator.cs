@@ -196,8 +196,8 @@ namespace Relic.Items.Bosses
 
             // A boss belongs to the people of its region and is named in their phonology. Most are
             // guardians (canon: "many bosses are wild guardians rather than villains"); about three in
-            // ten are somber: constructs of the Quarrel, or things left alone in the Hush.
-            var bible = world.Bible ?? LoreSource.Default;
+            // ten are somber: old constructs from a long-ago war, or things left alone in the quiet years.
+            var bible = world.Lore;
             var culture = bible.Culture(region.Culture) ?? bible.Cultures[0];
             var tone = Relic.Lore.MoodPicker.PickTone(ref rng, bible.Moods.BrightShare);
             string name = new Relic.Lore.NameGenerator(culture, bible.Style).Person(ref rng);

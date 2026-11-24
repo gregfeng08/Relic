@@ -6,30 +6,41 @@ namespace Relic.Lore.Tests
     /// <summary>The loader is strict: bad data is refused with a message, never guessed at.</summary>
     public class LoreLoaderTests
     {
+        static LoreBible Load(Dictionary<string, string> raw) => LoreBible.FromJson(raw);
+
         [Test]
         public void RawDocumentsLoadTheSameAsTheDirectory()
         {
-            var b = LoreTestData.Raw().Load();
-            Assert.AreEqual(LoreTestData.Bible.Cultures.Count, b.Cultures.Count);
-            Assert.AreEqual(LoreJson.Serialize(LoreTestData.Bible.Cultures), LoreJson.Serialize(b.Cultures));
+            var b = Load(LoreTestData.Raw());
+            Assert.AreEqual(LoreJson.Serialize(LoreTestData.Bible.CultureTemplates), LoreJson.Serialize(b.CultureTemplates));
+            Assert.AreEqual(LoreJson.Serialize(LoreTestData.Bible.ForWorld(5).Cultures), LoreJson.Serialize(b.ForWorld(5).Cultures));
         }
 
         [Test]
-        public void CultureOrderDoesNotDependOnInputOrder()
+        public void TheConstitutionHoldsNoStory()
+        {
+            var b = LoreTestData.Bible;
+            Assert.IsFalse(b.IsWorld);
+            Assert.IsEmpty(b.Cultures, "cultures are generated per world");
+            Assert.IsEmpty(b.Eras, "eras are generated per world");
+            Assert.IsEmpty(b.Legends, "legends are generated per world");
+        }
+
+        [Test]
+        public void MissingDocumentIsRejected()
         {
             var raw = LoreTestData.Raw();
-            raw.Cultures.Reverse();
-            var b = raw.Load();
-            for (int i = 1; i < b.Cultures.Count; i++)
-                Assert.Less(string.CompareOrdinal(b.Cultures[i - 1].Id, b.Cultures[i].Id), 0);
+            raw.Remove(LoreBible.FormsFile);
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
+            StringAssert.Contains(LoreBible.FormsFile, ex.Message);
         }
 
         [Test]
         public void UnknownFieldIsRejected()
         {
             var raw = LoreTestData.Raw();
-            raw.Style = raw.Style.Replace("\"maxSentenceWords\"", "\"maxSentenceWordz\"");
-            var ex = Assert.Throws<LoreDataException>(() => raw.Load());
+            raw[LoreBible.StyleFile] = raw[LoreBible.StyleFile].Replace("\"maxSentenceWords\"", "\"maxSentenceWordz\"");
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
             StringAssert.Contains("style.json", ex.Message);
         }
 
@@ -37,25 +48,24 @@ namespace Relic.Lore.Tests
         public void UnknownEnumIsRejected()
         {
             var raw = LoreTestData.Raw();
-            raw.Motifs = raw.Motifs.Replace("\"Soaked\"", "\"Drenched\"");
-            Assert.Throws<LoreDataException>(() => raw.Load());
+            raw[LoreBible.MotifsFile] = raw[LoreBible.MotifsFile].Replace("\"Soaked\"", "\"Drenched\"");
+            Assert.Throws<LoreDataException>(() => Load(raw));
         }
 
         [Test]
         public void UnknownRegionFamilyIsRejected()
         {
             var raw = LoreTestData.Raw();
-            var first = raw.Cultures[0];
-            raw.Cultures[0] = new KeyValuePair<string, string>(first.Key, first.Value.Replace("\"families\": [\"", "\"families\": [\"Volcano\", \""));
-            Assert.Throws<LoreDataException>(() => raw.Load());
+            raw[LoreBible.CultureTemplatesFile] = raw[LoreBible.CultureTemplatesFile].Replace("\"families\": [\"Meadow\"", "\"families\": [\"Volcano\", \"Meadow\"");
+            Assert.Throws<LoreDataException>(() => Load(raw));
         }
 
         [Test]
         public void DuplicateIdIsRejected()
         {
             var raw = LoreTestData.Raw();
-            raw.Cultures.Add(raw.Cultures[0]);
-            var ex = Assert.Throws<LoreDataException>(() => raw.Load());
+            raw[LoreBible.CultureTemplatesFile] = raw[LoreBible.CultureTemplatesFile].Replace("\"id\": \"grove-tenders\"", "\"id\": \"meadow-growers\"");
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
             StringAssert.Contains("duplicate", ex.Message);
         }
 
@@ -63,17 +73,35 @@ namespace Relic.Lore.Tests
         public void DanglingReferenceIsRejected()
         {
             var raw = LoreTestData.Raw();
-            raw.Legends = raw.Legends.Replace("\"related\": [\"iron-sentence\"]", "\"related\": [\"no-such-legend\"]");
-            var ex = Assert.Throws<LoreDataException>(() => raw.Load());
-            StringAssert.Contains("no-such-legend", ex.Message);
+            raw[LoreBible.EventsFile] = raw[LoreBible.EventsFile].Replace("\"eras\": [\"strife\"]", "\"eras\": [\"no-such-era\"]");
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
+            StringAssert.Contains("no-such-era", ex.Message);
+        }
+
+        [Test]
+        public void UntaggedFormIsRejected()
+        {
+            var raw = LoreTestData.Raw();
+            raw[LoreBible.CultureTemplatesFile] = raw[LoreBible.CultureTemplatesFile].Replace("\"pie-tin buckler\"", "\"pie-tin hat\"");
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
+            StringAssert.Contains("pie-tin hat", ex.Message);
+        }
+
+        [Test]
+        public void TemplateWithoutMetalsIsRejected()
+        {
+            var raw = LoreTestData.Raw();
+            raw[LoreBible.CultureTemplatesFile] = raw[LoreBible.CultureTemplatesFile].Replace("\"metals\": [\"brass\", \"pewter\", \"iron\"]", "\"metals\": []");
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
+            StringAssert.Contains("metals", ex.Message);
         }
 
         [Test]
         public void UndeclaredTemplateSlotIsRejected()
         {
             var raw = LoreTestData.Raw();
-            raw.Events = raw.Events.Replace("The Founding of {place}", "The Founding of {town}");
-            var ex = Assert.Throws<LoreDataException>(() => raw.Load());
+            raw[LoreBible.EventsFile] = raw[LoreBible.EventsFile].Replace("The Founding of {place}", "The Founding of {town}");
+            var ex = Assert.Throws<LoreDataException>(() => Load(raw));
             StringAssert.Contains("{town}", ex.Message);
         }
 

@@ -26,7 +26,7 @@ namespace Relic.Items.Bosses
         public string[] Hazards;
         /// <summary>Guardian lore, the usual case (canon: many bosses are wild guardians, not villains). Placeholders: {name} {region} {landmark} {faction} {event} {figure} {culture}.</summary>
         public string[] LoreTemplates;
-        /// <summary>The somber minority: old constructs of the Quarrel, things left alone in the Hush.</summary>
+        /// <summary>The somber minority: old constructs from a long-ago war, things left alone in the quiet years.</summary>
         public string[] SomberLore;
     }
 
@@ -47,12 +47,12 @@ namespace Relic.Items.Bosses
                 Hazards = new[] { "shelves that topple when struck", "ink pools that leave footprints" },
                 LoreTemplates = new[]
                 {
-                    "{name} has kept the reading room at {landmark} since the Hush, long after {faction} stopped sending readers. It still shushes visitors.",
+                    "{name} has kept the reading room at {landmark} since the quiet years, long after {faction} stopped sending readers. It still shushes visitors.",
                     "The {culture} say {name} was a reading-owl once. Now it guards every book in {region} and lends none of them.",
                 },
                 SomberLore = new[]
                 {
-                    "{name} was set to guard an Imperative vault in {region} during the Quarrel. Nobody ever came back to tell it to stop.",
+                    "{name} was set to guard a sealed vault in {region} during an old war. Nobody ever came back to tell it to stop.",
                 },
             },
             new BossArchetype
@@ -72,7 +72,7 @@ namespace Relic.Items.Bosses
                 },
                 SomberLore = new[]
                 {
-                    "{name} is an Imperative construct from the Quarrel, still holding {landmark} against an army that went home long ago.",
+                    "{name} is an old construct from a long-ago war, still holding {landmark} against an army that went home long ago.",
                 },
             },
             new BossArchetype
@@ -112,7 +112,7 @@ namespace Relic.Items.Bosses
                 },
                 SomberLore = new[]
                 {
-                    "{name} grew huge in the quiet of the Hush, and she has not forgiven {region} for leaving her alone.",
+                    "{name} grew huge in the long quiet, and she has not forgiven {region} for leaving her alone.",
                 },
             },
             new BossArchetype
@@ -132,7 +132,7 @@ namespace Relic.Items.Bosses
                 },
                 SomberLore = new[]
                 {
-                    "{name} was bound to a weir during the Quarrel and never released. The water at {landmark} still answers to it.",
+                    "{name} was bound to a weir during an old war and never released. The water at {landmark} still answers to it.",
                 },
             },
             new BossArchetype
@@ -152,7 +152,7 @@ namespace Relic.Items.Bosses
                 },
                 SomberLore = new[]
                 {
-                    "{name} was an Imperative forge-construct. It still hammers out orders at {landmark}, though nobody comes to collect them.",
+                    "{name} was an old forge-construct. It still hammers out orders at {landmark}, though nobody comes to collect them.",
                 },
             },
             new BossArchetype
@@ -192,7 +192,7 @@ namespace Relic.Items.Bosses
                 },
                 SomberLore = new[]
                 {
-                    "{name} kept up the court at {landmark} after everyone left in the Hush. It is still waiting for the guests.",
+                    "{name} kept up the court at {landmark} after everyone left in the quiet years. It is still waiting for the guests.",
                 },
             },
         };

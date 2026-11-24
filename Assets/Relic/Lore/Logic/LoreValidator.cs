@@ -17,11 +17,19 @@ namespace Relic.Lore
 
         public static readonly string[] ItemNameSlots = { "maker", "form", "place", "epithet", "adjective", "word" };
         public static readonly string[] FactionNameSlots = { "place", "founder", "culture", "word" };
-        public static readonly string[] MoodLineSlots = { "maker", "place", "culture", "form", "word", "legend", "faction" };
+        public static readonly string[] MoodLineSlots = { "maker", "place", "culture", "form", "word", "legend", "faction", "era" };
+        public static readonly string[] CultureMoodSlots = { "people", "adjective" };
+        public static readonly string[] EraNameSlots = { "word" };
+        public static readonly string[] EraSummarySlots = { "culture", "founder", "place", "word" };
+        public static readonly string[] FounderSummarySlots = { "founder", "culture", "place", "craft", "form", "value" };
+        public static readonly string[] ArtifactSummarySlots = { "culture", "form", "place", "era", "maker" };
+        /// <summary>Items.BaseType names a form tag may use (Items checks they parse).</summary>
+        public static readonly string[] BaseNames = { "Sword", "Greatsword", "Bow", "Staff", "Tome", "LightArmor", "MediumArmor", "HeavyArmor", "Trinket", "Relic" };
 
         public static List<string> Validate(LoreBible b)
         {
             var e = new List<string>();
+            Rules(e, b);
             Ids(e, "culture", b.Cultures, c => c.Id);
             Ids(e, "faction", b.Factions, f => f.Id);
             Ids(e, "event", b.Events, x => x.Id);
@@ -35,12 +43,109 @@ namespace Relic.Lore
             foreach (var t in b.Events) Event(e, b, t);
             foreach (var m in b.Motifs) Motif(e, b, m);
             Moods(e, b.Moods);
-            Eras(e, b.Eras);
+            Eras(e, b, b.Eras);
             foreach (var l in b.Legends) Legend(e, b, l);
             if (b.Style.BannedNameSubstrings.Count == 0) e.Add("style: bannedNameSubstrings is empty");
             foreach (var s in b.Style.BannedNameSubstrings)
                 if (s != s.ToLowerInvariant()) e.Add("style: banned name substring '" + s + "' must be lower case");
             return e;
+        }
+
+        /// <summary>The constitution: phonology families, form tags, culture and era templates.</summary>
+        static void Rules(List<string> e, LoreBible b)
+        {
+            Ids(e, "phonology", b.Phonologies, p => p.Id);
+            Ids(e, "culture template", b.CultureTemplates, t => t.Id);
+            Ids(e, "era template", b.PrehistoryRules.Eras, t => t.Id);
+            foreach (var p in b.Phonologies)
+            {
+                string w = "phonology " + p.Id;
+                Need(e, w, "label", p.Label);
+                NeedAny(e, w, "adjectiveEndings", p.AdjectiveEndings);
+                foreach (var s in p.AdjectiveEndings)
+                    if (s == null || (s.Length > 0 && !SyllableRx.IsMatch(s))) e.Add(w + ": bad adjective ending '" + s + "'");
+                Phonology(e, w, p.Phonology);
+            }
+            foreach (var f in b.Forms)
+            {
+                string w = "form '" + f.Form + "'";
+                Need(e, w, "form", f.Form);
+                if (Array.IndexOf(BaseNames, f.Base) < 0) e.Add(w + ": unknown base '" + f.Base + "'");
+                if ((f.Base == "Relic") != !string.IsNullOrEmpty(f.Kit)) e.Add(w + ": relic forms (and only they) need a kit");
+            }
+            if (b.CultureTemplates.Count < CultureGenerator.MinCultures)
+                e.Add("culture templates: need at least " + CultureGenerator.MinCultures);
+            var covered = new HashSet<LoreFamily>();
+            foreach (var t in b.CultureTemplates) CultureTemplate(e, b, t, covered);
+            foreach (LoreFamily f in Enum.GetValues(typeof(LoreFamily)))
+                if (b.CultureTemplates.Count > 0 && !covered.Contains(f)) e.Add("culture templates: no template likes " + f);
+
+            var pr = b.PrehistoryRules;
+            foreach (var t in pr.Eras)
+            {
+                string w = "era template " + t.Id;
+                NeedAny(e, w, "namePatterns", t.NamePatterns);
+                NeedAny(e, w, "summaries", t.Summaries);
+                NeedAny(e, w, "echoes", t.Echoes);
+                if (t.Weight <= 0) e.Add(w + ": weight must be positive");
+                foreach (var p in t.NamePatterns)
+                {
+                    Slots(e, w + " name", p, EraNameSlots);
+                    if (TemplateText.SlotsIn(p).Count > 0 && t.Words.Count == 0) e.Add(w + ": name uses {word} but words is empty");
+                }
+                foreach (var s in t.Summaries) Slots(e, w + " summary", s, EraSummarySlots);
+            }
+            if (!pr.Eras.Exists(x => x.Position == EraPosition.First)) e.Add("prehistory: no First era template");
+            if (!pr.Eras.Exists(x => x.Position == EraPosition.Last)) e.Add("prehistory: no Last era template");
+            if (pr.Eras.FindAll(x => x.Position == EraPosition.Middle).Count < 2) e.Add("prehistory: need at least two Middle era templates");
+            NeedAny(e, "prehistory", "founderSummaries", pr.FounderSummaries);
+            NeedAny(e, "prehistory", "artifactSummaries", pr.ArtifactSummaries);
+            NeedAny(e, "prehistory", "brightEpithets", pr.BrightEpithets);
+            NeedAny(e, "prehistory", "somberEpithets", pr.SomberEpithets);
+            foreach (var s in pr.FounderSummaries) Slots(e, "prehistory founder summary", s, FounderSummarySlots);
+            foreach (var s in pr.ArtifactSummaries) Slots(e, "prehistory artifact summary", s, ArtifactSummarySlots);
+        }
+
+        static void CultureTemplate(List<string> e, LoreBible b, CultureTemplate t, HashSet<LoreFamily> covered)
+        {
+            string w = "culture template " + t.Id;
+            Need(e, w, "label", t.Label);
+            if (t.Weight <= 0) e.Add(w + ": weight must be positive");
+            NeedAny(e, w, "families", t.Families);
+            covered.UnionWith(t.Families);
+            NeedAny(e, w, "climates", t.Climates);
+            NeedAny(e, w, "phonologies", t.Phonologies);
+            foreach (var id in t.Phonologies) if (b.Phonology(id) == null) e.Add(w + ": unknown phonology '" + id + "'");
+            NeedAny(e, w, "identities", t.Identities);
+            NeedAny(e, w, "architecture", t.Architecture);
+            NeedAny(e, w, "crafts", t.Crafts);
+            NeedAny(e, w, "materials", t.Materials);
+            NeedAny(e, w, "metals", t.Metals);
+            NeedAny(e, w, "foods", t.Foods);
+            NeedAny(e, w, "festivals", t.Festivals);
+            NeedAny(e, w, "values", t.Values);
+            NeedAny(e, w, "prides", t.Prides);
+            NeedAny(e, w, "factions", t.Factions);
+            NeedAny(e, w, "motifs", t.Motifs);
+            NeedAny(e, w, "founderEpithets", t.FounderEpithets);
+            if (t.MoodLines.Count < 2) e.Add(w + ": needs at least two mood lines");
+            foreach (var l in t.MoodLines) Slots(e, w + " mood line", l, CultureMoodSlots);
+            foreach (var id in t.Factions) if (b.Faction(id) == null) e.Add(w + ": unknown faction '" + id + "'");
+            foreach (var id in t.Motifs) if (b.Motif(id) == null) e.Add(w + ": unknown motif '" + id + "'");
+            int relic = 0;
+            foreach (var f in t.ItemForms)
+            {
+                var tags = b.FormTagsOf(f);
+                if (tags.Count == 0) e.Add(w + ": form '" + f + "' has no tag in forms.json");
+                if (tags.Exists(x => x.Base == "Relic")) relic++;
+            }
+            if (relic < 2) e.Add(w + ": needs at least two relic forms");
+            var n = t.ItemNaming;
+            NeedAny(e, w, "itemNaming.patterns", n.Patterns);
+            NeedAny(e, w, "itemNaming.epithets", n.Epithets);
+            NeedAny(e, w, "itemNaming.adjectives", n.Adjectives);
+            NeedAny(e, w, "itemNaming.makersMarks", n.MakersMarks);
+            foreach (var p in n.Patterns) Slots(e, w + " item pattern", p, ItemNameSlots);
         }
 
         static void Ids<T>(List<string> e, string kind, List<T> items, Func<T, string> id)
@@ -79,6 +184,9 @@ namespace Relic.Lore
             Need(e, w, "identity", c.Identity);
             Need(e, w, "architecture", c.Architecture);
             Need(e, w, "pride", c.Pride);
+            Need(e, w, "mood", c.Mood);
+            foreach (var f in c.ItemForms)
+                if (!c.FormTags.Exists(x => string.Equals(x.Form, f, StringComparison.OrdinalIgnoreCase))) e.Add(w + ": form '" + f + "' has no tag");
             NeedAny(e, w, "families", c.Families);
             if (new HashSet<LoreFamily>(c.Families).Count != c.Families.Count) e.Add(w + ": duplicate family");
             NeedAny(e, w, "climates", c.Climates);
@@ -160,7 +268,7 @@ namespace Relic.Lore
             NeedAny(e, w, "namePatterns", t.NamePatterns);
             NeedAny(e, w, "leaves", t.Leaves);
             if (t.Weight <= 0) e.Add(w + ": weight must be positive");
-            foreach (var id in t.Eras) if (b.Era(id) == null) e.Add(w + ": unknown era '" + id + "'");
+            foreach (var id in t.Eras) if (b.EraTemplate(id) == null) e.Add(w + ": unknown era template '" + id + "'");
             var names = new HashSet<string>(StringComparer.Ordinal);
             foreach (var s in t.Slots)
                 if (string.IsNullOrEmpty(s.Name) || !names.Add(s.Name)) e.Add(w + ": bad or duplicate slot '" + s.Name + "'");
@@ -208,7 +316,7 @@ namespace Relic.Lore
             if (!bright || !somber) e.Add("moods: need at least one Bright and one Somber mood");
         }
 
-        static void Eras(List<string> e, List<EraDef> eras)
+        static void Eras(List<string> e, LoreBible b, List<EraDef> eras)
         {
             var orders = new HashSet<int>();
             foreach (var x in eras)
@@ -218,6 +326,7 @@ namespace Relic.Lore
                 Need(e, w, "summary", x.Summary);
                 NeedAny(e, w, "echoes", x.Echoes);
                 if (x.StartYearsAgo < x.EndYearsAgo) e.Add(w + ": starts after it ends");
+                if (b.EraTemplate(x.Template) == null) e.Add(w + ": unknown era template '" + x.Template + "'");
                 if (x.Order < 0 || x.Order >= eras.Count || !orders.Add(x.Order)) e.Add(w + ": orders must be 0..n-1, unique");
             }
         }

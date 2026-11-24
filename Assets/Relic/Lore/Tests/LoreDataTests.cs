@@ -7,6 +7,7 @@ using Relic.World.Regions;
 
 namespace Relic.Lore.Tests
 {
+    /// <summary>The constitution's data: complete, consistent, bright, and free of fixed story.</summary>
     public class LoreDataTests
     {
         static LoreBible B => LoreTestData.Bible;
@@ -14,9 +15,9 @@ namespace Relic.Lore.Tests
         [Test]
         public void AllDataLoads()
         {
-            Assert.That(B.Cultures.Count, Is.InRange(6, 8), "cultures");
-            Assert.That(B.Eras.Count, Is.InRange(3, 4), "eras");
-            Assert.That(B.Legends.Count, Is.InRange(6, 10), "legends");
+            Assert.That(B.CultureTemplates.Count, Is.GreaterThanOrEqualTo(CultureGenerator.MaxCultures), "culture templates (enough for 8 distinct cultures)");
+            Assert.That(B.Phonologies.Count, Is.GreaterThanOrEqualTo(5), "phonology families");
+            Assert.That(B.PrehistoryRules.Eras.Count, Is.GreaterThanOrEqualTo(4), "era templates");
             Assert.That(B.Factions.Count, Is.GreaterThanOrEqualTo(10), "faction archetypes");
             Assert.That(B.Motifs.Count, Is.GreaterThanOrEqualTo(7), "motifs");
             Assert.IsEmpty(LoreValidator.Validate(B));
@@ -25,14 +26,14 @@ namespace Relic.Lore.Tests
         [Test]
         public void NoDuplicateIds()
         {
-            AssertUnique("culture", B.Cultures.Select(x => x.Id));
+            AssertUnique("culture template", B.CultureTemplates.Select(x => x.Id));
+            AssertUnique("phonology", B.Phonologies.Select(x => x.Id));
+            AssertUnique("era template", B.PrehistoryRules.Eras.Select(x => x.Id));
             AssertUnique("faction", B.Factions.Select(x => x.Id));
             AssertUnique("event", B.Events.Select(x => x.Id));
             AssertUnique("motif", B.Motifs.Select(x => x.Id));
             AssertUnique("mood", B.Moods.Moods.Select(x => x.Id));
-            AssertUnique("era", B.Eras.Select(x => x.Id));
-            AssertUnique("legend", B.Legends.Select(x => x.Id));
-            AssertUnique("culture name", B.Cultures.Select(x => x.Name));
+            AssertUnique("form tag", B.Forms.Select(x => x.Form + "/" + x.Base));
         }
 
         static void AssertUnique(string kind, IEnumerable<string> ids)
@@ -50,24 +51,10 @@ namespace Relic.Lore.Tests
         }
 
         [Test]
-        public void EveryCultureReferencesValidRegionFamilies()
+        public void EveryRegionFamilyHasAHomeTemplate()
         {
-            var world = new HashSet<string>(Enum.GetNames(typeof(RegionFamily)));
-            foreach (var c in B.Cultures)
-            {
-                Assert.IsNotEmpty(c.Families, c.Id);
-                foreach (var f in c.Families) Assert.IsTrue(world.Contains(f.ToString()), c.Id + ": " + f);
-            }
-        }
-
-        [Test]
-        public void EveryRegionFamilyHasAHomeCulture()
-        {
-            foreach (RegionFamily f in Enum.GetValues(typeof(RegionFamily)))
-            {
-                var lf = (LoreFamily)Enum.Parse(typeof(LoreFamily), f.ToString());
-                Assert.IsTrue(B.Cultures.Any(c => c.Families[0] == lf), "no culture calls " + f + " home");
-            }
+            foreach (LoreFamily f in Enum.GetValues(typeof(LoreFamily)))
+                Assert.IsTrue(B.CultureTemplates.Any(t => t.Families[0] == f), "no culture template calls " + f + " home");
         }
 
         [Test]
@@ -79,6 +66,8 @@ namespace Relic.Lore.Tests
                 Assert.IsTrue(B.Events.Any(e => e.Kind == k), "no event template of kind " + k);
             foreach (FactionKind k in Enum.GetValues(typeof(FactionKind)))
                 Assert.IsTrue(B.Factions.Any(f => f.Kind == k), "no faction archetype of kind " + k);
+            foreach (var era in B.PrehistoryRules.Eras)
+                Assert.IsTrue(B.Events.Any(e => e.Eras.Contains(era.Id)), "no event template fits era " + era.Id);
         }
 
         [Test]
@@ -86,8 +75,11 @@ namespace Relic.Lore.Tests
         {
             double brightFactions = B.Factions.Where(f => f.Tone == Tone.Bright).Sum(f => f.Weight) / (double)B.Factions.Sum(f => f.Weight);
             double brightEvents = B.Events.Where(e => e.Tone == Tone.Bright).Sum(e => e.Weight) / (double)B.Events.Sum(e => e.Weight);
+            double brightEras = B.PrehistoryRules.Eras.Where(e => e.Position == EraPosition.Middle && e.Tone == Tone.Bright).Sum(e => e.Weight)
+                / (double)B.PrehistoryRules.Eras.Where(e => e.Position == EraPosition.Middle).Sum(e => e.Weight);
             Assert.That(brightFactions, Is.GreaterThanOrEqualTo(0.7), "faction weight share");
             Assert.That(brightEvents, Is.GreaterThanOrEqualTo(0.7), "event weight share");
+            Assert.That(brightEras, Is.GreaterThanOrEqualTo(0.5), "middle-era weight share");
             foreach (var e in B.Events.Where(e => e.Kind == EventKind.War || e.Kind == EventKind.Disaster))
                 Assert.AreEqual(1, e.Weight, e.Id + " should be rare");
         }
@@ -95,25 +87,35 @@ namespace Relic.Lore.Tests
         [Test]
         public void DataContainsNoBannedWords()
         {
-            var docs = new Dictionary<string, object>
-            {
-                ["cultures"] = B.Cultures, ["factions"] = B.Factions, ["events"] = B.Events,
-                ["motifs"] = B.Motifs, ["moods"] = B.Moods, ["eras"] = B.Eras, ["legends"] = B.Legends,
-            };
-            foreach (var kv in docs)
+            foreach (var kv in Docs())
             {
                 var hits = TemplateText.BannedIn(LoreJson.Serialize(kv.Value), B.Style.BannedWords);
                 Assert.IsEmpty(hits, kv.Key + " uses banned words");
             }
         }
 
+        /// <summary>Decision 2026-11-18: the story is wiped. No fixed cultures, eras, legends or places survive in the data.</summary>
         [Test]
-        public void LegendsAreReferencedByCanonNames()
+        public void DataHoldsNoFixedStory()
         {
-            Assert.IsNotNull(B.Legend("old-hearth"));
-            Assert.IsNotNull(B.Legend("wren"));
-            Assert.IsNotNull(B.Culture("wendle"), "the origin sanctuary's culture");
-            Assert.AreEqual(LoreFamily.Meadow, B.Culture("wendle").Families[0], "the Lanternfold sits in Meadow at (0, 0)");
+            var wiped = new[]
+            {
+                "Wendle", "Aruvi", "Teskari", "Solann", "Ochrel", "Eskeln", "Lunnet", "Corvane", "Imperative", "Concord",
+                "Silent Field", "Iron Sentence", "Lanternfold", "Old Hearth", "Lamplit", "Morning Bell", "Maudry", "Wren", "Corro",
+                "Unfinished Map", "the Wide",
+            };
+            foreach (var kv in Docs())
+            {
+                string json = LoreJson.Serialize(kv.Value);
+                foreach (var w in wiped) StringAssert.DoesNotContain(w, json, kv.Key + " still names " + w);
+            }
         }
+
+        static Dictionary<string, object> Docs() => new Dictionary<string, object>
+        {
+            ["culture templates"] = B.CultureTemplates, ["phonology"] = B.Phonologies, ["forms"] = B.Forms,
+            ["prehistory"] = B.PrehistoryRules, ["factions"] = B.Factions, ["events"] = B.Events,
+            ["motifs"] = B.Motifs, ["moods"] = B.Moods,
+        };
     }
 }

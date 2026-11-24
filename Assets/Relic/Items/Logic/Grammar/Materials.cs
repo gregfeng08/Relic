@@ -81,8 +81,8 @@ namespace Relic.Items
             M("rime-iron", Metal, 5, "#9FB8C8", Resist, "never quite warms", glow: 0.1f),
             M("blued steel", Metal, 6, "#4D5D7A", Resist, "takes a blow and shrugs"),
             M("star-iron", Metal, 8, "#5A6378", Ins, "fell out of the sky, they say", glow: 0.2f),
-            M("riveted plate", Metal, 6, "#7D8189", Def, "riveted the old Concord way"),
-            M("Imperative iron", Metal, 7, "#55585E", Def, "made to obey; it still stands to attention", wear: 0.15f),
+            M("riveted plate", Metal, 6, "#7D8189", Def, "riveted the old way"),
+            M("construct iron", Metal, 7, "#55585E", Def, "made for an old construct; it still stands to attention", wear: 0.15f),
             // woods
             M("ash", Wood, 0, "#C8B08A", Stamina, "light in the hand"),
             M("oak", Wood, 0, "#9C7A4E", Hp, "solid as a door"),

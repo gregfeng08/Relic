@@ -142,7 +142,7 @@ namespace Relic.Items.Text
         {
             var s = b.Sentence;
             var w = b.World;
-            var bible = w.Bible ?? LoreSource.Default;
+            var bible = w.Lore;
             var tone = theme.Tone;
             // {legend} is always a person (artifacts can't walk or be known), in the item's tone where possible.
             var legends = bible.Legends.FindAll(l => l.Tone == tone && l.Kind == LegendKind.Figure);
@@ -162,6 +162,7 @@ namespace Relic.Items.Text
                 ["word"] = theme.Words[rng.Range(0, theme.Words.Count)],
                 ["legend"] = LoreSampler.LegendName(legend),
                 ["faction"] = faction.Name,
+                ["era"] = LoreSampler.PastEra(bible, tone, ref rng).Name,
             };
 
             // A mood line that names something real (a place, a faction, a legend) and keeps
@@ -189,14 +190,12 @@ namespace Relic.Items.Text
                 if (leadPool.Count == 0) leadPool = w.Regions;
                 var lead = leadPool[rng.Range(0, leadPool.Count)];
                 var leadFaction = w.Factions[rng.Range(0, w.Factions.Count)];
-                // Leads look back: bright ones to the Lamplit Age or the Hush, somber ones to the Quarrel or the Hush (never the present Rekindling).
-                var eras = bible.Eras.FindAll(e => tone == Tone.Somber ? (e.Id == "quarrel" || e.Id == "hush") : (e.Id == "lamplit" || e.Id == "hush"));
-                if (eras.Count == 0) eras = bible.Eras;
+                // Leads look back to a past era in the item's tone where the world has one (never the present).
                 var leadValues = new Dictionary<string, string>
                 {
                     ["lead"] = lead.Name,
                     ["leadFaction"] = leadFaction.Name,
-                    ["era"] = eras[rng.Range(0, eras.Count)].Name,
+                    ["era"] = LoreSampler.PastEra(bible, tone, ref rng).Name,
                     ["legend"] = legend.Name,
                 };
                 // Try the leads in a seeded order; keep the first that is short enough and, with the line, names a legend or era.

@@ -14,7 +14,7 @@ Touchstones for the *feel* (never borrow names or terms from them): Genshin's Mo
 4. **Be concrete.** Name the material, the food, the weather, the craft, the season. "Bell-bronze, green at the rim" beats "an ancient artifact of great power."
 5. **Somber is quiet, not grim.** Show loss through care: the knife kept polished, the lantern relit, the ribbon on a waycairn. No gore, no bodies, no torture, no despair.
 6. **Gentle humor, often.** A light touch every few lines: a pie judging that ended friendships, a bell that rings slightly flat on purpose. Never sarcastic, never mean, never modern.
-7. **Grounded magic.** Magic works because the world listens (see `canon.md`). Relics have power because they were used and loved. Don't write "mysterious power" or "ancient energies." Say what the thing *did* and who cared about it.
+7. **Grounded magic.** Magic works because the world pays attention, and spells are written incantations the Magister reads (see `constitution.md`). Relics have power because they were used and loved. Don't write "mysterious power" or "ancient energies." Say what the thing *did* and who cared about it.
 8. **Point somewhere.** Relic lore should name at least one real place from the context, so the player has a lead to follow.
 9. **Stay in the world.** No modern slang, no game terms ("buff," "DPS," "level up," "loot drop"), no fourth-wall jokes.
 
@@ -22,7 +22,7 @@ Touchstones for the *feel* (never borrow names or terms from them): Genshin's Mo
 - **Reading level:** roughly grade 6–8. Plain, common words; one unusual word per line at most (*belfry*, *waycairn* are fine).
 - **Sentences:** at most **22 words**, averaging 10–15. Vary the length. A short sentence after a long one lands well.
 - **Relic lore:** 1–3 sentences. **Inscriptions:** one sentence or less. **Rumors:** 1–2 sentences. **Place descriptions:** 2–4 sentences.
-- **Names:** item names are 1–5 words and follow the culture's naming patterns (`cultures.md`).
+- **Names:** item names are 1–5 words and follow the culture's naming patterns (generated per world from `culture-templates.md`).
 - **Active voice** where possible. "Teso cast it," not "it was cast by Teso."
 
 ## Banned words and phrases
@@ -42,8 +42,8 @@ Generated **names** have their own filter: rude fragments, grim words and existi
 1. **"Teso of Yenel Pass worked this bell for three winters and signed it where only another maker would look."** *Concrete, crafted, names a real place, and has a tiny secret.*
 2. **"Carry it anywhere near Halmere and it hums like a kettle about to boil. Nobody knows why, but the kettles there are excellent."** *Wonder plus gentle humor, and a lead.*
 3. **"Prize of the yearly race at Osai Terrace. Keti's Foundry have won it nine times and bring it up often."** *Friendly rivalry, community and a smile.*
-4. **"Found in a waycairn on the road past Ayan Boughs, with a faded ribbon still tied around it."** *Somber done right: quiet, caring, grounded in canon.*
-5. **"Dug out of a fallen lamp-tower near Mimick Landing, still warm. Nobody at the Ledger recognizes the hand that made it."** *Discovery that points to more discovery.*
+4. **"Found in a waycairn on the road past Ayan Boughs, with a faded ribbon still tied around it."** *Somber done right: quiet, caring, grounded in the constitution.*
+5. **"Dug out of a fallen lamp-tower near Mimick Landing, still warm. Nobody at the Reliquary recognizes the hand that made it."** *Discovery that points to more discovery.*
 
 ## Five bad lines
 1. ~~"Forged in the eternal fires of the abyss, this blade whispers of doom to all who wield it."~~ *Banned words, stock fantasy, grim, and nothing concrete.*

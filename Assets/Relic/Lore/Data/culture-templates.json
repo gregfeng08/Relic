@@ -1,0 +1,282 @@
+[
+  {
+    "id": "meadow-growers", "weight": 3, "label": "meadow farmers, millers and bakers",
+    "families": ["Meadow", "Forest", "Coast"], "climates": ["Temperate"], "phonologies": ["hearth", "harbor"],
+    "identities": ["Farmers, millers and bakers who think most problems improve with a pie and a long talk.", "Meadow folk who measure a year by its harvests and a neighbor by their bread."],
+    "architecture": ["Half-timbered cottages under deep thatch, round doors painted bright colors, and a windmill on every rise.", "Stone bridges with a bench in the middle for talking, and barns big enough to hold a dance."],
+    "crafts": ["baking", "milling", "cheesemaking", "beekeeping", "lantern-making", "quilting", "cider-pressing"],
+    "materials": ["oak", "wheat straw", "beeswax", "wool", "river stone", "ash", "quilted cotton"],
+    "metals": ["brass", "pewter", "iron"],
+    "foods": ["meat-and-onion pies", "honey cake", "hard cheeses", "apple cider", "griddle scones", "mushroom stew"],
+    "festivals": [
+      { "name": "the Lantern Night", "season": "late autumn", "description": "Every household hangs one lantern for each family member who traveled that year, and the whole valley glows." },
+      { "name": "the Hay Races", "season": "midsummer", "description": "Hay-bale races, a tug-of-war across the millpond, and a pie judging that has ended friendships." },
+      { "name": "First Furrow", "season": "spring", "description": "The oldest farmer cuts the first furrow while the children follow, planting wishes with the seed." }
+    ],
+    "values": ["hospitality", "neighborliness", "honest work", "a good story", "being home before dark"],
+    "prides": ["No traveler has ever left one of their inns hungry.", "Their first hearth has never once gone cold."],
+    "factions": ["growers", "brewers", "festival-keepers", "archivists", "hearthwardens", "wayfarers"],
+    "motifs": ["lantern", "bloom", "hive", "bell", "song", "thorn"],
+    "itemForms": ["lantern", "walking staff", "shepherd's crook", "sickle", "cleaver", "wool cloak", "quilted coat", "pie-tin buckler", "hand-bell", "sling", "longbow"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "The {epithet} {form}"],
+      "epithets": ["Harvest", "Hearthside", "Long-Rail", "First-Furrow", "Market-Day"],
+      "adjectives": ["Good", "Steady", "Honest", "Mended", "Well-Loved", "Homely"],
+      "makersMarks": ["a wheat-ear stamped where the hand rests", "a tiny pie burned or scratched somewhere hard to find", "the maker's initials inside a lantern shape"]
+    },
+    "moodLines": ["Ask the way in {adjective} country and you will be fed before you are answered.", "Their villages smell of bread at dawn and woodsmoke at dusk.", "Every quarrel here ends at the same long table.", "Even their scarecrows look well looked after.", "Some barns stand empty since the old roads closed, and someone still sweeps them."],
+    "founderEpithets": ["the Hearth-Lighter", "the First Baker", "the Furrow-Cutter", "the Kind"]
+  },
+  {
+    "id": "grove-tenders", "weight": 3, "label": "woodwrights and grove-tenders",
+    "families": ["Forest", "Marsh", "Meadow"], "climates": ["Humid", "Temperate"], "phonologies": ["grove", "reed"],
+    "identities": ["Woodwrights and grove-tenders who share their villages with spirits.", "Patient forest folk who grow their houses instead of building them."],
+    "architecture": ["Houses grown from living willow, rope bridges between great trees, and moth-lanterns on every branch.", "Lacquered shrines among the roots and walkways that wind up the trunks."],
+    "crafts": ["woodcarving", "lacquerwork", "bow-making", "herbal medicine", "moth-silk weaving", "mushroom farming"],
+    "materials": ["living willow", "red lacquer", "moth-silk", "amberwood", "birch bark", "river pearl", "yew", "pressed petals"],
+    "metals": ["bronze", "green copper", "silver"],
+    "foods": ["mushroom dumplings", "nut bread", "flower tea", "smoked river fish", "wild-berry preserves"],
+    "festivals": [
+      { "name": "Moth Lantern Night", "season": "late summer", "description": "Wish-carved lanterns float up into the canopy, and everyone pretends not to read their neighbors' wishes." },
+      { "name": "the Tending", "season": "autumn", "description": "The village asks the grove's patron spirit, very politely, how its year went." },
+      { "name": "First Leaf", "season": "spring", "description": "The first leaf of the year is pressed into the village book, with a note on who spotted it." }
+    ],
+    "values": ["patience", "care for living things", "listening", "taking only what you need"],
+    "prides": ["Their spirits trust them.", "A grove they look after never goes wild."],
+    "factions": ["spirit-keepers", "scribes", "growers", "archivists"],
+    "motifs": ["thorn", "bloom", "lantern", "mist", "ink", "hive"],
+    "itemForms": ["carved longbow", "lacquered staff", "moth-silk cloak", "seed-pouch charm", "bark-bound tome", "antler knife", "spirit mask", "wooden flute", "woven shield"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "{form} of the {word}"],
+      "epithets": ["Grove-Tended", "Moonleaf", "Rootborn", "Spirit-Gifted", "Dew-Bright"],
+      "adjectives": ["Patient", "Living", "Gentle", "Rooted", "Evergreen"],
+      "makersMarks": ["a leaf carved so finely it seems to move", "a drop of red lacquer shaped like a seed", "the maker's grove-sign pressed in where the hand rests"]
+    },
+    "moodLines": ["The {people} speak softly in the woods, because the woods are listening.", "Every doorway has a little dish of water for whatever spirit is passing.", "Their children learn the names of trees before the names of towns.", "A {adjective} grove hums faintly on still evenings.", "Some groves stopped answering long ago, and the {people} still leave them gifts."],
+    "founderEpithets": ["the Tree-Singer", "the First Tender", "the Patient", "the Grove-Friend"]
+  },
+  {
+    "id": "terrace-builders", "weight": 3, "label": "terrace-builders, tea growers and bellfounders",
+    "families": ["Highlands", "Frost", "Badlands"], "climates": ["Alpine", "Temperate"], "phonologies": ["terrace", "saga"],
+    "identities": ["Terrace-builders, tea growers, bellfounders and kite-flyers.", "Mountain folk who carved their fields into stairs and their stairs into poems."],
+    "architecture": ["Stepped stone terraces, curved tile roofs, and bells hung where the wind can ring them.", "Bridges strung from peak to peak, with a tea house at each end."],
+    "crafts": ["bellfounding", "tea growing", "stone carving", "kite making", "porcelain", "paper-making"],
+    "materials": ["granite", "porcelain", "kite-silk", "mountain cedar", "slate", "parchment"],
+    "metals": ["bell-bronze", "bronze", "steel"],
+    "foods": ["terrace tea", "steamed buns", "goat cheese", "pine-nut noodles", "plum wine"],
+    "festivals": [
+      { "name": "Kite Day", "season": "early autumn", "description": "Every family flies a kite with its wishes painted on, and the highest kite's wish is read aloud." },
+      { "name": "the Ringing", "season": "midwinter", "description": "Every bell in the valley rings once at dawn, in order, from the highest terrace down." },
+      { "name": "First Pick", "season": "spring", "description": "The first tea leaves are picked by the youngest and brewed for the oldest." }
+    ],
+    "values": ["patience", "precision", "keeping one's word", "climbing a little higher each year"],
+    "prides": ["Their bridges have stood for centuries, and they will mention this.", "Their bells can be heard three valleys away."],
+    "factions": ["bellfounders", "smiths", "scribes", "lamplighters", "caravanners"],
+    "motifs": ["bell", "wind", "stone", "ink", "frost"],
+    "itemForms": ["bell", "kite-blade", "cedar staff", "porcelain mask", "climbing pick", "war-fan", "lacquered lamellar", "scroll case", "kite shield"],
+    "itemNaming": {
+      "patterns": ["{form} of the {word}", "{maker}'s {form}", "The {epithet} {form}", "{form} of {place}"],
+      "epithets": ["Peak-Rung", "Ninth-Step", "Cloud-Stair", "Kite-Day", "High-Terrace"],
+      "adjectives": ["Steady", "Clear-Toned", "Precise", "Patient", "Lofty"],
+      "makersMarks": ["a tiny bell engraved where the hand rests", "the number of steps from the maker's door, in small careful script", "a kite-shaped seal in red wax"]
+    },
+    "moodLines": ["In {adjective} country the bells keep time and the kites keep score.", "Tea is served on every landing, and every landing has a view.", "The {people} climb slowly and arrive first.", "Each terrace step is signed by the family who laid it.", "A few high bells have hung silent for generations, and nobody will melt them down."],
+    "founderEpithets": ["the Bell-Caster", "the Stair-Builder", "the First Climber", "the Precise"]
+  },
+  {
+    "id": "harbor-folk", "weight": 3, "label": "sunny harbor folk and lighthouse keepers",
+    "families": ["Coast", "Meadow", "Marsh"], "climates": ["Maritime", "Temperate"], "phonologies": ["harbor", "grove"],
+    "identities": ["Sunny harbor folk who keep the lighthouses lit.", "Sailors, net-makers and lens-grinders who would rather be at sea and usually are."],
+    "architecture": ["White-walled houses stacked up the cliffs, blue shutters, and a lighthouse on every point.", "Quays wide enough for a market, and a bell for every boat still out."],
+    "crafts": ["shipbuilding", "lens-grinding", "net-making", "sailmaking", "glassblowing", "salt-panning"],
+    "materials": ["sea-glass", "driftwood", "sailcloth", "salt", "coral", "white stone"],
+    "metals": ["brass", "mirror-brass", "copper"],
+    "foods": ["grilled sardines", "saffron fish stew", "lemon bread", "salted almonds", "sea-salt caramels"],
+    "festivals": [
+      { "name": "the Regatta", "season": "high summer", "description": "Every boat that floats races around the point, and a few that don't race anyway." },
+      { "name": "Lamp-Lighting at the Point", "season": "midwinter", "description": "The lighthouse keepers walk the cliff path with torches and the whole town follows them." },
+      { "name": "the Blessing of the Nets", "season": "spring", "description": "Nets are spread across the square and children run under them for luck." }
+    ],
+    "values": ["courage", "generosity", "a well-told story", "never turning a stranger away from the quay"],
+    "prides": ["Their lighthouses have never all gone dark at once.", "Their sailors have reached shores nobody else has drawn."],
+    "factions": ["shipwrights", "cartographers", "caravanners", "festival-keepers", "wayfarers"],
+    "motifs": ["tide", "sun", "star", "wind", "mist"],
+    "itemForms": ["cutlass", "harpoon", "spyglass", "compass", "lighthouse lantern", "sailcloth coat", "sea-glass charm", "oar-staff", "driftwood shield"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "{form} of {place}", "The {adjective} {form}", "The {epithet} {form}"],
+      "epithets": ["Regatta", "Lighthouse", "Far-Sailing", "Harbor-Blessed", "Fair-Weather"],
+      "adjectives": ["Bold", "Bright", "Salt-Kissed", "Sunny", "Steadfast"],
+      "makersMarks": ["a tiny lighthouse etched where the hand rests", "a knot of blue thread wound somewhere snug", "the maker's ship-name stamped backward, for luck"]
+    },
+    "moodLines": ["The {people} talk with their hands, mostly about boats.", "Every harbor wall is warm by noon and crowded by evening.", "A {adjective} welcome comes with a bowl of stew and too many questions.", "They paint their doors the color of the sea on a good day.", "Some lamps on the point are still lit for boats that never came back."],
+    "founderEpithets": ["the First Keeper", "the Far-Sailer", "the Lamp-Lighter", "the Bold"]
+  },
+  {
+    "id": "mesa-potters", "weight": 3, "label": "mesa potters, glassblowers and star-readers",
+    "families": ["Badlands", "Highlands", "Coast"], "climates": ["Arid"], "phonologies": ["mesa", "terrace"],
+    "identities": ["Mesa potters, glassblowers and star-readers who run the great caravans.", "Red-country folk who read the sky like a ledger and the desert like a friend."],
+    "architecture": ["Cliff houses of red clay, cool courtyards with a well at the center, and kilns that glow all night.", "Caravan halls with sun-clocks on every wall and star charts painted on the ceilings."],
+    "crafts": ["pottery", "glassblowing", "star-charting", "caravan-keeping", "dyeing", "sun-clock making"],
+    "materials": ["red clay", "sun-glass", "ochre dye", "sandstone", "dune-goat wool", "glazed clay", "ochre clay"],
+    "metals": ["copper", "red copper", "bronze"],
+    "foods": ["flatbread baked on hot stones", "spiced lentils", "date cakes", "mint tea", "honeyed figs"],
+    "festivals": [
+      { "name": "the Night of Counting", "season": "late summer", "description": "Everyone lies on the warm rooftops and counts falling stars until the youngest falls asleep." },
+      { "name": "Caravan Return", "season": "autumn", "description": "The great caravans come home, and every family sets a place for a traveler they haven't met." },
+      { "name": "the First Firing", "season": "spring", "description": "The kilns are lit together, and the first pot out is given away." }
+    ],
+    "values": ["hospitality to travelers", "careful water-keeping", "reading the sky", "bargaining well"],
+    "prides": ["Their caravans have never lost a well.", "Their glass holds the noon light longer than anyone's."],
+    "factions": ["caravanners", "scribes", "smiths", "archivists", "tollkeepers"],
+    "motifs": ["sun", "ember", "star", "stone"],
+    "itemForms": ["curved glaive", "sling", "glass orb", "star-chart tome", "sun-mirror shield", "clay flask", "desert veil", "copper bracer", "astrolabe"],
+    "itemNaming": {
+      "patterns": ["{form} of {place}", "{maker}'s {form}", "The {adjective} {form}", "{form} of the {word}"],
+      "epithets": ["Caravan", "Kiln-Fired", "Star-Read", "Long-Shade", "Wellspring"],
+      "adjectives": ["Clear", "Sun-Warmed", "Patient", "Generous", "Bright-Glazed"],
+      "makersMarks": ["a thumbprint pressed in somewhere it will last", "a small star etched where the light catches", "a knot pattern unique to the maker's caravan"]
+    },
+    "moodLines": ["The {people} bargain like it is a dance, and it is.", "Their courtyards are cool at noon and full of music at night.", "Every guest gets the last fig, and every guest knows it.", "A {adjective} star chart is a family heirloom and a running argument.", "Some wells along the old routes have dried, and the {people} still mark them on every map."],
+    "founderEpithets": ["the Well-Finder", "the Star-Reader", "the First Potter", "the Generous"]
+  },
+  {
+    "id": "frost-herders", "weight": 3, "label": "northern herders and storytellers",
+    "families": ["Frost", "Coast", "Highlands"], "climates": ["Cold", "Maritime"], "phonologies": ["saga", "hearth"],
+    "identities": ["Northern herders and storytellers who measure winters in tales.", "Snow-country folk who keep the fire high and the stories longer."],
+    "architecture": ["Long turf-roofed halls with a fire down the middle, and carved posts telling the family's stories.", "Snug lodges half under the snow, joined by roofed walkways."],
+    "crafts": ["bone and antler carving", "wool-felting", "sledge-building", "ice-fishing", "saga-telling", "fur-lined leatherwork"],
+    "materials": ["whalebone", "reindeer antler", "felted wool", "birch", "amber", "sealskin", "elkhide"],
+    "metals": ["rime-iron", "iron", "silver"],
+    "foods": ["smoked fish", "cloudberry jam", "rye flatbread", "reindeer stew", "hot spiced milk"],
+    "festivals": [
+      { "name": "Sun-Return", "season": "midwinter", "description": "The whole village climbs the ridge to cheer the first sunrise after the long dark." },
+      { "name": "the Long Telling", "season": "deep winter", "description": "One story is told across a whole week of nights, and nobody is allowed to guess the ending." },
+      { "name": "the Herd-Coming", "season": "spring", "description": "The herds come down from the high pastures and every bell on every collar rings at once." }
+    ],
+    "values": ["endurance", "hospitality in hard weather", "a story told well", "sharing the warm spot by the fire"],
+    "prides": ["No guest has ever been turned out into the snow.", "Their stories outlast their halls."],
+    "factions": ["wayfarers", "hearthwardens", "festival-keepers", "smiths", "spirit-keepers"],
+    "motifs": ["frost", "song", "star", "tide"],
+    "itemForms": ["bearded axe", "antler-hilted knife", "sledge-spear", "whalebone bow", "fur cloak", "horn", "saga-staff", "round shield"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "{form} of {place}", "{form} of the {word}", "The {epithet} {form}"],
+      "epithets": ["Long-Telling", "Sun-Return", "Fireside", "Snow-Walker", "Northward"],
+      "adjectives": ["Hardy", "Warm", "Weathered", "Stout", "Faithful"],
+      "makersMarks": ["a knot carved in where the hand rests", "a tally of winters notched along one edge", "a twist of red wool tied through a hole made for it"]
+    },
+    "moodLines": ["Winters are long in {adjective} country, so the stories are longer.", "Every hall keeps one seat by the fire for whoever walks in next.", "The {people} laugh loudest in the coldest weeks.", "Their herds know the way home better than most maps.", "Some halls stand roofless on the old ridges, and travelers still knock before entering."],
+    "founderEpithets": ["the Fire-Keeper", "the First Teller", "the Snow-Walker", "the Steadfast"]
+  },
+  {
+    "id": "fen-ferryfolk", "weight": 3, "label": "stilt-village ferry-keepers",
+    "families": ["Marsh", "Coast", "Forest"], "climates": ["Wetland", "Humid"], "phonologies": ["reed", "hearth"],
+    "identities": ["Stilt-village ferry-keepers famous for frog choirs and terrible puns.", "Fen folk who know every channel, every eel and every joke worth telling twice."],
+    "architecture": ["Stilt houses joined by plank walks, reed roofs, and a ferry bell at every landing.", "Floating gardens tied to the porches and lanterns hung low over the water."],
+    "crafts": ["reed-weaving", "ferry-building", "herbal medicine", "eel-trapping", "rush-paper making", "gourd lanterns"],
+    "materials": ["reeds", "bog-oak", "cattail down", "gourd", "river clay", "willow", "wicker"],
+    "metals": ["pewter", "green copper", "bronze"],
+    "foods": ["eel pie", "duck-egg custard", "rice cakes", "watercress soup", "cranberry tarts"],
+    "festivals": [
+      { "name": "the Frog Choir", "season": "late spring", "description": "The whole village sings with the frogs at dusk, and judges say the frogs win every year." },
+      { "name": "Big-Dry Day", "season": "late summer", "description": "When the water is lowest, everyone walks the fen floor to find what the year has dropped." },
+      { "name": "Lantern Float", "season": "autumn", "description": "Gourd lanterns are floated down every channel to show the ferries the way home." }
+    ],
+    "values": ["good humor", "helping first and asking later", "never laughing at a joke too early", "knowing every channel"],
+    "prides": ["Their ferries have never once refused a passenger.", "Their puns are, by common agreement, the worst anywhere."],
+    "factions": ["growers", "brewers", "festival-keepers", "spirit-keepers", "shipwrights"],
+    "motifs": ["mist", "tide", "bloom", "song", "lantern"],
+    "itemForms": ["punt-pole staff", "fishing spear", "reed shield", "gourd lantern", "herb satchel", "trident", "eel-skin boots", "rush-paper scroll"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "The {epithet} {form}"],
+      "epithets": ["Frog-Choir", "Ferry", "Firefly", "Big-Dry", "Fog-Finder"],
+      "adjectives": ["Cheerful", "Muddy", "Lucky", "Snug", "Trusty"],
+      "makersMarks": ["a little frog carved somewhere hard to find", "three dots of green paint", "a reed knot only the maker can tie"]
+    },
+    "moodLines": ["The {people} answer every question with a pun and then, kindly, with the answer.", "Mornings in the fens are foggy, slow and full of frog song.", "A {adjective} ferry will wait for you, and tease you the whole way across.", "Their gardens float, and so, they claim, do their spirits.", "Some channels silted up long ago, and the {people} still pole past them quietly."],
+    "founderEpithets": ["the First Ferrier", "the Fog-Finder", "the Merry", "the Channel-Reader"]
+  },
+  {
+    "id": "forge-folk", "weight": 2, "label": "smiths, miners and clockmakers",
+    "families": ["Highlands", "Badlands", "Meadow"], "climates": ["Alpine", "Temperate"], "phonologies": ["saga", "mesa", "terrace"],
+    "identities": ["Smiths, miners and clockmakers who can fix anything and will tell you how.", "Hill folk who sing while they hammer and hammer while they sing."],
+    "architecture": ["Workshops dug into the hillside, with chimneys poking out of the grass like mushrooms.", "Arched halls lit by forge-glow, with a clock over every door."],
+    "crafts": ["smithing", "mining", "clockmaking", "chain-making", "lock-making", "stone-cutting"],
+    "materials": ["granite", "slate", "flint", "oak", "boiled leather", "kiln brick", "oxhide"],
+    "metals": ["iron", "steel", "tempered steel", "bronze", "copper"],
+    "foods": ["oat porridge", "miner's pasties", "roast chestnuts", "dark ale", "blackberry crumble"],
+    "festivals": [
+      { "name": "the Anvil Chorus", "season": "midwinter", "description": "Every smith strikes the same rhythm at the same hour, and the whole hill rings." },
+      { "name": "Clock-Winding Day", "season": "spring", "description": "Every clock in town is wound together, and anyone whose clock is late buys the next round." },
+      { "name": "the Open Forge", "season": "autumn", "description": "Workshops open to everyone, and children make their first nail." }
+    ],
+    "values": ["good work", "fixing what is broken", "keeping time", "sharing tools"],
+    "prides": ["Their clocks agree with each other to the second.", "A hinge they made has never squeaked."],
+    "factions": ["smiths", "bellfounders", "caravanners", "hearthwardens", "scribes"],
+    "motifs": ["iron", "ember", "stone", "bell", "song"],
+    "itemForms": ["forge hammer", "riveted buckler", "censer", "longsword", "seal-ring", "chain coat", "plate cuirass", "key", "anvil charm", "smith's ledger"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of {place}", "The {epithet} {form}"],
+      "epithets": ["Anvil-Rung", "Deep-Forged", "Clockwork", "Hillfire", "Open-Forge"],
+      "adjectives": ["True", "Sturdy", "Well-Tempered", "Patient", "Bright-Struck"],
+      "makersMarks": ["a tiny hammer stamped where the hand rests", "the maker's number struck small and neat", "a single notch filed where only another smith would look"]
+    },
+    "moodLines": ["The {people} greet you with a handshake that checks your grip.", "Their hills ring all day and glow all night.", "A {adjective} smith will fix your kettle and lecture you about it, kindly.", "Every tool has a name and a story, and both are long.", "Some deep workings were sealed long ago, and the {people} still knock twice when they pass."],
+    "founderEpithets": ["the First Smith", "the Hammer-Singer", "the Clockmaker", "the Fixer"]
+  },
+  {
+    "id": "orchard-keepers", "weight": 2, "label": "orchard-keepers, beekeepers and cider-makers",
+    "families": ["Meadow", "Coast", "Forest"], "climates": ["Temperate", "Maritime"], "phonologies": ["harbor", "grove", "hearth"],
+    "identities": ["Orchard-keepers, beekeepers and cider-makers who plant trees for grandchildren they haven't met.", "Valley folk who run their lives by the blossom and the harvest."],
+    "architecture": ["Cottages tucked between the rows, with skeps along every wall and a press-house at the heart of the village.", "Long low barns that smell of apples all year."],
+    "crafts": ["grafting", "beekeeping", "cider-pressing", "candle-making", "jam-making", "basketry"],
+    "materials": ["beeswax", "honey-amber", "willow", "wicker", "pressed petals", "hawthorn wood", "oak"],
+    "metals": ["pewter", "oak and pewter", "brass"],
+    "foods": ["apple cake", "honey buns", "pear cider", "plum jam", "walnut bread"],
+    "festivals": [
+      { "name": "Blossom Day", "season": "spring", "description": "Everyone walks the rows under the blossom, and the bees are thanked by name." },
+      { "name": "the Wassail", "season": "midwinter", "description": "The oldest tree in the orchard is sung to, toasted, and told it is doing very well." },
+      { "name": "the Pressing", "season": "autumn", "description": "The first barrel of the year is opened, and arguments about it last until spring." }
+    ],
+    "values": ["patience", "generosity", "planting for later", "a full larder"],
+    "prides": ["Their oldest tree still fruits every year.", "Nobody leaves their valley without a basket."],
+    "factions": ["growers", "brewers", "festival-keepers", "wayfarers", "archivists"],
+    "motifs": ["hive", "bloom", "sun", "song", "thorn"],
+    "itemForms": ["pruning knife", "pruning staff", "cider chalice", "beeswax charm", "orchard bow", "music box", "hourglass", "harvest smock", "recipe book"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "The {adjective} {form}", "{form} of the {word}", "The {epithet} {form}"],
+      "epithets": ["Blossom-Day", "Wassail", "Harvest-Home", "Hive-Kept", "Long-Row"],
+      "adjectives": ["Sweet", "Golden", "Generous", "Ripe", "Well-Grafted"],
+      "makersMarks": ["a tiny bee pressed in where the hand rests", "a blossom stamped somewhere it will catch the light", "the year's vintage scratched small and neat"]
+    },
+    "moodLines": ["The {people} measure time in blossoms and harvests, never in hours.", "Their valleys hum with bees from spring to first frost.", "A {adjective} cider is shared, argued over, and shared again.", "Every child plants a tree and is told it will outlive them, cheerfully.", "Some old orchards stand unpicked, and the {people} still prune them every winter."],
+    "founderEpithets": ["the First Grafter", "the Bee-Friend", "the Generous", "the Planter"]
+  },
+  {
+    "id": "wind-riders", "weight": 2, "label": "herders, riders and kite-flyers of the open plains",
+    "families": ["Badlands", "Meadow", "Frost"], "climates": ["Arid", "Temperate"], "phonologies": ["mesa", "saga"],
+    "identities": ["Herders and riders who follow the wind and their herds across the open plains.", "Plains folk who can read weather from a single cloud."],
+    "architecture": ["Round felt tents that come down in an hour and go up in two.", "Painted wind-poles at every camp, hung with bells and ribbons."],
+    "crafts": ["felt-making", "horse-training", "kite making", "leatherwork", "weather-reading", "rope-making"],
+    "materials": ["felted wool", "hide", "boiled leather", "reindeer antler", "carved horn", "ash", "ochre dye"],
+    "metals": ["bronze", "brass", "iron"],
+    "foods": ["fried dough", "salted milk tea", "dried apricots", "roast mutton", "yogurt with honey"],
+    "festivals": [
+      { "name": "the Long Ride", "season": "summer", "description": "Riders race from one camp to the next, and the winner must cook for everyone." },
+      { "name": "Kite Night", "season": "autumn", "description": "Lantern-kites are flown over the plain so that far-off camps can wave back." },
+      { "name": "the Gathering", "season": "spring", "description": "Every camp meets at the same river bend to trade, marry and tell tall tales." }
+    ],
+    "values": ["freedom", "loyalty to the herd", "a fast horse", "reading the weather right"],
+    "prides": ["They have never been lost on the plains.", "Their kites can carry a letter between camps."],
+    "factions": ["caravanners", "wayfarers", "cartographers", "festival-keepers", "spirit-keepers"],
+    "motifs": ["wind", "star", "sun", "song"],
+    "itemForms": ["kite shield", "horse-bow", "felt coat", "sabre", "lance", "wind-bell", "astrolabe", "lodestone", "herder's staff", "riding coat"],
+    "itemNaming": {
+      "patterns": ["{maker}'s {form}", "{form} of the {word}", "The {epithet} {form}", "The {adjective} {form}"],
+      "epithets": ["Long-Ride", "Far-Camp", "Wind-Read", "Gathering", "Open-Sky"],
+      "adjectives": ["Swift", "Free", "Wind-Worn", "Loyal", "Far-Seeing"],
+      "makersMarks": ["a hoofprint stamped where the hand rests", "a ribbon of the maker's camp colors", "a little cloud scratched where only a rider would look"]
+    },
+    "moodLines": ["The {people} never say goodbye, only see you at the Gathering.", "Their camps move with the grass and leave nothing but circles of greener ground.", "A {adjective} rider can tell tomorrow's weather from today's breeze.", "Every tent has a guest-cushion that nobody else may sit on.", "Some old camp-circles are still green, and the {people} ride around them, never through."],
+    "founderEpithets": ["the First Rider", "the Wind-Reader", "the Far-Walker", "the Free"]
+  }
+]

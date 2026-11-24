@@ -152,7 +152,7 @@ namespace Relic.Lore
         }
 
         /// <summary>Joins two parts, dropping a repeated vowel at the seam ("Ama" + "a" = "Ama").</summary>
-        static string Join(string a, string b)
+        internal static string Join(string a, string b)
         {
             if (string.IsNullOrEmpty(a)) return b ?? "";
             if (string.IsNullOrEmpty(b)) return a;
@@ -163,7 +163,7 @@ namespace Relic.Lore
         }
 
         /// <summary>Lower-case with a capital first letter.</summary>
-        static string Normalize(string s)
+        internal static string Normalize(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
             string lower = s.ToLowerInvariant();

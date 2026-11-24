@@ -20,7 +20,7 @@ namespace Relic.Items
             var errors = new List<string>();
             var s = item.Grammar;
             if (s == null) { errors.Add(Who(item) + ": has no item sentence (Item.Grammar)"); return errors; }
-            bible = bible ?? world?.Bible ?? LoreSource.Default;
+            bible = bible ?? world?.Lore ?? LoreSource.Default;
             string who = Who(item);
             void Err(string msg) => errors.Add(who + ": " + msg);
 

@@ -4,7 +4,7 @@ using Relic.Lore;
 namespace Relic.Items
 {
     /// <summary>
-    /// Which of a culture's naming patterns (cultures.md itemNaming.patterns) a name follows.
+    /// Which of a culture's naming patterns (itemNaming.patterns, from its culture template) a name follows.
     /// {form} and {maker} must be the sentence's own words; the other slots are flair.
     /// </summary>
     public static class NamePatterns

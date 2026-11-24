@@ -21,7 +21,7 @@ namespace Relic.Items.Text
         public static RelicDraft Compose(RelicBrief b)
         {
             var rng = Pcg32.ForPurpose(b.Seed, "relic.template");
-            var bible = b.World?.Bible ?? LoreSource.Default;
+            var bible = b.World?.Lore ?? LoreSource.Default;
             var s = b.Sentence ?? throw new ArgumentException("RelicBrief.Sentence is required");
             var culture = bible.Culture(s.Culture) ?? bible.Cultures[0];
             var theme = b.Theme ?? ItemGrammar.ThemeOf(s, bible);

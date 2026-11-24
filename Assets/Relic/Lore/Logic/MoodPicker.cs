@@ -7,7 +7,7 @@ namespace Relic.Lore
     /// <summary>
     /// Picks moods with the Bible's tone weights: first the tone (Bright with probability
     /// <see cref="MoodTable.BrightShare"/>, about 70%), then a mood within that tone by weight.
-    /// Callers that need a darker place (a ruin of the Quarrel, a villain's lair) pass a lower
+    /// Callers that need a darker place (an old battlefield, a villain's lair) pass a lower
     /// bright share explicitly; the default always honors the 70/30 rule.
     /// </summary>
     public sealed class MoodPicker

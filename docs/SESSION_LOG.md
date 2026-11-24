@@ -1,6 +1,14 @@
 # Session log
 
 Newest first.
+## 2026-11-19 (hourly run, ~00:30–02:40 UTC) — Lore v2 to review; LLM benchmark partly done
+
+- **No new responses from Greg** on the board since the 19:45 UTC dash answer (RLC-070), which the lead already recorded.
+- **RLC-058 Lore v2 → review** on `stream/lore2` (4 commits). The fixed story is wiped; docs/lore is now a lean constitution. `CultureGenerator` (5–8 cultures per seed), `WorldPrehistory` (eras, founders, events) and `LoreBible.ForWorld(seed)`; Items' StubWorld uses them. dotnet 231/231, Unity EditMode 244 passed (5 skipped), PlayMode 8/8. Left over: `Prompts.cs` still says "the Wide"; docs 19/20 still name the Lanternfold and Wren.
+- **RLC-031 LLM benchmark stays in progress** on `stream/llmbench` (14 commits). The pipeline fixes from the research note are in, each with a test. 4B, thinking off: 100% valid JSON, 0% accepted first try, 35% fall back to templates, 21 s/relic, ~3.6 GB VRAM. Thinking on runs out of tokens. Recommendation so far: 4B, thinking off. **Not done:** the 9B rows, the blind comparison (seed 5309 reserved), frame time, PlayMode. GPU work stopped because Overwatch was running from 18:13 local. dotnet 230/230, EditMode 243 passed (7 skipped).
+- **Process note:** Overwatch isn't on the scheduled task's game list (League, VALORANT, Genshin). The agent treated it as a game anyway. Suggest adding `Overwatch*` to the list.
+- **Merge note:** both branches touch Assets/Relic/Items (lore2: StubWorld, TemplateWriting; llmbench: Prompts and the LLM pipeline). Expect small conflicts. Merge lore2 first, then fix "the Wide" in Prompts on llmbench.
+
 
 ## 2026-11-18 — Character, world, lore merged; endgame and agents designed; autonomous runs start
 

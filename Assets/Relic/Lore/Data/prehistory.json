@@ -1,0 +1,66 @@
+{
+  "eras": [
+    {
+      "id": "dawn", "position": "First", "tone": "Bright", "weight": 1,
+      "namePatterns": ["the Age of First Hearths", "the {word} Dawn", "the Founding Years"],
+      "words": ["Lantern", "Hearth", "Green", "Kindling", "First-Light"],
+      "summaries": [
+        "The first {culture} families lit their hearths at {place}, and {founder} taught them to listen to the things they loved.",
+        "{founder} led the first {culture} families to {place}, and the world began to hear them."
+      ],
+      "echoes": ["first hearthstones", "founders' cairns", "the oldest songs", "worn stone thresholds", "the first maps, mostly blank"]
+    },
+    {
+      "id": "wonders", "position": "Middle", "tone": "Bright", "weight": 3,
+      "namePatterns": ["the Age of {word}s", "the Long {word} Years", "the {word} Age"],
+      "words": ["Lantern", "Bell", "Bridge", "Lamp", "Road", "Kite"],
+      "summaries": [
+        "Roads joined the hearths, and makers raced each other to build wonders that carried across valleys.",
+        "Lamps were lit along every road, and {founder}'s heirs made things the world still remembers."
+      ],
+      "echoes": ["lamp-tower ruins", "old road milestones", "peak-to-peak bridges", "half-finished wonders", "bells that still carry"]
+    },
+    {
+      "id": "strife", "position": "Middle", "tone": "Somber", "weight": 1,
+      "namePatterns": ["the {word} Quarrel", "the Years of the {word}"],
+      "words": ["Loud", "Iron", "Long", "Bitter"],
+      "summaries": [
+        "A circle at {place} tried to command the world instead of asking it, and a war followed until the old roads closed.",
+        "Neighbors quarreled over who the world should answer, and the quarrel ended in quiet fields at {place}."
+      ],
+      "echoes": ["old battlefields gone to wildflowers", "constructs still guarding their posts", "broken bridges", "sealed vaults", "a fort nobody remembers the name of"]
+    },
+    {
+      "id": "quiet", "position": "Middle", "tone": "Somber", "weight": 2,
+      "namePatterns": ["the Long Quiet", "the {word} Hush", "the Quiet Years"],
+      "words": ["Long", "Grey", "Still", "Deep"],
+      "summaries": [
+        "The world listened less for a while; people gathered in safe valleys and kept small crafts, songs and festivals alive.",
+        "Roads grew over and relics slept, but the {culture} kept their recipes and their songs."
+      ],
+      "echoes": ["abandoned villages", "hidden family caches", "songs everyone sings slightly wrong", "overgrown roads", "guarded recipes"]
+    },
+    {
+      "id": "rekindling", "position": "Last", "tone": "Bright", "weight": 1,
+      "namePatterns": ["the Rekindling", "the Waking Roads", "the New {word} Years"],
+      "words": ["Lantern", "Road", "Hearth", "Kite"],
+      "summaries": [
+        "Hearths are being relit, roads reopened, and wayfarers are setting out to see what the world remembers.",
+        "{founder}'s old hearth was relit at {place}, and wayfarers set out from it to rediscover the world."
+      ],
+      "echoes": ["newly relit hearthstones", "wayfarers' waycairns", "fresh lines on old maps", "reopened roads", "festivals revived after centuries"]
+    }
+  ],
+  "founderSummaries": [
+    "{founder} of the {culture} lit the first hearth at {place} and taught {craft} to anyone who would sit still long enough.",
+    "{founder} walked the first {culture} families to {place}, carrying a {form} that never let them lose the way.",
+    "{founder} founded {place} and was famous there for {value} long before anyone called it a {culture} virtue."
+  ],
+  "artifactSummaries": [
+    "A {culture} {form} made at {place} in {era}, so well loved that the world began to answer it.",
+    "The {form} {maker} carried in {era}. It has been used every day since, and it hums about it.",
+    "A {form} from {place}, made in {era} and passed hand to hand ever since."
+  ],
+  "brightEpithets": ["the Finder", "the Wayfarer", "the Maker", "the Bold", "the Kind", "the Clever"],
+  "somberEpithets": ["the Steadfast", "the Last Keeper", "the Gate-Holder", "the Patient"]
+}

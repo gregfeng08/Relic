@@ -6,7 +6,7 @@ using Relic.Core.Random;
 namespace Relic.Lore
 {
     /// <summary>
-    /// Template-mode instantiation of Bible data: names, faction names, relic one-liners and
+    /// Template-mode instantiation of a world bible (<see cref="LoreBible.ForWorld"/>): names, faction names, relic one-liners and
     /// event summaries filled from a seed. This is a stand-in for the world graph (it invents
     /// places on the spot instead of reading them from the graph) and the basis of
     /// docs/lore/samples.md. Slot conventions: {faction} values carry their own article
@@ -145,6 +145,7 @@ namespace Relic.Lore
                 ["word"] = word,
                 ["legend"] = LegendName(legend),
                 ["faction"] = MidSentence(FactionName(FactionArchetypeFor(c), c)),
+                ["era"] = PastEra(mood.Tone).Name,
             };
             return new SampleRelic
             {
@@ -157,6 +158,23 @@ namespace Relic.Lore
                 Maker = maker,
                 Mark = Pick(naming.MakersMarks),
             };
+        }
+
+        /// <summary>
+        /// An era a relic can remember: any but the present (last) one, in the mood's tone when one
+        /// fits. Somber lines look back at somber eras; bright ones at bright eras.
+        /// </summary>
+        public EraDef PastEra(Tone tone) => PastEra(_bible, tone, ref _rng);
+
+        public static EraDef PastEra(LoreBible bible, Tone tone, ref Pcg32 rng)
+        {
+            if (bible.Eras.Count == 0) throw new LoreDataException("no eras: use a world bible (LoreBible.ForWorld)");
+            int last = bible.Eras.Count - 1;
+            var past = bible.Eras.FindAll(e => e.Order < last);
+            if (past.Count == 0) past = bible.Eras;
+            var toned = past.FindAll(e => e.Tone == tone);
+            var pool = toned.Count > 0 ? toned : past;
+            return pool[rng.Range(0, pool.Count)];
         }
 
         public static string LegendName(LegendDef l) =>
