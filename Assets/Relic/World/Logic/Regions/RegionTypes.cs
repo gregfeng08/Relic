@@ -56,6 +56,21 @@ namespace Relic.World.Regions
         /// <summary>Palette: color of exposed rock on slopes and cliffs.</summary>
         public Rgb RockTint;
 
+        /// <summary>Multiplies every blended field by k (Family is left alone).</summary>
+        public void Scale(double k)
+        {
+            HeightScale *= k;
+            Ruggedness *= k;
+            Erosion *= k;
+            WaterLevelBias *= k;
+            ContinentBias *= k;
+            TemperatureBias *= k;
+            HumidityBias *= k;
+            Terrace *= k;
+            GroundTint = GroundTint * (float)k;
+            RockTint = RockTint * (float)k;
+        }
+
         /// <summary>Accumulates w * p into this (Family is left alone).</summary>
         public void AddWeighted(in RegionParams p, double w)
         {

@@ -31,6 +31,9 @@ namespace Relic.World.PlayTests
             TerrainSandbox.SeedOverride = 1337;
             var go = new GameObject("Sandbox Under Test");
             _sandbox = go.AddComponent<TerrainSandbox>();
+            // Controller smoothness on bare terrain: a tree trunk next to the scripted path (the world
+            // changes whenever the generator does) deflects the body and reads as jitter.
+            _sandbox.ShowProps = false;
             float t = 0f;
             while (!_sandbox.Spawned && t < 60f) { t += Time.unscaledDeltaTime; yield return null; }
         }

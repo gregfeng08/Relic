@@ -12,10 +12,10 @@ namespace Relic.World.Regions
     /// 2. Each cell's center is jittered by up to ±40% of a cell, and each center has a seeded
     ///    size s; distance is measured as d / s (multiplicatively weighted Voronoi), so some
     ///    regions are larger than others and borders curve.
-    /// 3. The nearest three regions (by weighted distance) are blended with a smoothstep over a
-    ///    ~200 m border band. A second factor fades each weight out before the 4th-nearest region
-    ///    can take its slot, which keeps the blend continuous everywhere (not just at the
-    ///    two-region borders).
+    /// 3. Every region within ~200 weighted meters of the nearest is blended with a smoothstep
+    ///    falloff (the nearest weighs 1). Any number of regions can take part, so no weight has
+    ///    to be faded early to free a slot: the blend is continuous and changes no faster than
+    ///    the band allows, even at four-way junctions.
     ///
     /// Deterministic, infinite, thread-safe and allocation-free in Sample.
     /// </summary>
@@ -27,7 +27,7 @@ namespace Relic.World.Regions
         public const double MinSize = 0.82;
         public const double MaxSize = 1.22;
         /// <summary>Width of the blend band across a border, in (weighted) meters.</summary>
-        public const double BorderBand = 200.0;
+        public const double BorderBand = 250.0;
         public const double WarpWavelength = 2200.0;
         public const double WarpAmplitude = 300.0;
         /// <summary>
@@ -93,32 +93,47 @@ namespace Relic.World.Regions
         {
             Warp(x, z, out double qx, out double qz);
             Top4 top = FindNearest(qx, qz);
+            double d0 = top.D0;
 
-            double e1 = top.D0;
-            double e4 = top.D3;
-            double w0 = Weight(top.D0, e1, e4);
-            double w1 = Weight(top.D1, e1, e4);
-            double w2 = Weight(top.D2, e1, e4);
-            double sum = w0 + w1 + w2;
-            if (sum < 1e-9) { w0 = 1.0; w1 = 0.0; w2 = 0.0; sum = 1.0; }
+            // Blend EVERY region within one band of the nearest (usually 1-3, at a four-way
+            // junction 4+). An earlier version kept 3 slots and faded each weight out before the
+            // 4th-nearest region could take its slot; near four-way junctions that left only tiny
+            // weights to normalize, which swung within meters and stood 50-100 m walls up
+            // (RLC-069). Here the nearest always weighs 1, so the blend changes no faster than the
+            // band allows. Blend in double: float expressions can round differently under Unity's
+            // Mono than .NET.
+            var blended = new RegionParams();
+            RegionFamily family = RegionFamily.Meadow;
+            double sum = 0.0;
+            long fx = WorldMath.FloorToLong(qx / CellSize);
+            long fz = WorldMath.FloorToLong(qz / CellSize);
+            for (long cx = fx - SearchLow; cx <= fx + SearchHigh; cx++)
+            {
+                for (long cz = fz - SearchLow; cz <= fz + SearchHigh; cz++)
+                {
+                    Shape(cx, cz, out double px, out double pz, out double size);
+                    double dx = qx - px, dz = qz - pz;
+                    double w = BorderWeight(System.Math.Sqrt(dx * dx + dz * dz) / size, d0);
+                    if (w <= 0.0) continue;
+                    RegionParams p = ParamsOf(new RegionId(cx, cz));
+                    if (cx == top.Id0.X && cz == top.Id0.Z) family = p.Family;
+                    blended.AddWeighted(p, w);
+                    sum += w;
+                }
+            }
+            blended.Scale(1.0 / sum);
 
-            double n0 = w0 / sum, n1 = w1 / sum, n2 = w2 / sum;
-            var s = new RegionSample
+            // The three strongest regions for display (weights renormalized among them).
+            double w0 = BorderWeight(top.D0, d0), w1 = BorderWeight(top.D1, d0), w2 = BorderWeight(top.D2, d0);
+            double top3 = w0 + w1 + w2;
+            blended.Family = family;
+            return new RegionSample
             {
                 Id0 = top.Id0, Id1 = top.Id1, Id2 = top.Id2,
-                W0 = (float)n0, W1 = (float)n1, W2 = (float)n2,
+                W0 = (float)(w0 / top3), W1 = (float)(w1 / top3), W2 = (float)(w2 / top3),
+                Blended = blended,
+                Family = family,
             };
-
-            // Blend in double: float expressions can round differently under Unity's Mono than .NET.
-            RegionParams p0 = ParamsOf(top.Id0);
-            var blended = new RegionParams();
-            blended.AddWeighted(p0, n0);
-            if (n1 > 0.0) { RegionParams p1 = ParamsOf(top.Id1); blended.AddWeighted(p1, n1); }
-            if (n2 > 0.0) { RegionParams p2 = ParamsOf(top.Id2); blended.AddWeighted(p2, n2); }
-            blended.Family = p0.Family;
-            s.Blended = blended;
-            s.Family = p0.Family;
-            return s;
         }
 
         public RegionParams ParamsOf(RegionId id)
@@ -151,13 +166,8 @@ namespace Relic.World.Regions
             qz = z + WarpAmplitude * _warpZ.Fbm(x * f, z * f, 2);
         }
 
-        /// <summary>Unnormalized weight of a region at weighted distance d, given the nearest (d1) and 4th-nearest (d4).</summary>
-        static double Weight(double d, double d1, double d4)
-        {
-            double border = WorldMath.Smooth01(1.0 - (d - d1) / BorderBand);
-            double fourth = WorldMath.Smooth01((d4 - d) / BorderBand);
-            return border * fourth;
-        }
+        /// <summary>Unnormalized weight of a region at weighted distance d, given the nearest's d0: 1 for the nearest, 0 one band out.</summary>
+        static double BorderWeight(double d, double d0) => WorldMath.Smooth01(1.0 - (d - d0) / BorderBand);
 
         void Shape(long cx, long cz, out double centerX, out double centerZ, out double size)
         {

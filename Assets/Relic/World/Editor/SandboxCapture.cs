@@ -42,7 +42,7 @@ namespace Relic.World.Editor
     /// <summary>
     /// Renders still screenshots of the generated world without entering play mode, for reviews
     /// and for checking the look from batchmode:
-    /// Unity -batchmode -quit -projectPath . -executeMethod Relic.World.Editor.SandboxCapture.Run -captureDir C:/tmp/shots [-captureSeed 1337] [-captureSet default|ridges|props|all]
+    /// Unity -batchmode -quit -projectPath . -executeMethod Relic.World.Editor.SandboxCapture.Run -captureDir C:/tmp/shots [-captureSeed 1337 | -captureSeeds 1338,7] [-captureSet default|ridges|snow|dive|props|shapes|all]
     /// Builds chunks synchronously around each viewpoint (same mesh builder as the streamer),
     /// places the placeholder hero, and saves PNGs.
     /// </summary>
@@ -55,10 +55,13 @@ namespace Relic.World.Editor
         {
             string dir = Arg("-captureDir") ?? Path.Combine(Application.dataPath, "../Temp/RelicCaptures");
             ulong seed = ulong.TryParse(Arg("-captureSeed"), out ulong s) ? s : 1337UL;
+            // -captureSeeds 1338,7,42: one set per seed into the same folder.
+            string many = Arg("-captureSeeds");
             string set = Arg("-captureSet") ?? "default";
             try
             {
-                Capture(dir, seed, set);
+                if (many == null) Capture(dir, seed, set);
+                else foreach (string part in many.Split(',')) Capture(dir, ulong.Parse(part.Trim()), set);
             }
             catch (Exception e)
             {
@@ -107,6 +110,7 @@ namespace Relic.World.Editor
             if (all || set == "snow") CaptureViews.AddSnowViews(env.Gen, views);
             if (all || set == "dive") CaptureViews.AddDiveViews(env.Gen, views);
             if (all || set == "props") CaptureViews.AddPropViews(env.Gen, views);
+            if (all || set == "shapes") CaptureViews.AddShapeViews(env.Gen, views);
 
             int index = 0;
             foreach (CaptureView v in views) RenderView(env, v, dir, ++index);

@@ -42,14 +42,14 @@ namespace Relic.World.Terrain
     public sealed partial class TerrainGenerator
     {
         /// <summary>Bump when the height function changes, so saves can tell old terrain from new.</summary>
-        public const int Version = 2;
+        public const int Version = 3;
         public const float SeaLevel = 0f;
 
         // Wavelengths in meters.
         const double ContinentWavelength = 7000.0;
         const double ErosionWavelength = 2400.0;
         const double MountainMaskWavelength = 3000.0;
-        const double PeaksWavelength = 1150.0;
+        const double PeaksWavelength = 1600.0;
         const double HillsWavelength = 320.0;
         const double DetailWavelength = 56.0;
         const double WarpWavelength = 650.0;
@@ -58,9 +58,12 @@ namespace Relic.World.Terrain
         const double TintWavelength = 37.0;
         const double CliffWavelength = 900.0;
 
-        const double TerraceStep = 13.0;
-        // Rounds ridge crests over ~0.1 noise units (~40 m at the peaks wavelength) instead of a razor V.
-        const double RidgeSoftness = 0.1;
+        // Peaks: share of the domain warp, octave gain, amplitude (x HeightScale), and how wide
+        // crests are rounded (noise units; wider in tall regions, so crest width grows with height).
+        const double PeaksWarp = 0.4;
+        const double PeaksGain = 0.4;
+        const double PeaksAmplitude = 0.7;
+        const double RidgeSoftLow = 0.15, RidgeSoftHigh = 0.35;
 
         readonly ulong _seed;
         readonly IRegionField _regions;
@@ -86,6 +89,7 @@ namespace Relic.World.Terrain
             _tint = SimplexNoise2.ForPurpose(seed, "terrain.tint");
             _cliffs = SimplexNoise2.ForPurpose(seed, "terrain.cliffs");
             _snow = SimplexNoise2.ForPurpose(seed, "terrain.snow");
+            _strata = SimplexNoise2.ForPurpose(seed, "terrain.strata");
 
             // Continentalness → base height in meters: deep sea, shelf, coast, lowland, upland.
             _continentSpline = new MonotoneSpline(
@@ -181,40 +185,41 @@ namespace Relic.World.Terrain
 
             // 4. Domain warp for the shaped layers: blobs become ridges and winding valleys.
             double warpAmp = 110.0 * (0.6 + 0.4 * rugged);
-            double wx = x + warpAmp * _warpX.Fbm(x / WarpWavelength, z / WarpWavelength, 2);
-            double wz = z + warpAmp * _warpZ.Fbm(x / WarpWavelength, z / WarpWavelength, 2);
+            double dx = warpAmp * _warpX.Fbm(x / WarpWavelength, z / WarpWavelength, 2);
+            double dz = warpAmp * _warpZ.Fbm(x / WarpWavelength, z / WarpWavelength, 2);
+            double wx = x + dx, wz = z + dz;
 
             // 3. Peaks and valleys: ridged noise, gathered into ranges by a low-frequency mask.
-            double pv = _peaks.Ridged(wx / PeaksWavelength, wz / PeaksWavelength, 3, 2.0, 0.5, RidgeSoftness);
+            // Massif profile (RLC-069): the full warp squeezes ridges up to ~2x and squared ridged
+            // noise has a cusp, which together stood 200 m walls up 20 m wide. So the peaks get a
+            // gentler warp, a longer wavelength, a linear profile, crests rounded wider where the
+            // region is taller, and fine octaves rounded over the same meters as the first (they
+            // add bulk to a ridge instead of knife edges): slopes stay under ~55 degrees.
+            double px = x + PeaksWarp * dx, pz = z + PeaksWarp * dz;
+            double soft = WorldMath.Lerp(RidgeSoftLow, RidgeSoftHigh, WorldMath.SmoothStep(100.0, 300.0, p.HeightScale));
+            double pv = _peaks.Ridged(px / PeaksWavelength, pz / PeaksWavelength, 3, 2.0, PeaksGain, soft, 2.0);
             double mask = WorldMath.SmoothStep(-0.35, 0.45, _mountainMask.Fbm(x / MountainMaskWavelength, z / MountainMaskWavelength, 2));
-            double mountains = p.HeightScale * pv * pv * (1.0 - 0.8 * e) * land * (0.25 + 0.75 * mask);
-
-            // Escarpments: a sharp step on a warped low-frequency field gives climbable cliff bands.
-            double cliffField = _cliffs.Fbm(wx / CliffWavelength, wz / CliffWavelength, 2);
-            double cliffs = WorldMath.SmoothStep(0.10, 0.125, cliffField) * 16.0 * rugged * land * (1.0 - 0.5 * e);
+            double mountains = PeaksAmplitude * p.HeightScale * pv * (1.0 - 0.8 * e) * land * (0.25 + 0.75 * mask);
 
             // 5. Hills and detail octaves, scaled by ruggedness.
-            double hills = _hills.Fbm(wx / HillsWavelength, wz / HillsWavelength, 4) * 36.0 * rugged * (1.0 - 0.55 * e) * (0.35 + 0.65 * land);
+            double hillNoise = _hills.Fbm(wx / HillsWavelength, wz / HillsWavelength, 4);
+            double hills = hillNoise * 36.0 * rugged * (1.0 - 0.55 * e) * (0.35 + 0.65 * land);
             double detail = _detail.Fbm(wx / DetailWavelength, wz / DetailWavelength, 3) * 2.4 * rugged * (0.5 + 0.5 * land);
+
+            // Escarpments: a sharp step on a low-frequency field gives climbable cliff bands. They
+            // keep to low relief: a step at a mountain crest or a hilltop leaves a narrow spine
+            // with steep falls on both sides (a fin), so they fade out on high ridges and hilltops.
+            double cliffField = _cliffs.Fbm(px / CliffWavelength, pz / CliffWavelength, 2);
+            double cliffs = WorldMath.SmoothStep(0.10, 0.125, cliffField) * 16.0 * rugged * land * (1.0 - 0.5 * e)
+                            * WorldMath.SmoothStep(0.85, 0.5, pv) * WorldMath.SmoothStep(0.55, 0.15, hillNoise);
 
             double h = baseH + mountains + cliffs + hills + detail;
 
             // Local water: the sea, or a lake water table a few meters under the continental base.
             water = WorldMath.Max(SeaLevel, baseH + p.WaterLevelBias);
 
-            // 6. Mesa terracing (badlands): flat steps and steep risers above the water line.
-            double terrace = p.Terrace * WorldMath.SmoothStep(water + 1.0, water + 6.0, h);
-            if (terrace > 1e-4)
-            {
-                double k = h / TerraceStep;
-                double fl = Math.Floor(k);
-                // Risers about 3x the underlying slope (was 6x) and treads that keep 15% of it:
-                // still reads as mesas, but a riser spans several vertices even at 4 m LODs
-                // instead of aliasing into sawtooth triangles.
-                double f = k - fl;
-                double stepped = (fl + 0.85 * WorldMath.SmoothStep(0.3, 0.7, f) + 0.15 * f) * TerraceStep;
-                h = WorldMath.Lerp(h, stepped, terrace);
-            }
+            // 6. Mesa terracing (badlands), in the mesa band only.
+            if (p.Terrace > 1e-4) h = Mesa(x, z, h, water, WorldMath.Max(baseH, water), p);
 
             height = h;
         }
