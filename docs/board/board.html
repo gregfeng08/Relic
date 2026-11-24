@@ -100,6 +100,13 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin
 .rich strong { font-weight: 650; }
 .rich em { font-style: normal; color: var(--teal); }
 .ask .rich { gap: 6px; }
+.sec { display: grid; gap: 4px; }
+.sec > b { font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+.sec.status { font-size: 13px; color: var(--muted); }
+.fold { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.fold > summary { cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.fold[open] > summary { margin-bottom: 8px; }
+.fold .rich { font-size: 14px; }
 .ask { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
 .ask b { display: block; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
 .ref { font-family: var(--font-mono); font-size: 12px; color: var(--teal); overflow-wrap: anywhere; }
@@ -247,6 +254,7 @@ button.act:disabled { opacity: .55; cursor: default; }
     }
     return box;
   }
+  const fold = (label, text) => h("details", { class: "fold" }, h("summary", {}, label), rich(text));
   const fmtDate = iso => {
     if (!iso) return "";
     const d = new Date(iso);
@@ -349,8 +357,12 @@ button.act:disabled { opacity: .55; cursor: default; }
         h("span", { class: "tid" }, task.id + (task.updated ? " · updated " + fmtDate(task.updated) : "")),
       ),
       open ? h("div", { class: "detail" },
-        task.summary ? rich(task.summary) : null,
+        // A finished card leads with what was done; the original task folds away.
+        task.result ? h("div", { class: "sec" }, h("b", {}, "What was done"), rich(task.result)) : null,
+        task.summary ? (task.result ? fold("Original task", task.summary) : rich(task.summary)) : null,
         task.ask ? h("div", { class: "ask" }, h("b", {}, "What Claude needs from you"), rich(task.ask)) : null,
+        task.status ? h("div", { class: "sec status" }, h("b", {}, "Status"), rich(task.status)) : null,
+        task.lead ? fold("Lead notes", task.lead) : null,
         task.ref ? h("p", { class: "ref" }, task.ref) : null,
         responseLine(task),
         (task.column === "review" || task.column === "blocked") ? respondForm(task) : null,
